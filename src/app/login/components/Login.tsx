@@ -2,13 +2,14 @@ import React from 'react';
 import Image from 'next/image';
 import moment from 'moment-timezone';
 import LoginForm from './Form';
+import '@/app/globals.css';
 
 const Login = () => {
   return (
     <div className="flex flex-row items-center justify-around align-middle min-h-[100vh]">
       <div>
         <Image
-          src="/images/unsplash-1.jpg"
+          src="/images/khalek-molla-high-resolution-logo.png"
           alt="login"
           width={500}
           height={500}
@@ -20,7 +21,7 @@ const Login = () => {
         </h1>
         <LoginForm />
         <p className="text-center text-sm pt-4 pb-1">
-          ALL rights reserved by POS@DEMO &copy; {moment().format('YYYY')}-
+          ALL rights reserved by KMP &copy; {moment().format('YYYY')}-
           {moment().add(1, 'year').format('YYYY')}
         </p>
       </div>

@@ -9,7 +9,6 @@ interface User {
   id: string;
   db_id: string;
   full_name: string;
-  user_name: string;
   email: string;
   role: string;
   warehouse: string | null;
@@ -32,7 +31,6 @@ async function getUser(email: string, password: string): Promise<User | null> {
       id: userData._id,
       db_id: userData._id,
       full_name: userData.full_name,
-      user_name: userData.user_name,
       email: userData.email,
       role: userData.role,
       warehouse: userData.warehouse || null,

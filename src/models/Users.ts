@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 // Interface for User document
 interface User {
   full_name: string;
-  user_name: string;
   email: string;
   password: string;
   role: string;
@@ -15,10 +14,13 @@ const UserSchema = new mongoose.Schema<User>({
   full_name: {
     type: String,
     required: [true, 'Full name is not given'],
-    unique: true,
   },
-  user_name: { type: String, required: [true, 'User name is not given'] },
-  email: { type: String, required: [true, 'Email is not given'] },
+  email: {
+    type: String,
+    required: [true, 'Email is not given'],
+    unique: true,
+    index: true,
+  },
   password: { type: String, required: [true, 'Password is not given'] },
   role: { type: String, required: [true, 'Role is not given'] },
   warehouse: { type: String, default: null },

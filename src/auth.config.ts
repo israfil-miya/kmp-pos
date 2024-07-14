@@ -14,7 +14,6 @@ export const authConfig = {
       if (user) {
         token.db_id = user.db_id;
         token.full_name = user.full_name;
-        token.user_name = user.user_name;
         token.email = user.email;
         token.role = user.role;
         token.warehouse = user.warehouse;
@@ -26,7 +25,6 @@ export const authConfig = {
       if (token) {
         session.user.db_id = token.db_id;
         session.user.full_name = token.full_name;
-        session.user.user_name = token.user_name;
         session.user.email = token.email;
         session.user.role = token.role;
         session.user.warehouse = token.warehouse;

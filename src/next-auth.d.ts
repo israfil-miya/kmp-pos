@@ -7,7 +7,6 @@ declare module 'next-auth' {
     user: {
       db_id: string;
       full_name: string;
-      user_name: string;
       email: string;
       role: string;
       warehouse: string | null;
@@ -17,7 +16,6 @@ declare module 'next-auth' {
   interface User {
     db_id: string;
     full_name: string;
-    user_name: string;
     email: string;
     role: string;
     warehouse: string | null;
@@ -29,7 +27,6 @@ declare module 'next-auth/jwt' {
   interface JWT {
     db_id: string;
     full_name: string;
-    user_name: string;
     email: string;
     role: string;
     warehouse: string | null;

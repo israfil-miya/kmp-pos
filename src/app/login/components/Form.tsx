@@ -4,6 +4,7 @@ import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import '@/app/globals.css';
 
 const LoginForm = () => {
   const [creds, setCreds] = useState<{ email: string; password: string }>({

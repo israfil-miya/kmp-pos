@@ -33,6 +33,6 @@ export default auth((req: any) => {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|images/unsplash-1.jpg|_next/image|favicon.ico).*)',
+    '/((?!api|_next/static|images/khalek-molla-high-resolution-logo.png|_next/image|icon.ico).*)',
   ],
 };

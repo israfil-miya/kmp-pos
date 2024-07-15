@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 
-// Interface for User document
 interface User {
   full_name: string;
   email: string;
@@ -9,7 +8,6 @@ interface User {
   warehouse: string | null;
 }
 
-// Create User schema with type annotations for properties
 const UserSchema = new mongoose.Schema<User>({
   full_name: {
     type: String,
@@ -26,8 +24,6 @@ const UserSchema = new mongoose.Schema<User>({
   warehouse: { type: String, default: null },
 });
 
-// Define User model based on schema, using generics for type safety
 const User = mongoose.models.User || mongoose.model<User>('User', UserSchema);
 
-// Export the User model
 export default User;

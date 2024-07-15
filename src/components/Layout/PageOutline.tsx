@@ -28,16 +28,16 @@ const Outline: React.FC<OutlineProps> = async ({ children }) => {
             <Nav LogoutAction={LogoutAction} />
           </aside>
           <div className="flex-grow">
-            <header className="w-full p-4 flex flex-row justify-between items-center">
-              <div className="flex gap-2 items-center p-4 bg-yellow-400 border border-yellow-300 bg-opacity-30 text-xl font-semibold">
+            <header className="w-full px-10 py-4 flex flex-row justify-between items-center">
+              <div className="flex gap-2 items-center p-4 bg-yellow-400 bg-opacity-30 text-xl font-semibold rounded-md">
                 POS (Point of Sales) - v1.0
               </div>
 
               <div className="flex gap-2 items-center">
-                <div className="flex flex-col gap-0 leading-tight">
-                  <p className="font-serif uppercase font-semibold name">
+                <div className="flex flex-col gap-0 leading-4">
+                  <h1 className="uppercase font-semibold name text-xl">
                     {session?.user.full_name}
-                  </p>
+                  </h1>
                   <p className="role capitalize">{session?.user.role}</p>
                 </div>
                 <Image
@@ -52,7 +52,7 @@ const Outline: React.FC<OutlineProps> = async ({ children }) => {
               </div>
             </header>
 
-            <main className="ml-4">{children}</main>
+            <main className="mx-10 my-4">{children}</main>
           </div>
         </div>
       </div>

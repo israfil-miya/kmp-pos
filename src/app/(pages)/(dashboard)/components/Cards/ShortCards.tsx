@@ -10,7 +10,7 @@ const ShortCards = () => {
     <div className="flex flex-row gap-4">
       <ShortCardTemplate
         title="Today Sales"
-        description="500&#2547;"
+        description="350&#2547;"
         icon={
           <svg
             className="w-6 h-6"
@@ -30,7 +30,7 @@ const ShortCards = () => {
 
       <ShortCardTemplate
         title="Expired"
-        description="0"
+        description="2"
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -50,7 +50,7 @@ const ShortCards = () => {
       />
       <ShortCardTemplate
         title="Today Invoice"
-        description="0"
+        description="1"
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"

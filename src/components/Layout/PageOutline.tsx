@@ -16,7 +16,7 @@ const Outline: React.FC<OutlineProps> = async ({ children }) => {
       <div className="flex flex-col h-screen">
         <div className="flex flex-grow">
           <aside className="bg-gray-800 w-56 text-white gap-6 pt-6 pb-2 flex-col flex shadow-[rgba(0,0,0,0.15)_0px_4px_10px] overflow-y-auto">
-            <div className="flex flex-col gap-2 items-center text-nowrap">
+            <div className="flex flex-col gap-2 mb-4 mt-2 items-center text-nowrap">
               <Image
                 src="/images/khalek-molla-high-resolution-logo-white-transparent.png"
                 alt="logo"

@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 interface User {
   full_name: string;
   email: string;
+  phone?: string;
+  note?: string;
   password: string;
   role: string;
   warehouse: string | null;
@@ -19,6 +21,8 @@ const UserSchema = new mongoose.Schema<User>({
     unique: true,
     index: true,
   },
+  phone: { type: String, default: '' },
+  note: { type: String, default: '' },
   password: { type: String, required: [true, 'Password is not given'] },
   role: { type: String, required: [true, 'Role is not given'] },
   warehouse: { type: String, default: null },

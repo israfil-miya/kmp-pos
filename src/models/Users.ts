@@ -7,7 +7,7 @@ interface User {
   note?: string;
   password: string;
   role: string;
-  warehouse: string | null;
+  store: string | null;
 }
 
 const UserSchema = new mongoose.Schema<User>({
@@ -19,13 +19,12 @@ const UserSchema = new mongoose.Schema<User>({
     type: String,
     required: [true, 'Email is not given'],
     unique: true,
-    index: true,
   },
   phone: { type: String, default: '' },
   note: { type: String, default: '' },
   password: { type: String, required: [true, 'Password is not given'] },
   role: { type: String, required: [true, 'Role is not given'] },
-  warehouse: { type: String, default: null },
+  store: { type: String, default: null },
 });
 
 const User = mongoose.models.User || mongoose.model<User>('User', UserSchema);

@@ -9,7 +9,7 @@ declare module 'next-auth' {
       full_name: string;
       email: string;
       role: string;
-      warehouse: string | null;
+      store: string | null;
     } & DefaultSession['user'];
   }
 
@@ -18,7 +18,7 @@ declare module 'next-auth' {
     full_name: string;
     email: string;
     role: string;
-    warehouse: string | null;
+    store: string | null;
   }
 }
 
@@ -29,6 +29,6 @@ declare module 'next-auth/jwt' {
     full_name: string;
     email: string;
     role: string;
-    warehouse: string | null;
+    store: string | null;
   }
 }

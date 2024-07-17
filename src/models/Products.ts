@@ -9,7 +9,7 @@ interface Product {
   quantity?: number;
   supplier: string;
   category: string;
-  warehouse: string;
+  store: string;
   mft_date?: string;
   exp_date: string;
 }
@@ -48,9 +48,9 @@ const ProductSchema = new mongoose.Schema<Product>(
       type: String,
       required: [true, 'Category is not given'],
     },
-    warehouse: {
+    store: {
       type: String,
-      required: [true, 'Warehouse is not given'],
+      required: [true, 'store is not given'],
     },
     mft_date: {
       type: String,

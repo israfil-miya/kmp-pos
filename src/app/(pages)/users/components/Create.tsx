@@ -5,13 +5,15 @@ import { useSession } from 'next-auth/react';
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateconvertion';
 
 interface UserDataTypes {
-  full_name: string;
-  email: string;
-  role: string;
-  warehouse: string;
-  phone: string;
-  note: string;
-  password: string;
+  _id?: string;
+  full_name?: string;
+  email?: string;
+  role?: string;
+  store?: string;
+  phone?: string;
+  note?: string;
+  password?: string;
+  __v?: number;
 }
 
 interface PropsType {
@@ -30,7 +32,7 @@ const CreateButton: React.FC<PropsType> = props => {
     full_name: '',
     email: '',
     role: '',
-    warehouse: '',
+    store: '',
     phone: '',
     note: '',
     password: '',
@@ -42,7 +44,7 @@ const CreateButton: React.FC<PropsType> = props => {
         full_name: '',
         email: '',
         role: '',
-        warehouse: '',
+        store: '',
         phone: '',
         note: '',
         password: '',
@@ -133,7 +135,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
                   htmlFor="grid-password"
                 >
-                  Full Name
+                  Full Name*
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
@@ -141,6 +143,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   value={userData.full_name}
                   onChange={handleChange}
                   type="text"
+                  required
                 />
               </div>
 
@@ -149,7 +152,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   className="uppercase tracking-wide text-gray-700 text-sm font-bold flex gap-2 mb-2"
                   htmlFor="grid-password"
                 >
-                  Email
+                  Email*
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
@@ -157,6 +160,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   value={userData.email}
                   onChange={handleChange}
                   type="email"
+                  required
                 />
               </div>
 
@@ -165,7 +169,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   className="uppercase tracking-wide text-gray-700 text-sm font-bold flex gap-2 mb-2"
                   htmlFor="grid-password"
                 >
-                  Password
+                  Password*
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
@@ -173,6 +177,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   value={userData.password}
                   onChange={handleChange}
                   type="text"
+                  required
                 />
               </div>
 
@@ -197,7 +202,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
                   htmlFor="grid-last-name"
                 >
-                  Role
+                  Role*
                 </label>
                 <select
                   value={userData.role}
@@ -227,11 +232,11 @@ const CreateButton: React.FC<PropsType> = props => {
                   Store
                 </label>
                 <select
-                  value={userData.warehouse}
+                  value={userData.store}
                   onChange={e =>
                     setUserData(prevData => ({
                       ...prevData,
-                      warehouse: e.target.value,
+                      store: e.target.value,
                     }))
                   }
                   required
@@ -241,7 +246,7 @@ const CreateButton: React.FC<PropsType> = props => {
                     Select store
                   </option>
 
-                  {/* Loop over warehouses/stores from database here */}
+                  {/* Loop over stores/stores from database here */}
                   <option value="badda-01">Badda-01</option>
                   <option value="gulshan-02">Gulshan-02</option>
                   <option value="demra-03">Demra-03</option>

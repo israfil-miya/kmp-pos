@@ -16,7 +16,7 @@ export const authConfig = {
         token.full_name = user.full_name;
         token.email = user.email;
         token.role = user.role;
-        token.warehouse = user.warehouse;
+        token.store = user.store;
       }
       return token;
     },
@@ -27,7 +27,7 @@ export const authConfig = {
         session.user.full_name = token.full_name;
         session.user.email = token.email;
         session.user.role = token.role;
-        session.user.warehouse = token.warehouse;
+        session.user.store = token.store;
       }
       return session;
     },

@@ -6,15 +6,19 @@ import CreateButton from './Create';
 import fetchData from '@/utility/fetchdata';
 import { toast } from 'sonner';
 import ExtendableTd from '@/components/ExtendableTd';
+import DeleteButton from './Delete';
+import { useSession } from 'next-auth/react';
 
 interface UserDataTypes {
-  full_name: string;
-  email: string;
-  role: string;
-  warehouse: string;
-  phone: string;
-  note: string;
-  password: string;
+  _id?: string;
+  full_name?: string;
+  email?: string;
+  role?: string;
+  store?: string;
+  phone?: string;
+  note?: string;
+  password?: string;
+  __v?: number;
 }
 
 type UsersState = {
@@ -27,14 +31,25 @@ type UsersState = {
 
 const Table = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [users, setUsers] = useState<{ [key: string]: any }[]>([{}]);
+  const [users, setUsers] = useState<UserDataTypes[]>([]);
+  const { data: session } = useSession();
 
   const createNewUser = async (
     userData: UserDataTypes,
     setUserData: React.Dispatch<React.SetStateAction<UserDataTypes>>,
   ): Promise<void> => {
     try {
-      setIsLoading(true);
+      if (
+        userData.full_name === '' ||
+        userData.email === '' ||
+        userData.role === '' ||
+        userData.password === ''
+      ) {
+        toast.error('Please fill in all required fields');
+        return;
+      }
+
+      // setIsLoading(true);
 
       let url: string =
         process.env.NEXT_PUBLIC_BASE_URL + '/api/user?action=create-new-user';
@@ -49,16 +64,17 @@ const Table = () => {
       let response = await fetchData(url, options);
 
       if (response.ok) {
+        toast.success('New user added successfully');
         setUserData({
           full_name: '',
           email: '',
           role: '',
-          warehouse: '',
+          store: '',
           phone: '',
           note: '',
           password: '',
         });
-        toast.success('New report added successfully');
+        getAllUsers();
       } else {
         toast.error(response.data);
       }
@@ -70,9 +86,9 @@ const Table = () => {
     }
   };
 
-  async function getAllUsers() {
+  const getAllUsers = async (): Promise<void> => {
     try {
-      setIsLoading(true);
+      // setIsLoading(true);
 
       let url: string =
         process.env.NEXT_PUBLIC_BASE_URL + '/api/user?action=get-all-users';
@@ -96,7 +112,39 @@ const Table = () => {
     } finally {
       setIsLoading(false);
     }
-  }
+  };
+
+  const deleteUser = async (userData: {
+    [key: string]: any;
+  }): Promise<void> => {
+    try {
+      // setIsLoading(true);
+
+      let url: string =
+        process.env.NEXT_PUBLIC_BASE_URL + '/api/user?action=delete-user';
+      let options: {} = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: userData._id }),
+      };
+
+      let response = await fetchData(url, options);
+
+      if (response.ok) {
+        toast.success('User deleted successfully');
+        getAllUsers();
+      } else {
+        toast.error(response.data);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while deleting the user');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     getAllUsers();
@@ -111,31 +159,35 @@ const Table = () => {
 
       {isLoading && <p className="text-center">Loading...</p>}
 
-      {!isLoading &&
-        (users?.length !== 0 ? (
-          <div className="table-responsive text-nowrap text-sm">
-            <table className="table border">
-              <thead>
-                <tr>
-                  <th className="font-bold">S/N</th>
-                  <th className="font-bold">Full Name</th>
-                  <th className="font-bold">Email</th>
-                  <th className="font-bold">Role</th>
-                  <th className="font-bold">Store</th>
-                  <th className="font-bold">Note</th>
+      {!isLoading && (
+        <div className="table-responsive text-nowrap text-sm">
+          <table className="table border">
+            <thead>
+              <tr>
+                <th className="font-bold">S/N</th>
+                <th className="font-bold">Full Name</th>
+                <th className="font-bold">Email</th>
+                <th className="font-bold">Role</th>
+                <th className="font-bold">Store</th>
+                <th className="font-bold">Phone</th>
+                <th className="font-bold">Note</th>
+                {session?.user?.role === 'administrator' && (
                   <th className="font-bold">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users?.map((item: any, index: number) => {
-                  return (
-                    <tr key={item._id}>
-                      <td>{index + 1}</td>
-                      <td>{item.full_name}</td>
-                      <td>{item.email}</td>
-                      <td className="capitalize">{item.role}</td>
-                      <td className="capitalize">{item.warehouse}</td>
-                      <ExtendableTd data={item.note} />
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {users.length !== 0 ? (
+                users.map((item: any, index: number) => (
+                  <tr key={item._id}>
+                    <td>{index + 1}</td>
+                    <td>{item.full_name}</td>
+                    <td>{item.email}</td>
+                    <td className="capitalize">{item.role}</td>
+                    <td className="capitalize">{item.store}</td>
+                    <td>{item.phone}</td>
+                    <ExtendableTd data={item.note} />
+                    {session?.user?.role === 'administrator' && (
                       <td
                         className="text-center"
                         style={{ verticalAlign: 'middle' }}
@@ -143,23 +195,30 @@ const Table = () => {
                         <div className="inline-block">
                           <div className="flex gap-2">
                             <button>Edit</button>
-                            <button>Delete</button>
+                            <DeleteButton
+                              userData={item}
+                              submitHandler={deleteUser}
+                            />
                           </div>
                         </div>
                       </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <tr key={0}>
-            <td colSpan={7} className="align-center text-center">
-              No Users To Show.
-            </td>
-          </tr>
-        ))}
+                    )}
+                  </tr>
+                ))
+              ) : (
+                <tr key={0}>
+                  <td
+                    colSpan={session?.user?.role === 'administrator' ? 7 : 6}
+                    className=" align-center text-center"
+                  >
+                    No Users To Show.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
     </>
   );
 };

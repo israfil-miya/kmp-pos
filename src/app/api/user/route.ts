@@ -32,23 +32,14 @@ async function handleCreateNewUser(req: Request): Promise<{
   data: string | Object;
   status: number;
 }> {
-  const { fullName, password, email, warehouse, role, phone, note } =
-    await req.json();
+  const data = await req.json();
 
   try {
     const userData = await User.findOneAndUpdate(
       {
-        email: email,
+        email: data.email,
       },
-      {
-        full_name: fullName,
-        password: password,
-        email: email,
-        warehouse: warehouse,
-        role: role,
-        phone: phone,
-        note: note,
-      },
+      data,
       {
         upsert: true,
         new: true,
@@ -84,6 +75,28 @@ async function handleGetAllUsers(req: Request): Promise<{
   }
 }
 
+async function handleDeleteUser(req: Request): Promise<{
+  data: string | Object;
+  status: number;
+}> {
+  const { userId } = await req.json();
+
+  try {
+    const userData = await User.findOneAndDelete({
+      _id: userId,
+    });
+
+    if (userData) {
+      return { data: 'Deleted user successfully', status: 200 };
+    } else {
+      return { data: 'Unable to delete user', status: 400 };
+    }
+  } catch (e) {
+    console.error(e);
+    return { data: 'An error occurred', status: 500 };
+  }
+}
+
 export async function GET(req: Request) {
   let res: { data: string | Object; status: number };
   switch (getQuery(req).action) {
@@ -103,6 +116,9 @@ export async function POST(req: Request) {
   switch (getQuery(req).action) {
     case 'create-new-user':
       res = await handleCreateNewUser(req);
+      return NextResponse.json(res.data, { status: res.status });
+    case 'delete-user':
+      res = await handleDeleteUser(req);
       return NextResponse.json(res.data, { status: res.status });
     default:
       return NextResponse.json({ response: 'OK' }, { status: 200 });

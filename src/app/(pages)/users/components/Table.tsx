@@ -2,6 +2,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import CreateButton from './Create';
+import fetchData from '@/utility/fetchdata';
+import { toast } from 'sonner';
+import ExtendableTd from '@/components/ExtendableTd';
+
+interface UserDataTypes {
+  full_name: string;
+  email: string;
+  role: string;
+  warehouse: string;
+  phone: string;
+  note: string;
+  password: string;
+}
 
 type UsersState = {
   pagination: {
@@ -13,153 +27,139 @@ type UsersState = {
 
 const Table = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-  const [users, setUsers] = useState<UsersState>({
-    pagination: {
-      count: 0,
-      pageCount: 0,
-    },
-    items: [],
-  });
+  const [users, setUsers] = useState<{ [key: string]: any }[]>([{}]);
+
+  const createNewUser = async (
+    userData: UserDataTypes,
+    setUserData: React.Dispatch<React.SetStateAction<UserDataTypes>>,
+  ): Promise<void> => {
+    try {
+      setIsLoading(true);
+
+      let url: string =
+        process.env.NEXT_PUBLIC_BASE_URL + '/api/user?action=create-new-user';
+      let options: {} = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      };
+
+      let response = await fetchData(url, options);
+
+      if (response.ok) {
+        setUserData({
+          full_name: '',
+          email: '',
+          role: '',
+          warehouse: '',
+          phone: '',
+          note: '',
+          password: '',
+        });
+        toast.success('New report added successfully');
+      } else {
+        toast.error(response.data);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while submitting the form');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  async function getAllUsers() {
+    try {
+      setIsLoading(true);
+
+      let url: string =
+        process.env.NEXT_PUBLIC_BASE_URL + '/api/user?action=get-all-users';
+      let options: {} = {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      };
+
+      let response = await fetchData(url, options);
+
+      if (response.ok) {
+        setUsers(response.data);
+      } else {
+        toast.error(response.data);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while retrieving users data');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    getAllUsers();
+  }, []);
 
   return (
     <>
       <div className="flex flex-col sm:flex-row justify-between mb-4 gap-2 items-center">
         <h2 className="text-3xl font-semibold">Users List</h2>
-        <button
-          onClick={() => router.push('/make-a-call')}
-          className="flex justify-between items-center gap-2 rounded-md bg-blue-600 hover:opacity-90 hover:ring-4 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 text-white p-3"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            viewBox="0 0 16 16"
-          >
-            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
-          </svg>
-          Add User
-        </button>
+        <CreateButton isLoading={isLoading} submitHandler={createNewUser} />
       </div>
 
-      {isLoading ? <p className="text-center">Loading...</p> : <></>}
+      {isLoading && <p className="text-center">Loading...</p>}
 
-      {!isLoading && (
-        <div className="table-responsive text-nowrap">
-          <table className="table border">
-            <thead>
-              <tr>
-                <th className="font-bold">S/N</th>
-                <th className="font-bold">Full Name</th>
-                <th className="font-bold">Email</th>
-                <th className="font-bold">Role</th>
-                <th className="font-bold">Store</th>
-                <th className="font-bold">Note</th>
-                <th className="font-bold">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users?.items?.length !== 0 ? (
-                <>
-                  {/* {reports?.items?.map((item, index) => {
-                  let tableRowColor = 'table-secondary';
-
-                  if (item.is_prospected) {
-                    if (item?.prospect_status == 'high_interest') {
-                      tableRowColor = 'table-success';
-                    } else if (item?.prospect_status == 'low_interest') {
-                      tableRowColor = 'table-warning';
-                    }
-                  } else {
-                    tableRowColor = 'table-danger';
-                  }
-
+      {!isLoading &&
+        (users?.length !== 0 ? (
+          <div className="table-responsive text-nowrap text-sm">
+            <table className="table border">
+              <thead>
+                <tr>
+                  <th className="font-bold">S/N</th>
+                  <th className="font-bold">Full Name</th>
+                  <th className="font-bold">Email</th>
+                  <th className="font-bold">Role</th>
+                  <th className="font-bold">Store</th>
+                  <th className="font-bold">Note</th>
+                  <th className="font-bold">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users?.map((item: any, index: number) => {
                   return (
-                    <tr
-                      key={item._id}
-                      className={tableRowColor ? tableRowColor : ''}
-                    >
-                      <td>{index + 1 + itemPerPage * (page - 1)}</td>
-                      <td>
-                        {item.calling_date &&
-                          convertToDDMMYYYY(item.calling_date)}
-                      </td>
-                      <td>
-                        {item.followup_date &&
-                          convertToDDMMYYYY(item.followup_date)}
-                      </td>
-
-                      <td>{item.country}</td>
-                      <td>
-                        {item.website.length ? (
-                          <Linkify
-                            coverText="Click here to visit"
-                            data={item.website}
-                          />
-                        ) : (
-                          'No link provided'
-                        )}
-                      </td>
-                      <td>{item.category}</td>
-                      <td className="text-wrap">{item.company_name}</td>
-                      <td className="text-wrap">{item.contact_person}</td>
-                      <td>{item.designation}</td>
-                      <td className="text-wrap">{item.contact_number}</td>
-                      <td className="text-wrap">{item.email_address}</td>
-                      <CallingStatusTd data={item.calling_status} />
-                      <td>
-                        {item.linkedin.length ? (
-                          <Linkify
-                            coverText="Click here to visit"
-                            data={item.linkedin}
-                          />
-                        ) : (
-                          'No link provided'
-                        )}
-                      </td>
-                      <td>
-                        {item.test_given_date_history?.length ? 'Yes' : 'No'}
-                      </td>
-                      <td>
-                        {item.is_prospected
-                          ? `Yes (${item.followup_done ? 'Done' : 'Pending'})`
-                          : 'No'}
-                      </td>
+                    <tr key={item._id}>
+                      <td>{index + 1}</td>
+                      <td>{item.full_name}</td>
+                      <td>{item.email}</td>
+                      <td className="capitalize">{item.role}</td>
+                      <td className="capitalize">{item.warehouse}</td>
+                      <ExtendableTd data={item.note} />
                       <td
                         className="text-center"
                         style={{ verticalAlign: 'middle' }}
                       >
                         <div className="inline-block">
                           <div className="flex gap-2">
-                            <EditButton
-                              isLoading={isLoading}
-                              submitHandler={editReport}
-                              reportData={item}
-                            />
-                            <DeleteButton
-                              submitHandler={deleteReport}
-                              reportData={item}
-                            />
+                            <button>Edit</button>
+                            <button>Delete</button>
                           </div>
                         </div>
                       </td>
                     </tr>
                   );
-                })} */}
-                </>
-              ) : (
-                <tr key={0}>
-                  <td colSpan={7} className="align-center text-center">
-                    No User To Show.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <tr key={0}>
+            <td colSpan={7} className="align-center text-center">
+              No Users To Show.
+            </td>
+          </tr>
+        ))}
     </>
   );
 };

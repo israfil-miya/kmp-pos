@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import LogoutAction from '@/components/Logout/LogoutAction';
 import Nav from './Nav';
 import { auth } from '@/auth';
+import Timecard from './TimeCard';
 
 interface OutlineProps {
   children: ReactNode;
@@ -28,12 +29,13 @@ const Outline: React.FC<OutlineProps> = async ({ children }) => {
             <Nav LogoutAction={LogoutAction} />
           </aside>
           <div className="flex-grow">
-            <header className="w-full px-10 py-4 flex flex-row justify-between items-center">
-              <div className="flex gap-2 items-center p-4 bg-yellow-400 bg-opacity-30 text-xl font-semibold rounded-md">
+            <header className="w-full px-10 py-4 flex flex-row justify-end items-center">
+              {/* <div className="flex gap-2 items-center p-4 bg-yellow-400 bg-opacity-30 text-xl font-semibold rounded-md">
                 POS (Point of Sales) - v1.0
-              </div>
+              </div> */}
 
               <div className="flex gap-2 items-center">
+                <Timecard />
                 <div className="flex flex-col gap-0 leading-4">
                   <h1 className="uppercase font-semibold name text-xl">
                     {session?.user.full_name}

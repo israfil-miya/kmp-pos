@@ -8,26 +8,8 @@ import { toast } from 'sonner';
 import ExtendableTd from '@/components/ExtendableTd';
 import DeleteButton from './Delete';
 import { useSession } from 'next-auth/react';
-
-interface UserDataTypes {
-  _id?: string;
-  full_name?: string;
-  email?: string;
-  role?: string;
-  store?: string;
-  phone?: string;
-  note?: string;
-  password?: string;
-  __v?: number;
-}
-
-type UsersState = {
-  pagination: {
-    count: number;
-    pageCount: number;
-  };
-  items: { [key: string]: any }[];
-};
+import UserDataTypes from './UserDataTypes';
+import EditButton from './Edit';
 
 const Table = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -65,15 +47,7 @@ const Table = () => {
 
       if (response.ok) {
         toast.success('New user added successfully');
-        setUserData({
-          full_name: '',
-          email: '',
-          role: '',
-          store: '',
-          phone: '',
-          note: '',
-          password: '',
-        });
+        setUserData({});
         getAllUsers();
       } else {
         toast.error(response.data);
@@ -146,6 +120,42 @@ const Table = () => {
     }
   };
 
+  const editUser = async (
+    userId: string | undefined,
+    userData: UserDataTypes,
+    editedData: UserDataTypes,
+    setEditedData: React.Dispatch<React.SetStateAction<UserDataTypes>>,
+  ): Promise<void> => {
+    try {
+      // setIsLoading(true);
+
+      let url: string =
+        process.env.NEXT_PUBLIC_BASE_URL + '/api/user?action=edit-user';
+      let options: {} = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, editedData }),
+      };
+
+      let response = await fetchData(url, options);
+
+      if (response.ok) {
+        toast.success('User data edited successfully');
+        setEditedData({});
+        getAllUsers();
+      } else {
+        toast.error(response.data);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while submitting the form');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     getAllUsers();
   }, []);
@@ -161,7 +171,7 @@ const Table = () => {
 
       {!isLoading && (
         <div className="table-responsive text-nowrap text-sm">
-          <table className="table border">
+          <table className="table table-bordered">
             <thead>
               <tr>
                 <th className="font-bold">S/N</th>
@@ -194,7 +204,11 @@ const Table = () => {
                       >
                         <div className="inline-block">
                           <div className="flex gap-2">
-                            <button>Edit</button>
+                            <EditButton
+                              isLoading={isLoading}
+                              userData={item}
+                              submitHandler={editUser}
+                            />
                             <DeleteButton
                               userData={item}
                               submitHandler={deleteUser}
@@ -219,6 +233,15 @@ const Table = () => {
           </table>
         </div>
       )}
+
+      <style jsx>
+        {`
+          th,
+          td {
+            padding: 2.5px 10px;
+          }
+        `}
+      </style>
     </>
   );
 };

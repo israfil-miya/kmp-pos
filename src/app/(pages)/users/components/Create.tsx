@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateconvertion';
-import UserDataTypes from './UserDataTypes';
+import { UserDataTypes, handleResetState } from '../helpers';
 
 interface PropsType {
   isLoading: boolean;
+  storesName: string[];
   submitHandler: (
     userData: UserDataTypes,
     setUserData: React.Dispatch<React.SetStateAction<UserDataTypes>>,
@@ -19,7 +20,7 @@ const CreateButton: React.FC<PropsType> = props => {
 
   useEffect(() => {
     if (!isOpen) {
-      setUserData({});
+      handleResetState(setUserData);
     }
   }, [isOpen]);
 
@@ -216,11 +217,13 @@ const CreateButton: React.FC<PropsType> = props => {
                   <option value={''} className="text-gray-400">
                     Select store
                   </option>
-
-                  {/* Loop over stores/stores from database here */}
-                  <option value="badda-01">Badda-01</option>
-                  <option value="gulshan-02">Gulshan-02</option>
-                  <option value="demra-03">Demra-03</option>
+                  {props.storesName.map((storeName: string) => {
+                    return (
+                      <option className="capitalize" value={storeName}>
+                        {storeName}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 

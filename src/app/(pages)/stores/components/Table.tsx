@@ -8,58 +8,45 @@ import { toast } from 'sonner';
 import ExtendableTd from '@/components/ExtendableTd';
 import DeleteButton from './Delete';
 import { useSession } from 'next-auth/react';
-import { UserDataTypes, handleResetState } from '../helpers';
+import { StoreDataTypes, handleResetState } from '../helpers';
 import EditButton from './Edit';
 
 const Table = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [users, setUsers] = useState<UserDataTypes[]>([]);
-  const [storesName, setStoresName] = useState<string[]>([]);
+  const [stores, setStores] = useState<StoreDataTypes[]>([]);
   const { data: session } = useSession();
 
-  const createNewUser = async (
-    userData: UserDataTypes,
-    setUserData: React.Dispatch<React.SetStateAction<UserDataTypes>>,
+  const createNewStore = async (
+    storeData: StoreDataTypes,
+    setStoreData: React.Dispatch<React.SetStateAction<StoreDataTypes>>,
   ): Promise<void> => {
     try {
-      if (
-        !userData.full_name ||
-        !userData.email ||
-        !userData.role ||
-        !userData.password
-      ) {
+      console.log(storeData);
+      if (!storeData.name || !storeData.status) {
+        console.log('if statement ', storeData);
         toast.error('Please fill in all required fields');
-        handleResetState(setUserData);
-        return;
-      }
-
-      if (
-        (userData.role == 'cashier' || userData.role == 'manager') &&
-        !userData.store
-      ) {
-        toast.error('You have to assign a store for the user');
-        handleResetState(setUserData);
+        handleResetState(setStoreData);
         return;
       }
 
       // setIsLoading(true);
 
       let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL + '/api/user?action=create-new-user';
+        process.env.NEXT_PUBLIC_BASE_URL + '/api/store?action=create-new-store';
       let options: {} = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify(storeData),
       };
 
       let response = await fetchData(url, options);
 
       if (response.ok) {
-        toast.success('New user added successfully');
-        handleResetState(setUserData);
-        getAllUsers();
+        toast.success('New store added successfully');
+        handleResetState(setStoreData);
+        getAllStores();
       } else {
         toast.error(response.data);
       }
@@ -71,35 +58,7 @@ const Table = () => {
     }
   };
 
-  const getAllUsers = async (): Promise<void> => {
-    try {
-      // setIsLoading(true);
-
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL + '/api/user?action=get-all-users';
-      let options: {} = {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        setUsers(response.data);
-      } else {
-        toast.error(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while retrieving users data');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getAllStoresName = async (): Promise<void> => {
+  const getAllStores = async (): Promise<void> => {
     try {
       // setIsLoading(true);
 
@@ -115,97 +74,79 @@ const Table = () => {
       let response = await fetchData(url, options);
 
       if (response.ok) {
-        let storesNameArray: string[] = [];
-        response.data.forEach((store: any, index: number) => {
-          storesNameArray.push(store.name);
-        });
-        setStoresName(storesNameArray);
+        setStores(response.data);
       } else {
         toast.error(response.data);
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred while retrieving stores');
+      toast.error('An error occurred while retrieving stores data');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const deleteUser = async (userData: UserDataTypes): Promise<void> => {
+  const deleteStore = async (storeData: StoreDataTypes): Promise<void> => {
     try {
       // setIsLoading(true);
 
       let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL + '/api/user?action=delete-user';
+        process.env.NEXT_PUBLIC_BASE_URL + '/api/store?action=delete-store';
       let options: {} = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId: userData._id }),
+        body: JSON.stringify({ storeId: storeData._id }),
       };
 
       let response = await fetchData(url, options);
 
       if (response.ok) {
-        toast.success('User deleted successfully');
-        getAllUsers();
+        toast.success('Store deleted successfully');
+        getAllStores();
       } else {
         toast.error(response.data);
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred while deleting the user');
+      toast.error('An error occurred while deleting the store');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const editUser = async (
-    userId: string | undefined,
-    userData: UserDataTypes,
-    editedData: UserDataTypes,
-    setEditedData: React.Dispatch<React.SetStateAction<UserDataTypes>>,
+  const editStore = async (
+    storeId: string | undefined,
+    storeData: StoreDataTypes,
+    editedData: StoreDataTypes,
+    setEditedData: React.Dispatch<React.SetStateAction<StoreDataTypes>>,
   ): Promise<void> => {
     try {
-      if (
-        !editedData.full_name ||
-        !editedData.email ||
-        !editedData.role ||
-        !editedData.password
-      ) {
+      if (!editedData.name || !editedData.status) {
         toast.error('Please fill in all required fields');
         handleResetState(setEditedData);
         return;
       }
 
-      if (
-        (editedData.role == 'cashier' || editedData.role == 'manager') &&
-        !editedData.store
-      ) {
-        toast.error('You have to assign a store for the user');
-        handleResetState(setEditedData);
-        return;
-      }
-
       // setIsLoading(true);
 
       let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL + '/api/user?action=edit-user';
+        process.env.NEXT_PUBLIC_BASE_URL + '/api/store?action=edit-store';
       let options: {} = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId, editedData }),
+        body: JSON.stringify({ storeId, editedData }),
       };
 
       let response = await fetchData(url, options);
 
       if (response.ok) {
-        toast.success('User data edited successfully');
+        toast.success('Store data edited successfully');
         handleResetState(setEditedData);
-        getAllUsers();
+        getAllStores();
       } else {
         toast.error(response.data);
       }
@@ -218,19 +159,14 @@ const Table = () => {
   };
 
   useEffect(() => {
-    getAllUsers();
-    getAllStoresName();
+    getAllStores();
   }, []);
 
   return (
     <>
       <div className="flex flex-col sm:flex-row justify-between mb-4 gap-2 items-center">
-        <h2 className="text-3xl font-semibold">Users List</h2>
-        <CreateButton
-          isLoading={isLoading}
-          submitHandler={createNewUser}
-          storesName={storesName}
-        />
+        <h2 className="text-3xl font-semibold">Stores List</h2>
+        <CreateButton isLoading={isLoading} submitHandler={createNewStore} />
       </div>
 
       {isLoading && <p className="text-center">Loading...</p>}
@@ -241,28 +177,26 @@ const Table = () => {
             <thead>
               <tr>
                 <th className="font-bold">S/N</th>
-                <th className="font-bold">Full Name</th>
-                <th className="font-bold">Email</th>
-                <th className="font-bold">Role</th>
-                <th className="font-bold">Store</th>
+                <th className="font-bold">Name</th>
+                <th className="font-bold">Manager</th>
                 <th className="font-bold">Phone</th>
-                <th className="font-bold">Note</th>
+                <th className="font-bold">Location</th>
+                <th className="font-bold">Status</th>
                 {session?.user?.role === 'administrator' && (
                   <th className="font-bold">Action</th>
                 )}
               </tr>
             </thead>
             <tbody>
-              {users.length !== 0 ? (
-                users.map((item: UserDataTypes, index: number) => (
+              {stores.length !== 0 ? (
+                stores.map((item: StoreDataTypes, index: number) => (
                   <tr key={item._id}>
                     <td>{index + 1}</td>
-                    <td>{item.full_name}</td>
-                    <td>{item.email}</td>
-                    <td className="capitalize">{item.role}</td>
-                    <td className="capitalize">{item.store}</td>
-                    <td>{item.phone}</td>
-                    <ExtendableTd data={item.note || ''} />
+                    <td>{item.name}</td>
+                    <td>{item.manager}</td>
+                    <td className="capitalize">{item.phone}</td>
+                    <ExtendableTd data={item.location || ''} />
+                    <td className="capitalize">{item.status}</td>
                     {session?.user?.role === 'administrator' && (
                       <td
                         className="text-center"
@@ -272,13 +206,12 @@ const Table = () => {
                           <div className="flex gap-2">
                             <EditButton
                               isLoading={isLoading}
-                              userData={item}
-                              submitHandler={editUser}
-                              storesName={storesName}
+                              storeData={item}
+                              submitHandler={editStore}
                             />
                             <DeleteButton
-                              userData={item}
-                              submitHandler={deleteUser}
+                              storeData={item}
+                              submitHandler={deleteStore}
                             />
                           </div>
                         </div>
@@ -289,10 +222,10 @@ const Table = () => {
               ) : (
                 <tr key={0}>
                   <td
-                    colSpan={session?.user?.role === 'administrator' ? 8 : 7}
+                    colSpan={session?.user?.role === 'administrator' ? 7 : 6}
                     className="align-center text-center"
                   >
-                    No User To Show.
+                    No Store To Show.
                   </td>
                 </tr>
               )}

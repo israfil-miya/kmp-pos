@@ -2,128 +2,208 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-
-type CategoriesState = {
-  pagination: {
-    count: number;
-    pageCount: number;
-  };
-  items: { [key: string]: any }[];
-};
+import CreateButton from './Create';
+import fetchData from '@/utility/fetchdata';
+import { toast } from 'sonner';
+import ExtendableTd from '@/components/ExtendableTd';
+import DeleteButton from './Delete';
+import { useSession } from 'next-auth/react';
+import { CategoryDataTypes, handleResetState } from '../helpers';
+import EditButton from './Edit';
+import moment from 'moment-timezone';
+import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateconvertion';
 
 const Table = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-  const [categories, setCategories] = useState<CategoriesState>({
-    pagination: {
-      count: 0,
-      pageCount: 0,
-    },
-    items: [],
-  });
+  const [categories, setCategories] = useState<CategoryDataTypes[]>([]);
+  const { data: session } = useSession();
+
+  const createNewCategory = async (
+    categoryData: CategoryDataTypes,
+    setCategoryData: React.Dispatch<React.SetStateAction<CategoryDataTypes>>,
+  ): Promise<void> => {
+    try {
+      if (!categoryData.name) {
+        toast.error('Please fill in all required fields');
+        handleResetState(setCategoryData);
+        return;
+      }
+
+      // setIsLoading(true);
+
+      let url: string =
+        process.env.NEXT_PUBLIC_BASE_URL +
+        '/api/category?action=create-new-category';
+      let options: {} = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(categoryData),
+      };
+
+      let response = await fetchData(url, options);
+
+      if (response.ok) {
+        toast.success('New category added successfully');
+        handleResetState(setCategoryData);
+        getAllCategories();
+      } else {
+        toast.error(response.data);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while submitting the form');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getAllCategories = async (): Promise<void> => {
+    try {
+      // setIsLoading(true);
+
+      let url: string =
+        process.env.NEXT_PUBLIC_BASE_URL +
+        '/api/category?action=get-all-categories';
+      let options: {} = {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      };
+
+      let response = await fetchData(url, options);
+
+      if (response.ok) {
+        setCategories(response.data);
+      } else {
+        toast.error(response.data);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while retrieving categories data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteCategory = async (
+    categoryData: CategoryDataTypes,
+  ): Promise<void> => {
+    try {
+      // setIsLoading(true);
+
+      let url: string =
+        process.env.NEXT_PUBLIC_BASE_URL +
+        '/api/category?action=delete-category';
+      let options: {} = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ categoryId: categoryData._id }),
+      };
+
+      let response = await fetchData(url, options);
+
+      if (response.ok) {
+        toast.success('Category deleted successfully');
+        getAllCategories();
+      } else {
+        toast.error(response.data);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while deleting the category');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const editCategory = async (
+    categoryId: string | undefined,
+    categoryData: CategoryDataTypes,
+    editedData: CategoryDataTypes,
+    setEditedData: React.Dispatch<React.SetStateAction<CategoryDataTypes>>,
+  ): Promise<void> => {
+    try {
+      if (!editedData.name) {
+        toast.error('Please fill in all required fields');
+        handleResetState(setEditedData);
+        return;
+      }
+
+      // setIsLoading(true);
+
+      let url: string =
+        process.env.NEXT_PUBLIC_BASE_URL + '/api/category?action=edit-category';
+      let options: {} = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ categoryId, editedData }),
+      };
+
+      let response = await fetchData(url, options);
+
+      if (response.ok) {
+        toast.success('Category data edited successfully');
+        handleResetState(setEditedData);
+        getAllCategories();
+      } else {
+        toast.error(response.data);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while submitting the form');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getAllCategories();
+  }, []);
 
   return (
     <>
       <div className="flex flex-col sm:flex-row justify-between mb-4 gap-2 items-center">
         <h2 className="text-3xl font-semibold">Product Category List</h2>
-        <button
-          onClick={() => router.push('/make-a-call')}
-          className="flex justify-between items-center gap-2 rounded-md bg-blue-600 hover:opacity-90 hover:ring-4 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 text-white p-3"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            viewBox="0 0 16 16"
-          >
-            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
-          </svg>
-          Add Category
-        </button>
+        <CreateButton isLoading={isLoading} submitHandler={createNewCategory} />
       </div>
 
-      {isLoading ? <p className="text-center">Loading...</p> : <></>}
+      {isLoading && <p className="text-center">Loading...</p>}
 
       {!isLoading && (
-        <div className="table-responsive text-nowrap">
-          <table className="table border">
+        <div className="table-responsive text-nowrap text-sm">
+          <table className="table table-bordered">
             <thead>
               <tr>
                 <th className="font-bold">S/N</th>
                 <th className="font-bold">Category Name</th>
-                <th className="font-bold">Created At</th>
-                <th className="font-bold">Action</th>
+                <th className="font-bold">Creation Date</th>
+                {session?.user?.role === 'administrator' && (
+                  <th className="font-bold">Action</th>
+                )}
               </tr>
             </thead>
             <tbody>
-              {categories?.items?.length !== 0 ? (
-                <>
-                  {/* {reports?.items?.map((item, index) => {
-                  let tableRowColor = 'table-secondary';
-
-                  if (item.is_prospected) {
-                    if (item?.prospect_status == 'high_interest') {
-                      tableRowColor = 'table-success';
-                    } else if (item?.prospect_status == 'low_interest') {
-                      tableRowColor = 'table-warning';
-                    }
-                  } else {
-                    tableRowColor = 'table-danger';
-                  }
-
-                  return (
-                    <tr
-                      key={item._id}
-                      className={tableRowColor ? tableRowColor : ''}
-                    >
-                      <td>{index + 1 + itemPerPage * (page - 1)}</td>
-                      <td>
-                        {item.calling_date &&
-                          convertToDDMMYYYY(item.calling_date)}
-                      </td>
-                      <td>
-                        {item.followup_date &&
-                          convertToDDMMYYYY(item.followup_date)}
-                      </td>
-
-                      <td>{item.country}</td>
-                      <td>
-                        {item.website.length ? (
-                          <Linkify
-                            coverText="Click here to visit"
-                            data={item.website}
-                          />
-                        ) : (
-                          'No link provided'
-                        )}
-                      </td>
-                      <td>{item.category}</td>
-                      <td className="text-wrap">{item.company_name}</td>
-                      <td className="text-wrap">{item.contact_person}</td>
-                      <td>{item.designation}</td>
-                      <td className="text-wrap">{item.contact_number}</td>
-                      <td className="text-wrap">{item.email_address}</td>
-                      <CallingStatusTd data={item.calling_status} />
-                      <td>
-                        {item.linkedin.length ? (
-                          <Linkify
-                            coverText="Click here to visit"
-                            data={item.linkedin}
-                          />
-                        ) : (
-                          'No link provided'
-                        )}
-                      </td>
-                      <td>
-                        {item.test_given_date_history?.length ? 'Yes' : 'No'}
-                      </td>
-                      <td>
-                        {item.is_prospected
-                          ? `Yes (${item.followup_done ? 'Done' : 'Pending'})`
-                          : 'No'}
-                      </td>
+              {categories.length !== 0 ? (
+                categories.map((item: CategoryDataTypes, index: number) => (
+                  <tr key={item._id}>
+                    <td>{index + 1}</td>
+                    <td className="capitalize">{item.name}</td>
+                    <td>
+                      {item.createdAt
+                        ? moment(
+                            convertToDDMMYYYY(item?.createdAt),
+                            'DD-MM-YYYY',
+                          ).format('Do MMMM, YYYY')
+                        : null}
+                    </td>
+                    {session?.user?.role === 'administrator' && (
                       <td
                         className="text-center"
                         style={{ verticalAlign: 'middle' }}
@@ -132,23 +212,25 @@ const Table = () => {
                           <div className="flex gap-2">
                             <EditButton
                               isLoading={isLoading}
-                              submitHandler={editReport}
-                              reportData={item}
+                              categoryData={item}
+                              submitHandler={editCategory}
                             />
                             <DeleteButton
-                              submitHandler={deleteReport}
-                              reportData={item}
+                              categoryData={item}
+                              submitHandler={deleteCategory}
                             />
                           </div>
                         </div>
                       </td>
-                    </tr>
-                  );
-                })} */}
-                </>
+                    )}
+                  </tr>
+                ))
               ) : (
                 <tr key={0}>
-                  <td colSpan={4} className="align-center text-center">
+                  <td
+                    colSpan={session?.user?.role === 'administrator' ? 4 : 3}
+                    className="align-center text-center"
+                  >
                     No Category To Show.
                   </td>
                 </tr>
@@ -157,6 +239,15 @@ const Table = () => {
           </table>
         </div>
       )}
+
+      <style jsx>
+        {`
+          th,
+          td {
+            padding: 2.5px 10px;
+          }
+        `}
+      </style>
     </>
   );
 };

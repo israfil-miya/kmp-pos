@@ -7,8 +7,8 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'robohash.org',
-        pathname: '**',
+        hostname: 'gravatar.com',
+        pathname: '/avatar/*',
       },
     ],
   },

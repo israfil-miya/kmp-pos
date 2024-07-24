@@ -87,9 +87,9 @@ async function handleDeleteUser(req: Request): Promise<{
     });
 
     if (userData) {
-      return { data: 'Deleted user successfully', status: 200 };
+      return { data: 'Deleted the user successfully', status: 200 };
     } else {
-      return { data: 'Unable to delete user', status: 400 };
+      return { data: 'Unable to delete the user', status: 400 };
     }
   } catch (e) {
     console.error(e);
@@ -109,9 +109,9 @@ async function handleEditUser(req: Request): Promise<{
     });
 
     if (userData) {
-      return { data: 'Edited user data successfully', status: 200 };
+      return { data: 'Edited the user data successfully', status: 200 };
     } else {
-      return { data: 'Unable to edit user data', status: 400 };
+      return { data: 'Unable to edit the user data', status: 400 };
     }
   } catch (e) {
     console.error(e);

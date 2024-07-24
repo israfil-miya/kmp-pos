@@ -9,6 +9,7 @@ const CategorySchema = new mongoose.Schema<Category>(
     name: {
       type: String,
       required: [true, 'Name is not given'],
+      unique: true,
     },
   },
   { timestamps: true },

@@ -1,17 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateconvertion';
-import { UserDataTypes, handleResetState } from '../helpers';
+import { StoreDataTypes, handleResetState } from '../helpers';
 
 interface PropsType {
-  userData: UserDataTypes;
+  storeData: StoreDataTypes;
   isLoading: boolean;
-  storesName: string[];
   submitHandler: (
-    userId: string | undefined,
-    userData: UserDataTypes,
-    editedData: UserDataTypes,
-    setEditedData: React.Dispatch<React.SetStateAction<UserDataTypes>>,
+    storeId: string | undefined,
+    storeData: StoreDataTypes,
+    editedData: StoreDataTypes,
+    setEditedData: React.Dispatch<React.SetStateAction<StoreDataTypes>>,
   ) => Promise<void>;
 }
 
@@ -20,13 +19,13 @@ const EditButton: React.FC<PropsType> = props => {
   const { data: session } = useSession();
   const popupRef = useRef<HTMLElement>(null);
 
-  const [editedData, setEditedData] = useState<UserDataTypes>({});
+  const [editedData, setEditedData] = useState<StoreDataTypes>({});
 
   useEffect(() => {
     if (!isOpen) {
       handleResetState(setEditedData);
     } else {
-      setEditedData(props.userData);
+      setEditedData(props.storeData);
     }
   }, [isOpen]);
 
@@ -85,7 +84,7 @@ const EditButton: React.FC<PropsType> = props => {
         >
           <header className="flex items-center align-middle justify-between px-4 py-2 border-b rounded-t">
             <h3 className="text-gray-900 text-lg lg:text-xl font-semibold dark:text-white uppercase">
-              Edit User
+              Edit Store
             </h3>
             <button
               onClick={() => setIsOpen(false)}
@@ -114,12 +113,12 @@ const EditButton: React.FC<PropsType> = props => {
                   className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
                   htmlFor="grid-password"
                 >
-                  Full Name
+                  Store name
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="full_name"
-                  value={editedData.full_name}
+                  name="name"
+                  value={editedData.name}
                   onChange={handleChange}
                   type="text"
                 />
@@ -130,28 +129,12 @@ const EditButton: React.FC<PropsType> = props => {
                   className="uppercase tracking-wide text-gray-700 text-sm font-bold flex gap-2 mb-2"
                   htmlFor="grid-password"
                 >
-                  Email
+                  Manager
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="email"
-                  value={editedData.email}
-                  onChange={handleChange}
-                  type="email"
-                />
-              </div>
-
-              <div>
-                <label
-                  className="uppercase tracking-wide text-gray-700 text-sm font-bold flex gap-2 mb-2"
-                  htmlFor="grid-password"
-                >
-                  Password
-                </label>
-                <input
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="password"
-                  value={editedData.password}
+                  name="manager"
+                  value={editedData.manager}
                   onChange={handleChange}
                   type="text"
                 />
@@ -178,56 +161,24 @@ const EditButton: React.FC<PropsType> = props => {
                   className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
                   htmlFor="grid-last-name"
                 >
-                  Role
+                  Status
                 </label>
                 <select
-                  value={editedData.role}
+                  value={editedData.status}
                   onChange={e =>
-                    setEditedData((prevData: UserDataTypes) => ({
+                    setEditedData((prevData: StoreDataTypes) => ({
                       ...prevData,
-                      role: e.target.value,
+                      status: e.target.value,
                     }))
                   }
                   required
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                 >
                   <option value={''} className="text-gray-400">
-                    Select user role
+                    Select store status
                   </option>
-                  <option value="administrator">Administrator</option>
-                  <option value="cashier">Cashier</option>
-                  <option value="manager">Manager</option>
-                </select>
-              </div>
-
-              <div>
-                <label
-                  className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
-                  htmlFor="grid-last-name"
-                >
-                  Store
-                </label>
-                <select
-                  value={editedData.store}
-                  onChange={e =>
-                    setEditedData((prevData: UserDataTypes) => ({
-                      ...prevData,
-                      store: e.target.value,
-                    }))
-                  }
-                  required
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                >
-                  <option value={''} className="text-gray-400">
-                    Select store
-                  </option>
-                  {props.storesName.map((storeName: string) => {
-                    return (
-                      <option className="capitalize" value={storeName}>
-                        {storeName}
-                      </option>
-                    );
-                  })}
+                  <option value="open">Open</option>
+                  <option value="closed">Closed</option>
                 </select>
               </div>
 
@@ -236,13 +187,13 @@ const EditButton: React.FC<PropsType> = props => {
                   className="block uppercase tracking-wide text-gray-700 text-sm font-bold mb-2"
                   htmlFor="grid-password"
                 >
-                  Note
+                  Store Location
                 </label>
                 <textarea
                   rows={5}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="note"
-                  value={editedData.note}
+                  name="location"
+                  value={editedData.location}
                   onChange={handleChange}
                 />
               </div>
@@ -261,8 +212,8 @@ const EditButton: React.FC<PropsType> = props => {
               <button
                 onClick={() => {
                   props.submitHandler(
-                    props.userData?._id,
-                    props.userData,
+                    props.storeData?._id,
+                    props.storeData,
                     editedData,
                     setEditedData,
                   );

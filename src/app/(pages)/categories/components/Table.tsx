@@ -178,7 +178,7 @@ const Table = () => {
 
       {!isLoading && (
         <div className="table-responsive text-nowrap text-sm">
-          <table className="table table-bordered">
+          <table className="table table-bordered table-striped">
             <thead>
               <tr>
                 <th className="font-bold">S/N</th>

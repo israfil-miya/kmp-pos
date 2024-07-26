@@ -39,7 +39,7 @@ const Outline: React.FC<OutlineProps> = async ({ children }) => {
     <>
       <div className="flex flex-col h-screen">
         <div className="flex flex-grow">
-          <aside className="bg-gray-800 w-56 text-white gap-6 pt-6 pb-2 flex-col flex shadow-[rgba(0,0,0,0.15)_0px_4px_10px] overflow-y-auto">
+          <aside className="bg-gray-800 w-56 text-white gap-6 pt-6 pb-2 flex-col flex shadow-[4px_0px_10px_rgba(0,0,0,0.06)] overflow-y-auto">
             <div className="flex flex-col gap-2 mb-4 mt-2 items-center text-nowrap">
               <Image
                 src="/images/khalek-molla-high-resolution-logo-white-transparent.png"
@@ -52,7 +52,7 @@ const Outline: React.FC<OutlineProps> = async ({ children }) => {
             <Nav LogoutAction={LogoutAction} />
           </aside>
           <div className="flex-grow">
-            <header className="w-full px-10 py-4 flex flex-row justify-between items-center">
+            <header className="w-full px-10 py-2 flex flex-row justify-between items-center shadow-[0_4px_6px_rgba(0,0,0,0.06)]">
               {/* <div className="flex gap-2 items-center p-4 bg-yellow-400 bg-opacity-30 text-xl font-semibold rounded-md">
                 POS (Point of Sales) - v1.0
               </div> */}

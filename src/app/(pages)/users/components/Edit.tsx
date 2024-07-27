@@ -223,7 +223,11 @@ const EditButton: React.FC<PropsType> = props => {
                   </option>
                   {props.storesName.map((storeName: string) => {
                     return (
-                      <option className="capitalize" value={storeName}>
+                      <option
+                        key={storeName}
+                        className="capitalize"
+                        value={storeName}
+                      >
                         {storeName}
                       </option>
                     );

@@ -3,8 +3,8 @@ import mongoose from 'mongoose';
 interface Store {
   name: string;
   location?: string;
-  manager: string;
-  phone: string;
+  manager?: string;
+  phone?: string;
   status?: string;
 }
 
@@ -17,8 +17,8 @@ const StoreSchema = new mongoose.Schema<Store>({
     type: String,
     default: '',
   },
-  manager: { type: String, required: [true, 'Manager name is not given'] },
-  phone: { type: String, required: [true, 'Phone number is not given'] },
+  manager: { type: String, default: '' },
+  phone: { type: String, default: ''},
   status: { type: String, default: 'open' },
 });
 

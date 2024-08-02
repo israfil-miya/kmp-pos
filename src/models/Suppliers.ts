@@ -1,4 +1,4 @@
-import getTodayDate from '@/utility/gettodaysdate';
+import getTodayDate from '@/utility/getTodaysDate';
 import mongoose from 'mongoose';
 
 interface Supplier {

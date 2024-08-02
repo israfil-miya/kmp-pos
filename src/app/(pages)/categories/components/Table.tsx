@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import CreateButton from './Create';
-import fetchData from '@/utility/fetchdata';
+import fetchData from '@/utility/fetchData';
 import { toast } from 'sonner';
 import ExtendableTd from '@/components/ExtendableTd';
 import DeleteButton from './Delete';
@@ -11,7 +11,7 @@ import { useSession } from 'next-auth/react';
 import { CategoryDataTypes, handleResetState } from '../helpers';
 import EditButton from './Edit';
 import moment from 'moment-timezone';
-import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateconvertion';
+import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConvertion';
 
 const Table = () => {
   const [isLoading, setIsLoading] = useState(false);

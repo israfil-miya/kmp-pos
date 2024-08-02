@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import CreateButton from './Create';
-import fetchData from '@/utility/fetchdata';
+import fetchData from '@/utility/fetchData';
 import { toast } from 'sonner';
 import ExtendableTd from '@/components/ExtendableTd';
 import DeleteButton from './Delete';
@@ -11,21 +11,21 @@ import { useSession } from 'next-auth/react';
 import { ProductDataTypes, handleResetState } from '../helpers';
 import EditButton from './Edit';
 import moment from 'moment-timezone';
-import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateconvertion';
+import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConvertion';
 
 const Table = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [categories, setCategories] = useState<CategoryDataTypes[]>([]);
+  const [categories, setCategories] = useState<ProductDataTypes[]>([]);
   const { data: session } = useSession();
 
   const createNewCategory = async (
-    categoryData: CategoryDataTypes,
-    setCategoryData: React.Dispatch<React.SetStateAction<CategoryDataTypes>>,
+    productData: ProductDataTypes,
+    setProductData: React.Dispatch<React.SetStateAction<ProductDataTypes>>,
   ): Promise<void> => {
     try {
-      if (!categoryData.name) {
+      if (!productData.name) {
         toast.error('Please fill in all required fields');
-        handleResetState(setCategoryData);
+        handleResetState(setProductData);
         return;
       }
 
@@ -39,14 +39,14 @@ const Table = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(categoryData),
+        body: JSON.stringify(productData),
       };
 
       let response = await fetchData(url, options);
 
       if (response.ok) {
         toast.success('New category added successfully');
-        handleResetState(setCategoryData);
+        handleResetState(setProductData);
         getAllCategories();
       } else {
         toast.error(response.data);
@@ -89,7 +89,7 @@ const Table = () => {
   };
 
   const deleteCategory = async (
-    categoryData: CategoryDataTypes,
+    productData: ProductDataTypes,
   ): Promise<void> => {
     try {
       // setIsLoading(true);
@@ -102,7 +102,7 @@ const Table = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ categoryId: categoryData._id }),
+        body: JSON.stringify({ categoryId: productData._id }),
       };
 
       let response = await fetchData(url, options);
@@ -123,9 +123,9 @@ const Table = () => {
 
   const editCategory = async (
     categoryId: string | undefined,
-    categoryData: CategoryDataTypes,
-    editedData: CategoryDataTypes,
-    setEditedData: React.Dispatch<React.SetStateAction<CategoryDataTypes>>,
+    productData: ProductDataTypes,
+    editedData: ProductDataTypes,
+    setEditedData: React.Dispatch<React.SetStateAction<ProductDataTypes>>,
   ): Promise<void> => {
     try {
       if (!editedData.name) {
@@ -182,8 +182,14 @@ const Table = () => {
             <thead>
               <tr>
                 <th className="font-bold">S/N</th>
-                <th className="font-bold">Category Name</th>
-                <th className="font-bold">Creation Date</th>
+                <th className="font-bold">Barcode</th>
+                <th className="font-bold">Products</th>
+                <th className="font-bold">Category</th>
+                <th className="font-bold">Expire</th>
+                <th className="font-bold">Price</th>
+                <th className="font-bold">In Stock</th>
+                <th className="font-bold">Store</th>
+                <th className="font-bold">Status</th>
                 {session?.user?.role === 'administrator' && (
                   <th className="font-bold">Action</th>
                 )}
@@ -191,18 +197,18 @@ const Table = () => {
             </thead>
             <tbody>
               {categories.length !== 0 ? (
-                categories.map((item: CategoryDataTypes, index: number) => (
+                categories.map((item: ProductDataTypes, index: number) => (
                   <tr key={item._id}>
                     <td>{index + 1}</td>
+                    <td>{item.batch}</td>
                     <td className="capitalize">{item.name}</td>
+                    <td>{item.category}</td>
                     <td>
-                      {item.createdAt
-                        ? moment(
-                            convertToDDMMYYYY(item?.createdAt),
-                            'DD-MM-YYYY',
-                          ).format('Do MMMM, YYYY')
-                        : null}
+                      {item.exp_date
+                        ? convertToDDMMYYYY(item.exp_date)
+                        : 'N/A'}
                     </td>
+
                     {session?.user?.role === 'administrator' && (
                       <td
                         className="text-center"
@@ -212,11 +218,11 @@ const Table = () => {
                           <div className="flex gap-2">
                             <EditButton
                               isLoading={isLoading}
-                              categoryData={item}
+                              productData={item}
                               submitHandler={editCategory}
                             />
                             <DeleteButton
-                              categoryData={item}
+                              productData={item}
                               submitHandler={deleteCategory}
                             />
                           </div>

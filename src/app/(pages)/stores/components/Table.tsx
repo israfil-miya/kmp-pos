@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import CreateButton from './Create';
-import fetchData from '@/utility/fetchdata';
+import fetchData from '@/utility/fetchData';
 import { toast } from 'sonner';
 import ExtendableTd from '@/components/ExtendableTd';
 import DeleteButton from './Delete';

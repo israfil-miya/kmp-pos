@@ -9,8 +9,6 @@ export interface Query {
   supplier?: RegexQuery;
   category?: RegexQuery;
   store?: RegexQuery;
-  mft_date?: { $gte?: string; $lte?: string };
-  exp_date?: { $gte?: string; $lte?: string };
 }
 type RegexFields = Extract<
   keyof Query,
@@ -36,12 +34,5 @@ export const addRegexField = (
   const regexQuery = createRegexQuery(value, exactMatch);
   if (regexQuery) {
     query[key] = regexQuery;
-  }
-};
-
-// Helper function to add fields if they are defined
-export const addIfDefined = (query: Query, key: keyof Query, value: any) => {
-  if (value !== undefined && value !== null && value !== '') {
-    query[key] = value;
   }
 };

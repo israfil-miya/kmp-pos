@@ -13,6 +13,7 @@ export interface ProductDataTypes {
   store?: string;
   mft_date?: string;
   exp_date?: string;
+  in_stock?: boolean;
   __v?: number;
 }
 
@@ -31,5 +32,6 @@ export function handleResetState(
     store: '',
     mft_date: '',
     exp_date: '',
+    in_stock: false
   });
 }

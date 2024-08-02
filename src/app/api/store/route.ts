@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/utility/dbconnect';
+import dbConnect from '@/utility/dbConnect';
 dbConnect();
 import Store from '@/models/Stores';
-import getQuery from '@/utility/getapiquery';
+import getQuery from '@/utility/getApiQuery';
 
 async function handleCreateNewStore(req: Request): Promise<{
   data: string | Object;

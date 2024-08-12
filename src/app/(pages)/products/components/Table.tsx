@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import CreateButton from './Create';
 import fetchData from '@/utility/fetchData';
@@ -11,14 +11,45 @@ import { useSession } from 'next-auth/react';
 import { ProductDataTypes, handleResetState } from '../helpers';
 import EditButton from './Edit';
 import moment from 'moment-timezone';
-import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConvertion';
+import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
+
+
+interface ProductsState {
+  pagination?: {
+    count : number,
+    pageCount: number,
+  },
+  items?: ProductDataTypes[],
+}
 
 const Table = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [categories, setCategories] = useState<ProductDataTypes[]>([]);
+  const [products, setProducts] = useState<ProductsState>({
+    pagination: {
+      count: 0,
+      pageCount: 0,
+    },
+    items: [],
+  });
   const { data: session } = useSession();
 
-  const createNewCategory = async (
+
+  const router = useRouter();
+
+  const [isFiltered, setIsFiltered] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
+  const [pageCount, setPageCount] = useState<number>(0);
+  const [itemPerPage, setItemPerPage] = useState<number>(30);
+
+  const prevPageCount = useRef<number>(0);
+  const prevPage = useRef<number>(1);
+
+
+  const [filters, setFilters] = useState({
+searchText: '',
+  });
+
+  const createNewProducts = async (
     productData: ProductDataTypes,
     setProductData: React.Dispatch<React.SetStateAction<ProductDataTypes>>,
   ): Promise<void> => {
@@ -33,7 +64,7 @@ const Table = () => {
 
       let url: string =
         process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/category?action=create-new-category';
+        '/api/product?action=create-new-category';
       let options: {} = {
         method: 'POST',
         headers: {
@@ -45,9 +76,10 @@ const Table = () => {
       let response = await fetchData(url, options);
 
       if (response.ok) {
-        toast.success('New category added successfully');
+        toast.success('New product added successfully');
         handleResetState(setProductData);
-        getAllCategories();
+        if (!isFiltered) await getAllProducts();
+        else await getAllProductsFiltered();
       } else {
         toast.error(response.data);
       }
@@ -59,24 +91,29 @@ const Table = () => {
     }
   };
 
-  const getAllCategories = async (): Promise<void> => {
+  const getAllProducts = async (): Promise<void> => {
     try {
       // setIsLoading(true);
 
       let url: string =
         process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/category?action=get-all-categories';
-      let options: {} = {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      };
+        '/api/product?action=get-all-products';
+        let options: {} = {
+          method: 'POST',
+          headers: {
+            filtered: false,
+            paginated: true,
+            item_per_page: itemPerPage,
+            page,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        };
 
       let response = await fetchData(url, options);
 
       if (response.ok) {
-        setCategories(response.data);
+        setProducts(response.data);
       } else {
         toast.error(response.data);
       }
@@ -88,7 +125,44 @@ const Table = () => {
     }
   };
 
-  const deleteCategory = async (
+
+  const getAllProductsFiltered = async (): Promise<void> => {
+    try {
+      // setIsLoading(true);
+
+      let url: string =
+        process.env.NEXT_PUBLIC_BASE_URL +
+        '/api/product?action=get-all-products';
+        let options: {} = {
+          method: 'POST',
+          headers: {
+            filtered: true,
+            paginated: true,
+            item_per_page: itemPerPage,
+            page,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...filters
+          }),
+        };
+
+      let response = await fetchData(url, options);
+
+      if (response.ok) {
+        setProducts(response.data);
+      } else {
+        toast.error(response.data);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while retrieving categories data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteProduct = async (
     productData: ProductDataTypes,
   ): Promise<void> => {
     try {

@@ -50,15 +50,15 @@ async function handleGetAllProducts(req: Request): Promise<{
 
     const filters = await req.json();
 
-    const { name, batch, supplier, category, store } = filters;
+    const { searchText } = filters;
 
     const query: Query = {};
 
-    addRegexField(query, 'name', name);
-    addRegexField(query, 'batch', batch, true);
-    addRegexField(query, 'category', category, true);
-    addRegexField(query, 'supplier', supplier);
-    addRegexField(query, 'store', store, true);
+    addRegexField(query, 'name', searchText);
+    addRegexField(query, 'batch', searchText, true);
+    addRegexField(query, 'category', searchText, true);
+    addRegexField(query, 'supplier', searchText);
+    addRegexField(query, 'store', searchText, true);
 
     const searchQuery: Query = { ...query };
 

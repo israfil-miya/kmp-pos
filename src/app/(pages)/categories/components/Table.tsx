@@ -11,7 +11,7 @@ import { useSession } from 'next-auth/react';
 import { CategoryDataTypes, handleResetState } from '../helpers';
 import EditButton from './Edit';
 import moment from 'moment-timezone';
-import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConvertion';
+import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
 
 const Table = () => {
   const [isLoading, setIsLoading] = useState(false);

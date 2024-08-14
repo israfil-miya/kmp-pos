@@ -32,6 +32,6 @@ export function handleResetState(
     store: '',
     mft_date: '',
     exp_date: '',
-    in_stock: false
+    in_stock: false,
   });
 }

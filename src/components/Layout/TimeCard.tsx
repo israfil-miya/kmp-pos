@@ -6,9 +6,9 @@ import 'moment-timezone';
 
 const Timecard: React.FC = () => {
   return (
-    <div className="flex flex-col text-center">
+    <div className="flex flex-col text-center border-1 border rounded-md overflow-hidden">
       <div
-        className="text-md text-white bg-gray-800 font-medium px-6 rounded-t-md"
+        className="text-md text-black font-semibold bg-gray-300 px-6"
         suppressHydrationWarning={true}
       >
         <Moment
@@ -18,11 +18,12 @@ const Timecard: React.FC = () => {
         />
       </div>
       <div
-        className="text-md text-black font-semibold bg-gray-200 px-6 rounded-b-md"
+        className="text-md text-black bg-white px-6"
         suppressHydrationWarning={true}
       >
         <Moment
-          format="hh:mm:ss A"
+          // format="hh:mm:ss A"
+          format="hh:mm A"
           interval={1000} // changes every second
           tz={'Asia/Dhaka'}
         />

@@ -4,10 +4,7 @@ dbConnect();
 import Product from '@/models/Products';
 import getQuery from '@/utility/getApiQuery';
 import { headers } from 'next/headers';
-import {
-  addRegexField,
-  Query,
-} from '@/utility/productsFilterHelpers';
+import { addRegexField, Query } from '@/utility/productsFilterHelpers';
 
 async function handleCreateNewProduct(req: Request): Promise<{
   data: string | Object;
@@ -147,13 +144,9 @@ async function handleEditProduct(req: Request): Promise<{
   const { productId, editedData } = await req.json();
 
   try {
-    const productData = await Product.findByIdAndUpdate(
-      productId,
-      editedData,
-      {
-        new: true,
-      },
-    );
+    const productData = await Product.findByIdAndUpdate(productId, editedData, {
+      new: true,
+    });
 
     if (productData) {
       return { data: 'Edited the product data successfully', status: 200 };
@@ -169,9 +162,6 @@ async function handleEditProduct(req: Request): Promise<{
 export async function GET(req: Request) {
   let res: { data: string | Object; status: number };
   switch (getQuery(req).action) {
-    case 'get-all-products':
-      res = await handleGetAllProducts(req);
-      return NextResponse.json(res.data, { status: res.status });
     default:
       return NextResponse.json({ response: 'OK' }, { status: 200 });
   }
@@ -180,6 +170,9 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   let res: { data: string | Object; status: number };
   switch (getQuery(req).action) {
+    case 'get-all-products':
+      res = await handleGetAllProducts(req);
+      return NextResponse.json(res.data, { status: res.status });
     case 'create-new-product':
       res = await handleCreateNewProduct(req);
       return NextResponse.json(res.data, { status: res.status });

@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { ProductDataTypes, handleResetState } from '../helpers';
 
 interface PropsType {
-  categoryData: { [key: string]: any };
-  submitHandler: (categoryData: { [key: string]: any }) => Promise<void>;
+  productData: ProductDataTypes;
+  submitHandler: (productData: ProductDataTypes) => Promise<void>;
 }
 const DeleteButton: React.FC<PropsType> = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -39,7 +40,7 @@ const DeleteButton: React.FC<PropsType> = props => {
         >
           <header className="flex items-center align-middle justify-between px-4 py-2 border-b rounded-t">
             <h3 className="text-gray-900 text-lg lg:text-xl font-semibold dark:text-white uppercase">
-              Delete Category
+              Delete Product
             </h3>
             <button
               onClick={() => setIsOpen(false)}
@@ -63,7 +64,7 @@ const DeleteButton: React.FC<PropsType> = props => {
           </header>
           <div className="overflow-hidden max-h-[70vh] p-4">
             <p className="text-lg">
-              Are you sure, you want to delete this category?
+              Are you sure, you want to delete this product?
             </p>
           </div>
           <footer className="flex space-x-2 items-center px-4 py-2 border-t justify-end border-gray-200 rounded-b">
@@ -76,7 +77,7 @@ const DeleteButton: React.FC<PropsType> = props => {
             </button>
             <button
               onClick={() => {
-                props.submitHandler(props.categoryData);
+                props.submitHandler(props.productData);
                 setIsOpen(false);
               }}
               className="rounded-md bg-red-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-red-600 transition duration-200 delay-300 hover:text-opacity-100 px-8 py-2 uppercase"

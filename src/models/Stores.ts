@@ -18,7 +18,7 @@ const StoreSchema = new mongoose.Schema<Store>({
     default: '',
   },
   manager: { type: String, default: '' },
-  phone: { type: String, default: ''},
+  phone: { type: String, default: '' },
   status: { type: String, default: 'open' },
 });
 

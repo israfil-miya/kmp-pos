@@ -33,6 +33,8 @@ const Table = () => {
   });
   const { data: session } = useSession();
 
+  const [stores, setStores] = useState<string[]>([]);
+
   const router = useRouter();
 
   const [isFiltered, setIsFiltered] = useState<boolean>(false);
@@ -236,6 +238,32 @@ const Table = () => {
     }
   };
 
+  const getStores = async (): Promise<void> => {
+    try {
+      let url: string =
+        process.env.NEXT_PUBLIC_BASE_URL + '/api/store?action=get-all-stores';
+      let options: {} = {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      };
+
+      let response = await fetchData(url, options);
+
+      if (response.ok) {
+        response.data.forEach((store: { name: string }) => {
+          setStores(prevState => [...prevState, store.name]);
+        });
+      } else {
+        toast.error(response.data);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while retrieving stores data');
+    }
+  };
+
   useEffect(() => {
     getAllProducts();
   }, []);
@@ -360,7 +388,11 @@ const Table = () => {
             filters={filters}
           />
         </div>
-        <CreateButton isLoading={isLoading} submitHandler={createNewProduct} />
+        <CreateButton
+          isLoading={isLoading}
+          storesList={stores}
+          submitHandler={createNewProduct}
+        />
       </div>
 
       {isLoading && <p className="text-center">Loading...</p>}

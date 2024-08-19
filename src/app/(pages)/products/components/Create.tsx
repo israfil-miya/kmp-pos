@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
-import { CategoryDataTypes, handleResetState } from '../helpers';
+import { ProductDataTypes, handleResetState } from '../helpers';
+import generateUniqueCode from '@/utility/uCodeGenerator';
 
 interface PropsType {
   isLoading: boolean;
+  storesList: string[];
   submitHandler: (
-    categoryData: CategoryDataTypes,
-    setCategoryData: React.Dispatch<React.SetStateAction<CategoryDataTypes>>,
+    productData: ProductDataTypes,
+    setProductData: React.Dispatch<React.SetStateAction<ProductDataTypes>>,
   ) => Promise<void>;
 }
 
@@ -15,11 +17,11 @@ const CreateButton: React.FC<PropsType> = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { data: session } = useSession();
   const popupRef = useRef<HTMLElement>(null);
-  const [categoryData, setCategoryData] = useState<CategoryDataTypes>({});
+  const [productData, setProductData] = useState<ProductDataTypes>({});
 
   useEffect(() => {
     if (!isOpen) {
-      handleResetState(setCategoryData);
+      handleResetState(setProductData);
     }
   }, [isOpen]);
 
@@ -27,7 +29,7 @@ const CreateButton: React.FC<PropsType> = props => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ): void => {
     const { name, value } = e.target;
-    setCategoryData(prevData => ({
+    setProductData(prevData => ({
       ...prevData,
       [name]: value,
     }));
@@ -62,7 +64,7 @@ const CreateButton: React.FC<PropsType> = props => {
           <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
           <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
         </svg>
-        Add Category
+        Add Product
       </button>
 
       <section
@@ -76,7 +78,7 @@ const CreateButton: React.FC<PropsType> = props => {
         >
           <header className="flex items-center align-middle justify-between px-4 py-2 border-b rounded-t">
             <h3 className="text-gray-900 text-lg lg:text-xl font-semibold uppercase">
-              Create New Category
+              Create New Product
             </h3>
             <button
               onClick={() => setIsOpen(false)}
@@ -100,24 +102,24 @@ const CreateButton: React.FC<PropsType> = props => {
           </header>
 
           <div className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start">
-            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4"> */}
-            <div>
-              <label
-                className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
-                htmlFor="grid-password"
-              >
-                Category Name*
-              </label>
-              <input
-                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                name="name"
-                value={categoryData.name}
-                onChange={handleChange}
-                type="text"
-                required
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4">
+              <div>
+                <label
+                  className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
+                  htmlFor="grid-password"
+                >
+                  Name*
+                </label>
+                <input
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  name="name"
+                  value={productData.name}
+                  onChange={handleChange}
+                  type="text"
+                  required
+                />
+              </div>
             </div>
-            {/* </div> */}
           </div>
 
           <footer className="flex items-center px-4 py-2 border-t justify-end gap-6 border-gray-200 rounded-b">
@@ -131,7 +133,7 @@ const CreateButton: React.FC<PropsType> = props => {
               </button>
               <button
                 onClick={() => {
-                  props.submitHandler(categoryData, setCategoryData);
+                  props.submitHandler(productData, setProductData);
                   setIsOpen(false);
                 }}
                 className="rounded-md bg-blue-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-8 py-2 uppercase"

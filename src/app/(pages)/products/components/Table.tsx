@@ -252,9 +252,13 @@ const Table = () => {
       let response = await fetchData(url, options);
 
       if (response.ok) {
+        let stores: string[] = [];
+
         response.data.forEach((store: { name: string }) => {
-          setStores(prevState => [...prevState, store.name]);
+          stores.push(store.name);
         });
+
+        setStores(stores);
       } else {
         toast.error(response.data);
       }
@@ -266,6 +270,7 @@ const Table = () => {
 
   useEffect(() => {
     getAllProducts();
+    getStores();
   }, []);
 
   function handlePrevious() {

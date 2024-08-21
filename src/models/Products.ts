@@ -7,9 +7,9 @@ interface Product {
   cost_price: number;
   selling_price: number;
   quantity?: number;
-  supplier: string;
-  category: string;
-  store: string;
+  supplier: string[];
+  category: string[];
+  store: string[];
   mft_date?: string;
   exp_date: string;
 }
@@ -41,15 +41,15 @@ const ProductSchema = new mongoose.Schema<Product>(
       default: 0,
     },
     supplier: {
-      type: String,
+      type: [String],
       required: [true, 'Supplier is not given'],
     },
     category: {
-      type: String,
+      type: [String],
       required: [true, 'Category is not given'],
     },
     store: {
-      type: String,
+      type: [String],
       required: [true, 'store is not given'],
     },
     mft_date: {

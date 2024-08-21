@@ -3,6 +3,8 @@ import { useSession } from 'next-auth/react';
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
 import { ProductDataTypes, handleResetState } from '../helpers';
 import generateUniqueCode from '@/utility/uCodeGenerator';
+import 'flowbite';
+import 'flowbite-react';
 
 interface PropsType {
   isLoading: boolean;
@@ -28,11 +30,26 @@ const CreateButton: React.FC<PropsType> = props => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ): void => {
-    const { name, value } = e.target;
-    setProductData(prevData => ({
-      ...prevData,
-      [name]: value,
-    }));
+    const { name, value, type } = e.target;
+
+    if (type === 'checkbox') {
+      setProductData((prevData: ProductDataTypes) => {
+        const currentValues =
+          (prevData[name as keyof ProductDataTypes] as string[]) || [];
+
+        return {
+          ...prevData,
+          [name as keyof ProductDataTypes]: currentValues.includes(value)
+            ? currentValues.filter(s => s !== value)
+            : [...currentValues, value],
+        };
+      });
+    } else {
+      setProductData(prevData => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -104,10 +121,7 @@ const CreateButton: React.FC<PropsType> = props => {
           <div className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4">
               <div>
-                <label
-                  className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
-                  htmlFor="grid-password"
-                >
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
                   Name*
                 </label>
                 <input
@@ -118,6 +132,65 @@ const CreateButton: React.FC<PropsType> = props => {
                   type="text"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Store*
+                </label>
+
+                <div className="flex items-center space-x-0">
+                  {/* Dropdown Button */}
+                  <button
+                    aria-hidden="true"
+                    id="storesDropdown"
+                    data-dropdown-toggle="dropdown"
+                    className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    type="button"
+                  >
+                    Select
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  <div
+                    id="dropdown"
+                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 py-1"
+                  >
+                    <ul
+                      className="text-sm text-gray-700 dark:text-gray-200 overflow-auto max-h-28"
+                      aria-labelledby="storesDropdown"
+                    >
+                      {props.storesList.map((store, index) => (
+                        <li key={index} className="flex items-center py-1 px-3">
+                          <input
+                            className="form-check-input mr-2 h-4 w-4 border border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
+                            type="checkbox"
+                            name="store"
+                            value={store}
+                            id={`checkbox${index}`}
+                            checked={productData.store?.includes(store)}
+                            onChange={handleChange}
+                          />
+                          <label
+                            className="form-check-label text-gray-700"
+                            htmlFor={`checkbox${index}`}
+                          >
+                            {store}
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Input Field */}
+                  <input
+                    disabled
+                    type="text"
+                    className="flex-grow appearance-none block w-full rounded-s-none bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    placeholder="Add stores by selecting from dropdown"
+                    value={productData.store?.join('+') || ''}
+                  />
+                </div>
               </div>
             </div>
           </div>

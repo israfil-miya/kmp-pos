@@ -34,6 +34,7 @@ const Table = () => {
   const { data: session } = useSession();
 
   const [stores, setStores] = useState<string[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
 
   const router = useRouter();
 
@@ -268,9 +269,41 @@ const Table = () => {
     }
   };
 
+  const getCategories = async (): Promise<void> => {
+    try {
+      let url: string =
+        process.env.NEXT_PUBLIC_BASE_URL +
+        '/api/category?action=get-all-categories';
+      let options: {} = {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      };
+
+      let response = await fetchData(url, options);
+
+      if (response.ok) {
+        let categories: string[] = [];
+
+        response.data.forEach((category: { name: string }) => {
+          categories.push(category.name);
+        });
+
+        setCategories(categories);
+      } else {
+        toast.error(response.data);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while retrieving categories data');
+    }
+  };
+
   useEffect(() => {
     getAllProducts();
     getStores();
+    getCategories();
   }, []);
 
   function handlePrevious() {
@@ -394,6 +427,7 @@ const Table = () => {
           />
         </div>
         <CreateButton
+          categoriesList={categories}
           isLoading={isLoading}
           storesList={stores}
           submitHandler={createNewProduct}

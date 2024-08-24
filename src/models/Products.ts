@@ -6,11 +6,11 @@ interface Product {
   description: string;
   cost_price: number;
   selling_price: number;
-  quantity?: number;
+  quantity: number;
   supplier: string[];
   category: string[];
   store: string[];
-  mft_date?: string;
+  mft_date: string;
   exp_date: string;
 }
 

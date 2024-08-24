@@ -1,7 +1,5 @@
 import { useSession } from 'next-auth/react';
 
-import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
-import generateUniqueCode from '@/utility/uCodeGenerator';
 import 'flowbite';
 import { initFlowbite } from 'flowbite';
 import React, { useEffect, useRef, useState } from 'react';
@@ -14,8 +12,8 @@ interface PropsType {
   suppliersList: string[];
   isLoading: boolean;
   submitHandler: (
-    categoryId: string | undefined,
-    categoryData: ProductDataTypes,
+    productId: string | undefined,
+    productData: ProductDataTypes,
     editedData: ProductDataTypes,
     setEditedData: React.Dispatch<React.SetStateAction<ProductDataTypes>>,
   ) => Promise<void>;
@@ -111,7 +109,7 @@ const EditButton: React.FC<PropsType> = props => {
         >
           <header className="flex items-center align-middle justify-between px-4 py-2 border-b rounded-t">
             <h3 className="text-gray-900 text-lg lg:text-xl font-semibold dark:text-white uppercase">
-              Edit Category
+              Edit Product
             </h3>
             <button
               onClick={() => setIsOpen(false)}

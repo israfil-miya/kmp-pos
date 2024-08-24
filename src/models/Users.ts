@@ -3,8 +3,8 @@ import mongoose from 'mongoose';
 interface User {
   full_name: string;
   email: string;
-  phone?: string;
-  note?: string;
+  phone: string;
+  note: string;
   password: string;
   role: string;
   store: string | null;

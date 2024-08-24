@@ -4,10 +4,10 @@ import mongoose from 'mongoose';
 interface Supplier {
   name: string;
   company: string;
-  reg_date?: string;
+  reg_date: string;
   email: string;
   phone: string;
-  address?: string;
+  address: string;
 }
 
 const SupplierSchema = new mongoose.Schema<Supplier>({
@@ -17,7 +17,7 @@ const SupplierSchema = new mongoose.Schema<Supplier>({
   },
   company: {
     type: String,
-    required: [true, 'Company is not given'],
+    default: '',
   },
   reg_date: {
     type: String,
@@ -25,11 +25,11 @@ const SupplierSchema = new mongoose.Schema<Supplier>({
   },
   email: {
     type: String,
-    required: [true, 'Email is not given'],
+    default: '',
   },
   phone: {
     type: String,
-    required: [true, 'Phone number is not given'],
+    default: '',
   },
   address: {
     type: String,

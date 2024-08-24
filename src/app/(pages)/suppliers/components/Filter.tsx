@@ -77,7 +77,7 @@ const FilterButton: React.FC<PropsType> = props => {
         >
           <header className="flex items-center align-middle justify-between px-4 py-2 border-b rounded-t">
             <h3 className="text-gray-900 text-lg lg:text-xl font-semibold dark:text-white uppercase">
-              Filter Products
+              Filter Suppliers
             </h3>
             <button
               onClick={() => setIsOpen(false)}

@@ -1,6 +1,5 @@
 'use client';
 
-import ExtendableTd from '@/components/ExtendableTd';
 import cn from '@/utility/cn';
 import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
 import fetchData from '@/utility/fetchData';
@@ -329,9 +328,7 @@ const Table = () => {
       if (response.ok) {
         let stores: string[] = [];
 
-        response.data.forEach((store: { name: string }) => {
-          stores.push(store.name);
-        });
+        stores = response.data.map((store: { name: string }) => store.name);
 
         setStores(stores);
       } else {
@@ -364,9 +361,9 @@ const Table = () => {
       if (response.ok) {
         let categories: string[] = [];
 
-        response.data.forEach((category: { name: string }) => {
-          categories.push(category.name);
-        });
+        categories = response.data.map(
+          (category: { name: string }) => category.name,
+        );
 
         setCategories(categories);
       } else {
@@ -380,10 +377,44 @@ const Table = () => {
     }
   };
 
+  const getSuppliers = async (): Promise<void> => {
+    try {
+      setIsLoading(true);
+
+      let url: string =
+        process.env.NEXT_PUBLIC_BASE_URL +
+        '/api/supplier?action=get-all-suppliers-name';
+      let options: {} = {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      };
+
+      let response = await fetchData(url, options);
+
+      if (response.ok) {
+        let suppliers: string[] = [];
+        suppliers = response.data.map(
+          (supplier: { name: string }) => supplier.name,
+        );
+        setSuppliers(suppliers);
+      } else {
+        toast.error(response.data);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while retrieving suppliers data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     getAllProducts();
     getStores();
     getCategories();
+    getSuppliers();
   }, []);
 
   function handlePrevious() {

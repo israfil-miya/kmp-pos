@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server';
-import dbConnect from '@/utility/dbConnect';
-dbConnect();
 import Product from '@/models/Products';
+import dbConnect from '@/utility/dbConnect';
 import getQuery from '@/utility/getApiQuery';
-import { headers } from 'next/headers';
 import { addRegexField, Query } from '@/utility/productsFilterHelpers';
+import { headers } from 'next/headers';
+import { NextResponse } from 'next/server';
+dbConnect();
 
 async function handleCreateNewProduct(req: Request): Promise<{
   data: string | Object;
@@ -53,16 +53,25 @@ async function handleGetAllProducts(req: Request): Promise<{
 
     addRegexField(query, 'name', searchText);
     addRegexField(query, 'batch', searchText, true);
-    addRegexField(query, 'category', searchText, true);
+    addRegexField(query, 'category', searchText);
     addRegexField(query, 'supplier', searchText);
-    addRegexField(query, 'store', searchText, true);
+    addRegexField(query, 'store', searchText);
 
-    const searchQuery: Query = { ...query };
+    const searchQuery =
+      Object.keys(query).length > 0
+        ? {
+            $or: Object.entries(query).map(([key, value]) => ({
+              [key]: value,
+            })),
+          }
+        : { $or: [{}] };
 
     let sortQuery: Record<string, 1 | -1> = {
       in_stock: -1,
       createdAt: -1,
     };
+
+    console.log(searchQuery);
 
     if (!query && isFilter == true) {
       return { data: 'No filter applied', status: 400 };
@@ -91,7 +100,7 @@ async function handleGetAllProducts(req: Request): Promise<{
         products = await Product.find(searchQuery).lean();
       }
 
-      console.log('SEARCH Query:', searchQuery);
+      console.log('SEARCH Query:', searchQuery, products);
 
       const pageCount: number = Math.ceil(count / ITEMS_PER_PAGE);
 

@@ -14,13 +14,17 @@ const generateUniqueCode = (value: string): string => {
     hash = (hash * 33) ^ combinedString.charCodeAt(i);
   }
 
-  // Convert the hash to a base36 string, then split into digits and letters
-  const base36Code = Math.abs(hash).toString(36).toUpperCase();
+  // Convert the hash to a base36 string
+  let base36Code = Math.abs(hash).toString(36).toUpperCase();
 
-  // Extract the first 8 characters, ensuring a mix of letters and digits
-  const code = base36Code.replace(/[^A-Z0-9]/g, '').slice(0, 8);
+  // Ensure the code has a minimum length of 8 characters
+  if (base36Code.length < 8) {
+    base36Code = base36Code.padEnd(8, '0'); // Pad with '0' to ensure length
+  } else {
+    base36Code = base36Code.slice(0, 8); // Ensure it doesn't exceed 8 characters
+  }
 
-  return code;
+  return base36Code;
 };
 
 export default generateUniqueCode;

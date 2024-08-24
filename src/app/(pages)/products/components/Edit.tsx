@@ -2,6 +2,8 @@ import { useSession } from 'next-auth/react';
 
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
 import generateUniqueCode from '@/utility/uCodeGenerator';
+import 'flowbite';
+import { initFlowbite } from 'flowbite';
 import React, { useEffect, useRef, useState } from 'react';
 import { ProductDataTypes, handleResetState } from '../helpers';
 
@@ -25,6 +27,10 @@ const EditButton: React.FC<PropsType> = props => {
   const popupRef = useRef<HTMLElement>(null);
 
   const [editedData, setEditedData] = useState<ProductDataTypes>({});
+
+  useEffect(() => {
+    initFlowbite();
+  }, []);
 
   useEffect(() => {
     if (!isOpen) {
@@ -181,7 +187,7 @@ const EditButton: React.FC<PropsType> = props => {
                   >
                     <ul
                       aria-labelledby="storesEditDropdown"
-                      className="text-sm text-gray-700 dark:text-gray-200 overflow-auto max-h-28"
+                      className="text-sm text-gray-700 capitalize dark:text-gray-200 overflow-auto max-h-28"
                     >
                       {props.storesList.map((store, index) => (
                         <li
@@ -228,8 +234,8 @@ const EditButton: React.FC<PropsType> = props => {
                 <div className="flex items-center space-x-0">
                   {/* Dropdown Button */}
                   <button
-                    id="categoriesDropdown"
-                    data-dropdown-toggle="dropdown2"
+                    id="categoriesEditDropdown"
+                    data-dropdown-toggle="dropdown5"
                     className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                     type="button"
                   >
@@ -238,12 +244,12 @@ const EditButton: React.FC<PropsType> = props => {
 
                   {/* Dropdown Menu */}
                   <div
-                    id="dropdown2"
+                    id="dropdown5"
                     className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 py-2.5"
                   >
                     <ul
-                      aria-labelledby="categoriesDropdown"
-                      className="text-sm text-gray-700 dark:text-gray-200 overflow-auto max-h-28"
+                      aria-labelledby="categoriesEditDropdown"
+                      className="text-sm text-gray-700 capitalize dark:text-gray-200 overflow-auto max-h-28"
                     >
                       {props.categoriesList.map((category, index) => (
                         <li
@@ -290,8 +296,8 @@ const EditButton: React.FC<PropsType> = props => {
                 <div className="flex items-center space-x-0">
                   {/* Dropdown Button */}
                   <button
-                    id="suppliersDropdown"
-                    data-dropdown-toggle="dropdown3"
+                    id="suppliersEditDropdown"
+                    data-dropdown-toggle="dropdown6"
                     className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                     type="button"
                   >
@@ -300,12 +306,12 @@ const EditButton: React.FC<PropsType> = props => {
 
                   {/* Dropdown Menu */}
                   <div
-                    id="dropdown3"
+                    id="dropdown6"
                     className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 py-2.5"
                   >
                     <ul
-                      aria-labelledby="suppliersDropdown"
-                      className="text-sm text-gray-700 dark:text-gray-200 overflow-auto max-h-28"
+                      aria-labelledby="suppliersEditDropdown"
+                      className="text-sm text-gray-700 capitalize dark:text-gray-200 overflow-auto max-h-28"
                     >
                       {props.suppliersList.map((supplier, index) => (
                         <li
@@ -338,11 +344,12 @@ const EditButton: React.FC<PropsType> = props => {
                     disabled
                     type="text"
                     className="flex-grow appearance-none block w-full rounded-s-none bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    placeholder="Add categories by selecting from dropdown"
+                    placeholder="Add suppliers by selecting from dropdown"
                     value={editedData.supplier?.join('+') || ''}
                   />
                 </div>
               </div>
+
               <div>
                 <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
                   Quantity*

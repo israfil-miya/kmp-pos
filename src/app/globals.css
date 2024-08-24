@@ -20,7 +20,6 @@ body {
   padding: 0;
   margin: 0;
   font-family: 'Lato', sans-serif;
-  font-size: 14px;
 }
 
 span,
@@ -33,7 +32,6 @@ select,
 textarea,
 div {
   font-family: 'Lato', sans-serif;
-  font-size: 14px;
 }
 
 /* For titles and headings */

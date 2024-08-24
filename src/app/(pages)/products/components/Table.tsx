@@ -1,10 +1,9 @@
 'use client';
 
 import ExtendableTd from '@/components/ExtendableTd';
+import cn from '@/utility/cn';
 import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
 import fetchData from '@/utility/fetchData';
-import { initFlowbite } from 'flowbite';
-import 'flowbite-react';
 import moment from 'moment-timezone';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -37,15 +36,7 @@ const Table = () => {
 
   const [stores, setStores] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
-  const [suppliers, setSuppliers] = useState<string[]>([
-    'peter',
-    'paul',
-    'john',
-  ]);
-
-  useEffect(() => {
-    initFlowbite();
-  }, []);
+  const [suppliers, setSuppliers] = useState<string[]>([]);
 
   const router = useRouter();
 
@@ -539,6 +530,7 @@ const Table = () => {
                 <th className="font-bold">Price</th>
                 <th className="font-bold">In Stock</th>
                 <th className="font-bold">Store</th>
+                <th className="font-bold">Supplier</th>
                 <th className="font-bold">Status</th>
                 {session?.user?.role === 'administrator' && (
                   <th className="font-bold">Action</th>
@@ -553,11 +545,68 @@ const Table = () => {
                       <td>{index + 1}</td>
                       <td>{item.batch}</td>
                       <td className="capitalize">{item.name}</td>
-                      <td>{item.category}</td>
+                      <td
+                        className="uppercase items-center"
+                        style={{ verticalAlign: 'middle' }}
+                      >
+                        {item.category?.map((category, index) => (
+                          <span
+                            key={index}
+                            className="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400"
+                          >
+                            {category}
+                          </span>
+                        ))}
+                      </td>
+
                       <td>
                         {item.exp_date
                           ? convertToDDMMYYYY(item.exp_date)
                           : 'N/A'}
+                      </td>
+                      <td>{item.selling_price}</td>
+                      <td>{item.quantity}</td>
+                      <td
+                        className="uppercase items-center"
+                        style={{ verticalAlign: 'middle' }}
+                      >
+                        {item.store?.map((store, index) => (
+                          <span
+                            key={index}
+                            className="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400"
+                          >
+                            {store}
+                          </span>
+                        ))}
+                      </td>
+                      <td
+                        className="uppercase items-center text-wrap"
+                        style={{ verticalAlign: 'middle' }}
+                      >
+                        {item.supplier?.map((supplier, index) => (
+                          <span
+                            key={index}
+                            className="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400"
+                          >
+                            {supplier}
+                          </span>
+                        ))}
+                      </td>
+                      <td
+                        className="uppercase items-center"
+                        style={{ verticalAlign: 'middle' }}
+                      >
+                        <span
+                          key={index}
+                          className={cn(
+                            'text-xs font-medium px-2.5 py-0.5 rounded border',
+                            item.in_stock
+                              ? 'bg-green-100 text-green-800 border-green-400'
+                              : 'bg-red-100 text-red-800 border-red-400',
+                          )}
+                        >
+                          {item.in_stock ? 'In Stock' : 'Out of Stock'}
+                        </span>
                       </td>
 
                       {session?.user?.role === 'administrator' && (
@@ -579,6 +628,7 @@ const Table = () => {
                                 productData={item}
                                 submitHandler={deleteProduct}
                               />
+                              {/* <button>Print Product Barcode</button> */}
                             </div>
                           </div>
                         </td>
@@ -589,7 +639,7 @@ const Table = () => {
               ) : (
                 <tr key={0}>
                   <td
-                    colSpan={session?.user?.role === 'administrator' ? 10 : 9}
+                    colSpan={session?.user?.role === 'administrator' ? 11 : 10}
                     className="align-center text-center"
                   >
                     No Product To Show.

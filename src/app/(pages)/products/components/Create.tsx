@@ -2,6 +2,8 @@
 
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
 import generateUniqueCode from '@/utility/uCodeGenerator';
+import 'flowbite';
+import { initFlowbite } from 'flowbite';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { ProductDataTypes, handleResetState } from '../helpers';
@@ -21,6 +23,10 @@ const CreateButton: React.FC<PropsType> = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const popupRef = useRef<HTMLElement>(null);
   const [productData, setProductData] = useState<ProductDataTypes>({});
+
+  useEffect(() => {
+    initFlowbite();
+  }, []);
 
   const debouncedBatch = useDebouncedCallback(value => {
     if (!value) {
@@ -192,7 +198,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   >
                     <ul
                       aria-labelledby="storesDropdown"
-                      className="text-sm text-gray-700 dark:text-gray-200 overflow-auto max-h-28"
+                      className="text-sm text-gray-700 capitalize dark:text-gray-200 overflow-auto max-h-28"
                     >
                       {props.storesList.map((store, index) => (
                         <li
@@ -254,7 +260,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   >
                     <ul
                       aria-labelledby="categoriesDropdown"
-                      className="text-sm text-gray-700 dark:text-gray-200 overflow-auto max-h-28"
+                      className="text-sm text-gray-700 capitalize dark:text-gray-200 overflow-auto max-h-28"
                     >
                       {props.categoriesList.map((category, index) => (
                         <li
@@ -316,7 +322,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   >
                     <ul
                       aria-labelledby="suppliersDropdown"
-                      className="text-sm text-gray-700 dark:text-gray-200 overflow-auto max-h-28"
+                      className="text-sm text-gray-700 capitalize dark:text-gray-200 overflow-auto max-h-28"
                     >
                       {props.suppliersList.map((supplier, index) => (
                         <li
@@ -349,11 +355,12 @@ const CreateButton: React.FC<PropsType> = props => {
                     disabled
                     type="text"
                     className="flex-grow appearance-none block w-full rounded-s-none bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    placeholder="Add categories by selecting from dropdown"
+                    placeholder="Add suppliers by selecting from dropdown"
                     value={productData.supplier?.join('+') || ''}
                   />
                 </div>
               </div>
+
               <div>
                 <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
                   Quantity*

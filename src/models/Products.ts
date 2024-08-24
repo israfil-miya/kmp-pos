@@ -26,7 +26,7 @@ const ProductSchema = new mongoose.Schema<Product>(
     },
     description: {
       type: String,
-      required: [true, 'Description is not given'],
+      default: '',
     },
     cost_price: {
       type: Number,
@@ -58,7 +58,7 @@ const ProductSchema = new mongoose.Schema<Product>(
     },
     exp_date: {
       type: String,
-      required: [true, 'Expiry date is not given'],
+      default: '',
     },
   },
   { timestamps: true },

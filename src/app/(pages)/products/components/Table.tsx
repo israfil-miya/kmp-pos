@@ -1,17 +1,19 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import CreateButton from './Create';
-import fetchData from '@/utility/fetchData';
-import { toast } from 'sonner';
 import ExtendableTd from '@/components/ExtendableTd';
-import DeleteButton from './Delete';
-import { useSession } from 'next-auth/react';
-import { ProductDataTypes, handleResetState } from '../helpers';
-import EditButton from './Edit';
-import moment from 'moment-timezone';
 import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
+import fetchData from '@/utility/fetchData';
+import { initFlowbite } from 'flowbite';
+import 'flowbite-react';
+import moment from 'moment-timezone';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
+import { ProductDataTypes, handleResetState } from '../helpers';
+import CreateButton from './Create';
+import DeleteButton from './Delete';
+import EditButton from './Edit';
 import FilterButton from './Filter';
 
 interface ProductsState {
@@ -35,6 +37,15 @@ const Table = () => {
 
   const [stores, setStores] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [suppliers, setSuppliers] = useState<string[]>([
+    'peter',
+    'paul',
+    'john',
+  ]);
+
+  useEffect(() => {
+    initFlowbite();
+  }, []);
 
   const router = useRouter();
 
@@ -50,14 +61,85 @@ const Table = () => {
     searchText: '',
   });
 
+  const inputValidations = (productData: ProductDataTypes): boolean => {
+    if (
+      !productData.batch ||
+      !productData.name ||
+      !productData.category?.length ||
+      !productData.store?.length ||
+      !productData.supplier?.length ||
+      productData.quantity == undefined ||
+      productData.cost_price == undefined
+    ) {
+      console.log(
+        !productData.batch,
+        !productData.name,
+        productData.category?.length,
+        productData.store?.length,
+        productData.supplier?.length,
+        productData.quantity == undefined,
+        productData.cost_price == undefined,
+      );
+      toast.error('Please fill in all required fields');
+
+      return false;
+    }
+
+    if (productData.exp_date) {
+      if (moment(productData.exp_date).isBefore(moment())) {
+        toast.error('Expiry date cannot be in the past');
+
+        return false;
+      }
+      if (moment(productData.exp_date).isSame(moment())) {
+        toast.error('Expiry date cannot be today');
+
+        return false;
+      }
+      if (
+        productData.mft_date &&
+        moment(productData.exp_date) <= moment(productData.mft_date)
+      ) {
+        toast.error('Expiry date cannot be before manufacturing date');
+
+        return false;
+      }
+    }
+
+    if (productData.selling_price !== undefined) {
+      if (productData.selling_price < productData.cost_price) {
+        console.log(
+          productData.selling_price,
+          productData.cost_price,
+          productData.selling_price < productData.cost_price,
+          productData.selling_price > productData.cost_price,
+          typeof productData.selling_price == 'number',
+        );
+        toast.error('Selling price must be equal or greater than cost price');
+
+        return false;
+      }
+      if (productData.selling_price < 0) {
+        toast.error('Selling price cannot be negative');
+
+        return false;
+      }
+    } else {
+      productData.selling_price = productData.cost_price;
+    }
+
+    return true;
+  };
+
   const createNewProduct = async (
     productData: ProductDataTypes,
     setProductData: React.Dispatch<React.SetStateAction<ProductDataTypes>>,
   ): Promise<void> => {
     try {
-      if (!productData.name) {
-        toast.error('Please fill in all required fields');
-        handleResetState(setProductData);
+      console.log(productData);
+
+      if (!inputValidations(productData)) {
+        // handleResetState(setProductData);
         return;
       }
 
@@ -65,7 +147,7 @@ const Table = () => {
 
       let url: string =
         process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/product?action=create-new-category';
+        '/api/product?action=create-new-product';
       let options: {} = {
         method: 'POST',
         headers: {
@@ -203,8 +285,7 @@ const Table = () => {
     setEditedData: React.Dispatch<React.SetStateAction<ProductDataTypes>>,
   ): Promise<void> => {
     try {
-      if (!editedData.name) {
-        toast.error('Please fill in all required fields');
+      if (!inputValidations(editedData)) {
         handleResetState(setEditedData);
         return;
       }
@@ -241,6 +322,8 @@ const Table = () => {
 
   const getStores = async (): Promise<void> => {
     try {
+      setIsLoading(true);
+
       let url: string =
         process.env.NEXT_PUBLIC_BASE_URL + '/api/store?action=get-all-stores';
       let options: {} = {
@@ -266,11 +349,15 @@ const Table = () => {
     } catch (error) {
       console.error(error);
       toast.error('An error occurred while retrieving stores data');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const getCategories = async (): Promise<void> => {
     try {
+      setIsLoading(true);
+
       let url: string =
         process.env.NEXT_PUBLIC_BASE_URL +
         '/api/category?action=get-all-categories';
@@ -297,6 +384,8 @@ const Table = () => {
     } catch (error) {
       console.error(error);
       toast.error('An error occurred while retrieving categories data');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -427,6 +516,7 @@ const Table = () => {
           />
         </div>
         <CreateButton
+          suppliersList={suppliers}
           categoriesList={categories}
           isLoading={isLoading}
           storesList={stores}
@@ -478,9 +568,11 @@ const Table = () => {
                           <div className="inline-block">
                             <div className="flex gap-2">
                               <EditButton
+                                storesList={stores}
+                                categoriesList={categories}
+                                suppliersList={suppliers}
                                 isLoading={isLoading}
-                                categoryData={item}
-                                // productData={item}
+                                productData={item}
                                 submitHandler={editProduct}
                               />
                               <DeleteButton

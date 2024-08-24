@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useSession } from 'next-auth/react';
+'use client';
+
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
-import { ProductDataTypes, handleResetState } from '../helpers';
 import generateUniqueCode from '@/utility/uCodeGenerator';
-import 'flowbite';
-import { initFlowbite } from 'flowbite';
+import React, { useEffect, useRef, useState } from 'react';
+import { useDebouncedCallback } from 'use-debounce';
+import { ProductDataTypes, handleResetState } from '../helpers';
 
 interface PropsType {
   isLoading: boolean;
   storesList: string[];
   categoriesList: string[];
+  suppliersList: string[];
   submitHandler: (
     productData: ProductDataTypes,
     setProductData: React.Dispatch<React.SetStateAction<ProductDataTypes>>,
@@ -18,13 +19,17 @@ interface PropsType {
 
 const CreateButton: React.FC<PropsType> = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { data: session } = useSession();
   const popupRef = useRef<HTMLElement>(null);
   const [productData, setProductData] = useState<ProductDataTypes>({});
 
-  useEffect(() => {
-    initFlowbite();
-  }, []);
+  const debouncedBatch = useDebouncedCallback(value => {
+    if (!value) {
+      setProductData(prevData => ({ ...prevData, batch: '' }));
+      return;
+    }
+    let generatedBatch = generateUniqueCode(value);
+    setProductData(prevData => ({ ...prevData, batch: generatedBatch }));
+  }, 1500);
 
   useEffect(() => {
     if (!isOpen) {
@@ -52,7 +57,7 @@ const CreateButton: React.FC<PropsType> = props => {
     } else {
       setProductData(prevData => ({
         ...prevData,
-        [name]: value,
+        [name]: type === 'number' ? +value : value,
       }));
     }
   };
@@ -61,7 +66,8 @@ const CreateButton: React.FC<PropsType> = props => {
     if (
       popupRef.current &&
       !popupRef.current.contains(e.target as Node) &&
-      !popupRef.current.querySelector('input:focus, textarea:focus')
+      !popupRef.current.querySelector('input:focus, textarea:focus') &&
+      !popupRef.current.querySelector('button:focus')
     ) {
       setIsOpen(false);
     }
@@ -126,6 +132,27 @@ const CreateButton: React.FC<PropsType> = props => {
           <div className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4">
               <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold flex items-center gap-2 mb-2">
+                  Batch*{' '}
+                  <span className="cursor-pointer has-tooltip text-xs">
+                    &#9432;
+                    <span className="tooltip italic font-medium rounded-md text-xs shadow-lg p-1 px-2 bg-gray-100 ml-2">
+                      Auto generated
+                    </span>
+                  </span>
+                </label>
+                <input
+                  required
+                  disabled
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  // name="batch"
+                  value={productData.batch}
+                  // onChange={handleChange}
+                  type="text"
+                />
+              </div>
+
+              <div>
                 <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
                   Name*
                 </label>
@@ -133,7 +160,10 @@ const CreateButton: React.FC<PropsType> = props => {
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   name="name"
                   value={productData.name}
-                  onChange={handleChange}
+                  onChange={e => {
+                    handleChange(e);
+                    debouncedBatch(e.target.value);
+                  }}
                   type="text"
                   required
                 />
@@ -158,26 +188,29 @@ const CreateButton: React.FC<PropsType> = props => {
                   {/* Dropdown Menu */}
                   <div
                     id="dropdown1"
-                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 py-1"
+                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 py-2.5"
                   >
                     <ul
                       aria-labelledby="storesDropdown"
                       className="text-sm text-gray-700 dark:text-gray-200 overflow-auto max-h-28"
                     >
                       {props.storesList.map((store, index) => (
-                        <li key={index} className="flex items-center py-1 px-3">
+                        <li
+                          key={`${store}_${index}`}
+                          className="flex items-center py-1 px-3"
+                        >
                           <input
-                            className="form-check-input mr-2 h-4 w-4 border border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
+                            className="form-check-input cursor-pointer mr-2 h-4 w-4 border border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
                             type="checkbox"
                             name="store"
                             value={store}
-                            id={`checkbox${index}`}
+                            id={`checkbox_${store}_${index}`}
                             checked={productData.store?.includes(store)}
                             onChange={handleChange}
                           />
                           <label
-                            className="form-check-label text-gray-700"
-                            htmlFor={`checkbox${index}`}
+                            className="form-check-label cursor-pointer text-gray-700"
+                            htmlFor={`checkbox_${store}_${index}`}
                           >
                             {store}
                           </label>
@@ -189,6 +222,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   {/* Input Field */}
                   <input
                     disabled
+                    required
                     type="text"
                     className="flex-grow appearance-none block w-full rounded-s-none bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                     placeholder="Add stores by selecting from dropdown"
@@ -216,26 +250,29 @@ const CreateButton: React.FC<PropsType> = props => {
                   {/* Dropdown Menu */}
                   <div
                     id="dropdown2"
-                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 py-1"
+                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 py-2.5"
                   >
                     <ul
                       aria-labelledby="categoriesDropdown"
                       className="text-sm text-gray-700 dark:text-gray-200 overflow-auto max-h-28"
                     >
                       {props.categoriesList.map((category, index) => (
-                        <li key={index} className="flex items-center py-1 px-3">
+                        <li
+                          key={`${category}_${index}`}
+                          className="flex items-center py-1 px-3"
+                        >
                           <input
-                            className="form-check-input mr-2 h-4 w-4 border border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
+                            className="form-check-input cursor-pointer mr-2 h-4 w-4 border border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
                             type="checkbox"
                             name="category"
                             value={category}
-                            id={`checkbox${index}`}
+                            id={`checkbox_${category}_${index}`}
                             checked={productData.category?.includes(category)}
                             onChange={handleChange}
                           />
                           <label
-                            className="form-check-label text-gray-700"
-                            htmlFor={`checkbox${index}`}
+                            className="form-check-label cursor-pointer text-gray-700"
+                            htmlFor={`checkbox_${category}_${index}`}
                           >
                             {category}
                           </label>
@@ -247,12 +284,160 @@ const CreateButton: React.FC<PropsType> = props => {
                   {/* Input Field */}
                   <input
                     disabled
+                    required
                     type="text"
                     className="flex-grow appearance-none block w-full rounded-s-none bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    placeholder="Add stores by selecting from dropdown"
-                    value={productData.store?.join('+') || ''}
+                    placeholder="Add categories by selecting from dropdown"
+                    value={productData.category?.join('+') || ''}
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Supplier*
+                </label>
+
+                <div className="flex items-center space-x-0">
+                  {/* Dropdown Button */}
+                  <button
+                    id="suppliersDropdown"
+                    data-dropdown-toggle="dropdown3"
+                    className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    type="button"
+                  >
+                    Select
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  <div
+                    id="dropdown3"
+                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 py-2.5"
+                  >
+                    <ul
+                      aria-labelledby="suppliersDropdown"
+                      className="text-sm text-gray-700 dark:text-gray-200 overflow-auto max-h-28"
+                    >
+                      {props.suppliersList.map((supplier, index) => (
+                        <li
+                          key={`${supplier}_${index}`}
+                          className="flex items-center py-1 px-3"
+                        >
+                          <input
+                            className="form-check-input cursor-pointer mr-2 h-4 w-4 border border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
+                            type="checkbox"
+                            name="supplier"
+                            value={supplier}
+                            id={`checkbox_${supplier}_${index}`}
+                            checked={productData.supplier?.includes(supplier)}
+                            onChange={handleChange}
+                          />
+                          <label
+                            className="form-check-label cursor-pointer text-gray-700"
+                            htmlFor={`checkbox_${supplier}_${index}`}
+                          >
+                            {supplier}
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Input Field */}
+                  <input
+                    required
+                    disabled
+                    type="text"
+                    className="flex-grow appearance-none block w-full rounded-s-none bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    placeholder="Add categories by selecting from dropdown"
+                    value={productData.supplier?.join('+') || ''}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Quantity*
+                </label>
+                <input
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  name="quantity"
+                  value={productData.quantity}
+                  onChange={handleChange}
+                  type="number"
+                  required
+                />
+              </div>
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Cost Price*
+                </label>
+                <input
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  name="cost_price"
+                  value={productData.cost_price}
+                  onChange={handleChange}
+                  type="number"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold flex items-center gap-2 mb-2">
+                  Selling Price
+                  <span className="cursor-pointer text-xs has-tooltip">
+                    &#9432;
+                    <span className="tooltip italic font-medium rounded-md text-xs shadow-lg p-1 px-2 bg-gray-100 ml-2">
+                      Default to cost price if not given
+                    </span>
+                  </span>
+                </label>
+                <input
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  name="selling_price"
+                  value={productData.selling_price}
+                  onChange={handleChange}
+                  type="number"
+                />
+              </div>
+
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Mft. Date
+                </label>
+                <input
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  name="mft_date"
+                  value={productData.mft_date}
+                  onChange={handleChange}
+                  type="date"
+                />
+              </div>
+
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Exp. Date
+                </label>
+                <input
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  name="exp_date"
+                  value={productData.exp_date}
+                  onChange={handleChange}
+                  type="date"
+                />
+              </div>
+
+              <div>
+                <label className="block uppercase tracking-wide text-gray-700 text-sm font-bold mb-2">
+                  Description
+                </label>
+                <textarea
+                  rows={5}
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  name="description"
+                  value={productData.description}
+                  onChange={handleChange}
+                  placeholder="What's the product about?"
+                />
               </div>
             </div>
           </div>

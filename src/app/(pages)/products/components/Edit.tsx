@@ -1,16 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
+
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
-import { CategoryDataTypes, handleResetState } from '../helpers';
+import generateUniqueCode from '@/utility/uCodeGenerator';
+import React, { useEffect, useRef, useState } from 'react';
+import { ProductDataTypes, handleResetState } from '../helpers';
 
 interface PropsType {
-  categoryData: CategoryDataTypes;
+  productData: ProductDataTypes;
+  storesList: string[];
+  categoriesList: string[];
+  suppliersList: string[];
   isLoading: boolean;
   submitHandler: (
     categoryId: string | undefined,
-    categoryData: CategoryDataTypes,
-    editedData: CategoryDataTypes,
-    setEditedData: React.Dispatch<React.SetStateAction<CategoryDataTypes>>,
+    categoryData: ProductDataTypes,
+    editedData: ProductDataTypes,
+    setEditedData: React.Dispatch<React.SetStateAction<ProductDataTypes>>,
   ) => Promise<void>;
 }
 
@@ -19,31 +24,47 @@ const EditButton: React.FC<PropsType> = props => {
   const { data: session } = useSession();
   const popupRef = useRef<HTMLElement>(null);
 
-  const [editedData, setEditedData] = useState<CategoryDataTypes>({});
+  const [editedData, setEditedData] = useState<ProductDataTypes>({});
 
   useEffect(() => {
     if (!isOpen) {
       handleResetState(setEditedData);
     } else {
-      setEditedData(props.categoryData);
+      setEditedData(props.productData);
     }
   }, [isOpen]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ): void => {
-    const { name, value } = e.target;
-    setEditedData(prevData => ({
-      ...prevData,
-      [name]: value,
-    }));
+    const { name, value, type } = e.target;
+
+    if (type === 'checkbox') {
+      setEditedData((prevData: ProductDataTypes) => {
+        const currentValues =
+          (prevData[name as keyof ProductDataTypes] as string[]) || [];
+
+        return {
+          ...prevData,
+          [name as keyof ProductDataTypes]: currentValues.includes(value)
+            ? currentValues.filter(s => s !== value)
+            : [...currentValues, value],
+        };
+      });
+    } else {
+      setEditedData(prevData => ({
+        ...prevData,
+        [name]: type === 'number' ? +value : value,
+      }));
+    }
   };
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
       popupRef.current &&
       !popupRef.current.contains(e.target as Node) &&
-      !popupRef.current.querySelector('input:focus, textarea:focus')
+      !popupRef.current.querySelector('input:focus, textarea:focus') &&
+      !popupRef.current.querySelector('button:focus')
     ) {
       setIsOpen(false);
     }
@@ -107,23 +128,301 @@ const EditButton: React.FC<PropsType> = props => {
             </button>
           </header>
           <div className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start">
-            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4"> */}
-            <div>
-              <label
-                className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
-                htmlFor="grid-password"
-              >
-                Category Name
-              </label>
-              <input
-                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                name="name"
-                value={editedData.name}
-                onChange={handleChange}
-                type="text"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4">
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Batch*
+                </label>
+                <input
+                  required
+                  disabled
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  // name="batch"
+                  value={editedData.batch}
+                  // onChange={handleChange}
+                  type="text"
+                />
+              </div>
+
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Name*
+                </label>
+                <input
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  name="name"
+                  value={editedData.name}
+                  onChange={handleChange}
+                  type="text"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Store*
+                </label>
+
+                <div className="flex items-center space-x-0">
+                  {/* Dropdown Button */}
+                  <button
+                    id="storesEditDropdown"
+                    data-dropdown-toggle="dropdown4"
+                    className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    type="button"
+                  >
+                    Select
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  <div
+                    id="dropdown4"
+                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 py-2.5"
+                  >
+                    <ul
+                      aria-labelledby="storesEditDropdown"
+                      className="text-sm text-gray-700 dark:text-gray-200 overflow-auto max-h-28"
+                    >
+                      {props.storesList.map((store, index) => (
+                        <li
+                          key={`${store}_${index}`}
+                          className="flex items-center py-1 px-3"
+                        >
+                          <input
+                            className="form-check-input cursor-pointer mr-2 h-4 w-4 border border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
+                            type="checkbox"
+                            name="store"
+                            value={store}
+                            id={`checkbox_${store}_${index}`}
+                            checked={editedData.store?.includes(store)}
+                            onChange={handleChange}
+                          />
+                          <label
+                            className="form-check-label cursor-pointer text-gray-700"
+                            htmlFor={`checkbox_${store}_${index}`}
+                          >
+                            {store}
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Input Field */}
+                  <input
+                    disabled
+                    required
+                    type="text"
+                    className="flex-grow appearance-none block w-full rounded-s-none bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    placeholder="Add stores by selecting from dropdown"
+                    value={editedData.store?.join('+') || ''}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Category*
+                </label>
+
+                <div className="flex items-center space-x-0">
+                  {/* Dropdown Button */}
+                  <button
+                    id="categoriesDropdown"
+                    data-dropdown-toggle="dropdown2"
+                    className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    type="button"
+                  >
+                    Select
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  <div
+                    id="dropdown2"
+                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 py-2.5"
+                  >
+                    <ul
+                      aria-labelledby="categoriesDropdown"
+                      className="text-sm text-gray-700 dark:text-gray-200 overflow-auto max-h-28"
+                    >
+                      {props.categoriesList.map((category, index) => (
+                        <li
+                          key={`${category}_${index}`}
+                          className="flex items-center py-1 px-3"
+                        >
+                          <input
+                            className="form-check-input cursor-pointer mr-2 h-4 w-4 border border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
+                            type="checkbox"
+                            name="category"
+                            value={category}
+                            id={`checkbox_${category}_${index}`}
+                            checked={editedData.category?.includes(category)}
+                            onChange={handleChange}
+                          />
+                          <label
+                            className="form-check-label cursor-pointer text-gray-700"
+                            htmlFor={`checkbox_${category}_${index}`}
+                          >
+                            {category}
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Input Field */}
+                  <input
+                    disabled
+                    required
+                    type="text"
+                    className="flex-grow appearance-none block w-full rounded-s-none bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    placeholder="Add categories by selecting from dropdown"
+                    value={editedData.category?.join('+') || ''}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Supplier*
+                </label>
+
+                <div className="flex items-center space-x-0">
+                  {/* Dropdown Button */}
+                  <button
+                    id="suppliersDropdown"
+                    data-dropdown-toggle="dropdown3"
+                    className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    type="button"
+                  >
+                    Select
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  <div
+                    id="dropdown3"
+                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 py-2.5"
+                  >
+                    <ul
+                      aria-labelledby="suppliersDropdown"
+                      className="text-sm text-gray-700 dark:text-gray-200 overflow-auto max-h-28"
+                    >
+                      {props.suppliersList.map((supplier, index) => (
+                        <li
+                          key={`${supplier}_${index}`}
+                          className="flex items-center py-1 px-3"
+                        >
+                          <input
+                            className="form-check-input cursor-pointer mr-2 h-4 w-4 border border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
+                            type="checkbox"
+                            name="supplier"
+                            value={supplier}
+                            id={`checkbox_${supplier}_${index}`}
+                            checked={editedData.supplier?.includes(supplier)}
+                            onChange={handleChange}
+                          />
+                          <label
+                            className="form-check-label cursor-pointer text-gray-700"
+                            htmlFor={`checkbox_${supplier}_${index}`}
+                          >
+                            {supplier}
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Input Field */}
+                  <input
+                    required
+                    disabled
+                    type="text"
+                    className="flex-grow appearance-none block w-full rounded-s-none bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    placeholder="Add categories by selecting from dropdown"
+                    value={editedData.supplier?.join('+') || ''}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Quantity*
+                </label>
+                <input
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  name="quantity"
+                  value={editedData.quantity}
+                  onChange={handleChange}
+                  type="number"
+                  required
+                />
+              </div>
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Cost Price*
+                </label>
+                <input
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  name="cost_price"
+                  value={editedData.cost_price}
+                  onChange={handleChange}
+                  type="number"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Selling Price
+                </label>
+                <input
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  name="selling_price"
+                  value={editedData.selling_price}
+                  onChange={handleChange}
+                  type="number"
+                />
+              </div>
+
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Mft. Date
+                </label>
+                <input
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  name="mft_date"
+                  value={editedData.mft_date}
+                  onChange={handleChange}
+                  type="date"
+                />
+              </div>
+
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Exp. Date
+                </label>
+                <input
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  name="exp_date"
+                  value={editedData.exp_date}
+                  onChange={handleChange}
+                  type="date"
+                />
+              </div>
+
+              <div>
+                <label className="block uppercase tracking-wide text-gray-700 text-sm font-bold mb-2">
+                  Description
+                </label>
+                <textarea
+                  rows={5}
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  name="description"
+                  value={editedData.description}
+                  onChange={handleChange}
+                  placeholder="What's the product about?"
+                />
+              </div>
             </div>
-            {/* </div> */}
           </div>
 
           <footer className="flex items-center px-4 py-2 border-t justify-end gap-6 border-gray-200 rounded-b">
@@ -138,8 +437,8 @@ const EditButton: React.FC<PropsType> = props => {
               <button
                 onClick={() => {
                   props.submitHandler(
-                    props.categoryData?._id,
-                    props.categoryData,
+                    props.productData?._id,
+                    props.productData,
                     editedData,
                     setEditedData,
                   );

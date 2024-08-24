@@ -1,7 +1,7 @@
+import { auth } from '@/auth';
+import { SessionProvider } from 'next-auth/react';
 import React from 'react';
 import Table from './components/Table';
-import { SessionProvider } from 'next-auth/react';
-import { auth } from '@/auth';
 
 const ProductsPage = async () => {
   const session = await auth();

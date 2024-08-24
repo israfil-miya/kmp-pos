@@ -1,12 +1,12 @@
-function generateUniqueCode(input: string): string {
+const generateUniqueCode = (value: string): string => {
   // Get the current date and time in the format YYYYMMDDHHMMSS
   const dateTimeString = new Date()
     .toISOString()
     .replace(/[-T:.Z]/g, '')
     .slice(0, 14);
 
-  // Combine the input string and dateTimeString
-  const combinedString = input + dateTimeString;
+  // Combine the value string and dateTimeString
+  const combinedString = value + dateTimeString;
 
   // Hash the combined string using a simple hash function (e.g., DJB2)
   let hash = 5381;
@@ -21,6 +21,6 @@ function generateUniqueCode(input: string): string {
   const code = base36Code.replace(/[^A-Z0-9]/g, '').slice(0, 8);
 
   return code;
-}
+};
 
 export default generateUniqueCode;

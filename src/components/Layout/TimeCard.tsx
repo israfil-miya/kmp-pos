@@ -1,8 +1,8 @@
 'use client';
 
+import 'moment-timezone';
 import React from 'react';
 import Moment from 'react-moment';
-import 'moment-timezone';
 
 const Timecard: React.FC = () => {
   return (

@@ -209,13 +209,13 @@ const CreateButton: React.FC<PropsType> = props => {
                             type="checkbox"
                             name="store"
                             value={store}
-                            id={`checkbox_${store}_${index}`}
+                            id={`checkbox_edit_${store}_${index}`}
                             checked={productData.store?.includes(store)}
                             onChange={handleChange}
                           />
                           <label
-                            className="form-check-label cursor-pointer text-gray-700"
-                            htmlFor={`checkbox_${store}_${index}`}
+                            className="form-check-label cursor-pointer select-none text-gray-700"
+                            htmlFor={`checkbox_edit_${store}_${index}`}
                           >
                             {store}
                           </label>
@@ -271,13 +271,13 @@ const CreateButton: React.FC<PropsType> = props => {
                             type="checkbox"
                             name="category"
                             value={category}
-                            id={`checkbox_${category}_${index}`}
+                            id={`checkbox_edit_${category}_${index}`}
                             checked={productData.category?.includes(category)}
                             onChange={handleChange}
                           />
                           <label
-                            className="form-check-label cursor-pointer text-gray-700"
-                            htmlFor={`checkbox_${category}_${index}`}
+                            className="form-check-label cursor-pointer select-none text-gray-700"
+                            htmlFor={`checkbox_edit_${category}_${index}`}
                           >
                             {category}
                           </label>
@@ -333,13 +333,13 @@ const CreateButton: React.FC<PropsType> = props => {
                             type="checkbox"
                             name="supplier"
                             value={supplier}
-                            id={`checkbox_${supplier}_${index}`}
+                            id={`checkbox_edit_${supplier}_${index}`}
                             checked={productData.supplier?.includes(supplier)}
                             onChange={handleChange}
                           />
                           <label
-                            className="form-check-label cursor-pointer text-gray-700"
-                            htmlFor={`checkbox_${supplier}_${index}`}
+                            className="form-check-label cursor-pointer select-none text-gray-700"
+                            htmlFor={`checkbox_edit_${supplier}_${index}`}
                           >
                             {supplier}
                           </label>

@@ -14,16 +14,46 @@ const UserSchema = new mongoose.Schema<User>({
   full_name: {
     type: String,
     required: [true, 'Full name is not given'],
+    validate: {
+      validator: function (v: string) {
+        return v.trim().length > 0;
+      },
+      message: 'Full name cannot be empty',
+    },
   },
   email: {
     type: String,
     required: [true, 'Email is not given'],
     unique: true,
+    validate: {
+      validator: function (v: string) {
+        return v.trim().length > 0;
+      },
+      message: 'Email cannot be empty',
+    },
   },
   phone: { type: String, default: '' },
   note: { type: String, default: '' },
-  password: { type: String, required: [true, 'Password is not given'] },
-  role: { type: String, required: [true, 'Role is not given'] },
+  password: {
+    type: String,
+    required: [true, 'Password is not given'],
+    validate: {
+      validator: function (v: string) {
+        return v.trim().length > 0;
+      },
+      message: 'Password cannot be empty',
+    },
+  },
+  role: {
+    type: String,
+    required: [true, 'Role is not given'],
+    validate: {
+      validator: function (v: string) {
+        return v.trim().length > 0;
+      },
+      message: 'Role cannot be empty',
+    },
+  },
   store: { type: String, default: null },
 });
 

@@ -12,6 +12,12 @@ const StoreSchema = new mongoose.Schema<Store>({
   name: {
     type: String,
     required: [true, 'Name is not given'],
+    validate: {
+      validator: function (v: string) {
+        return v.trim().length > 0;
+      },
+      message: 'Name cannot be empty',
+    },
   },
   location: { type: String, default: '' },
   manager: { type: String, default: '' },

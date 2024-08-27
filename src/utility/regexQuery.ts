@@ -1,19 +1,17 @@
-export interface RegexQuery {
-  $regex: string;
-  $options: string;
-}
+import {
+  Query as product_Query,
+  RegexFields as product_RegexFields,
+  RegexQuery as product_RegexQuery,
+} from '@/app/api/product/types';
+import {
+  Query as supplier_Query,
+  RegexFields as supplier_RegexFields,
+  RegexQuery as supplier_RegexQuery,
+} from '@/app/api/supplier/types';
 
-export interface Query {
-  company?: RegexQuery;
-  name?: RegexQuery;
-  email?: RegexQuery;
-  phone?: RegexQuery;
-  address?: RegexQuery;
-}
-type RegexFields = Extract<
-  keyof Query,
-  'company' | 'name' | 'email' | 'phone' | 'address'
->;
+type RegexQuery = supplier_RegexQuery | product_RegexQuery;
+type Query = supplier_Query | product_Query;
+type RegexFields = supplier_RegexFields | product_RegexFields;
 
 // Helper function to create a regex query
 export const createRegexQuery = (
@@ -33,6 +31,6 @@ export const addRegexField = (
 ) => {
   const regexQuery = createRegexQuery(value, exactMatch);
   if (regexQuery) {
-    query[key] = regexQuery;
+    (query as any)[key] = regexQuery;
   }
 };

@@ -1,9 +1,10 @@
 import Supplier from '@/models/Suppliers';
 import dbConnect from '@/utility/dbConnect';
 import getQuery from '@/utility/getApiQuery';
-import { addRegexField, Query } from '@/utility/suppliersFilterHelpers';
+import { addRegexField } from '@/utility/regexQuery';
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { Query } from './types';
 dbConnect();
 
 async function handleCreateNewSupplier(req: Request): Promise<{

@@ -14,6 +14,12 @@ const SupplierSchema = new mongoose.Schema<Supplier>({
   name: {
     type: String,
     required: [true, 'Name is not given'],
+    validate: {
+      validator: function (v: string) {
+        return v.trim().length > 0;
+      },
+      message: 'Name cannot be empty',
+    },
   },
   company: {
     type: String,

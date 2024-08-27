@@ -1,10 +1,18 @@
 import '@/app/globals.css';
+import { auth } from '@/auth';
 import PageOutline from '@/components/Layout/PageOutline';
+import { SessionProvider } from 'next-auth/react';
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <PageOutline>{children}</PageOutline>;
+  const session = await auth();
+
+  return (
+    <SessionProvider session={session}>
+      <PageOutline>{children}</PageOutline>
+    </SessionProvider>
+  );
 }

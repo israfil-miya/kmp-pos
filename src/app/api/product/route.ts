@@ -1,9 +1,10 @@
 import Product from '@/models/Products';
 import dbConnect from '@/utility/dbConnect';
 import getQuery from '@/utility/getApiQuery';
-import { addRegexField, Query } from '@/utility/productsFilterHelpers';
+import { addRegexField } from '@/utility/regexQuery';
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { Query } from './types';
 dbConnect();
 
 async function handleCreateNewProduct(req: Request): Promise<{

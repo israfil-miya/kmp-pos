@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
   images: {
     remotePatterns: [
       {
@@ -13,5 +10,8 @@ const nextConfig = {
     ],
   },
 };
+
+if (process.env.NODE_ENV === 'production')
+  nextConfig.compiler = { removeConsole: true };
 
 export default nextConfig;

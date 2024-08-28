@@ -5,9 +5,7 @@ import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
 import fetchData from '@/utility/fetchData';
 import moment from 'moment-timezone';
 import { useSession } from 'next-auth/react';
-import { revalidatePath } from 'next/cache';
-import { useRouter } from 'next/navigation';
-import React, { RefObject, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { CategoryDataTypes } from '../type';
 import CreateButton from './Create';
@@ -18,41 +16,6 @@ const Table = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState<CategoryDataTypes[]>([]);
   const { data: session } = useSession();
-
-  const createNewCategory = async (
-    data: CategoryDataTypes,
-    formRef: RefObject<HTMLFormElement>,
-  ): Promise<void> => {
-    try {
-      // setIsLoading(true);
-
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/category?action=create-new-category';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        toast.success('New category added successfully');
-        formRef.current?.reset();
-        revalidatePath('/categories');
-      } else {
-        toast.error(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while submitting the form');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const getAllCategories = async (): Promise<void> => {
     try {
@@ -167,7 +130,7 @@ const Table = () => {
     <>
       <div className="flex flex-col sm:flex-row justify-between mb-4 gap-2 items-center">
         <h2 className="text-3xl font-semibold">Product Category List</h2>
-        <CreateButton isLoading={isLoading} submitHandler={createNewCategory} />
+        <CreateButton />
       </div>
 
       {isLoading && <p className="text-center">Loading...</p>}
@@ -180,9 +143,9 @@ const Table = () => {
                 <th className="font-bold">S/N</th>
                 <th className="font-bold">Category Name</th>
                 <th className="font-bold">Creation Date</th>
-                {/* {session?.user?.role === 'administrator' && (
+                {session?.user?.role === 'administrator' && (
                   <th className="font-bold">Action</th>
-                )} */}
+                )}
               </tr>
             </thead>
             <tbody>

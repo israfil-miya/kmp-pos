@@ -3,28 +3,33 @@
 import cn from '@/utility/cn';
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { RefObject, useEffect, useRef, useState } from 'react';
+import React, { useActionState, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { createNewCategory } from '../actions';
 import { FormDataTypes, validationSchema } from '../schema';
 
-interface PropsType {
-  isLoading: boolean;
-  submitHandler: (
-    data: FormDataTypes,
-    formRef: RefObject<HTMLFormElement>,
-  ) => Promise<void>;
-}
-
-const CreateButton: React.FC<PropsType> = props => {
+const CreateButton: React.FC = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const popupRef = useRef<HTMLElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const [state, formAction, loading] = useActionState(createNewCategory, {
+    message: '',
+  });
 
   useEffect(() => {
-    if (isOpen) {
-      formRef.current?.reset();
+    if (!state.issues?.length) {
+      if (state?.message !== '') {
+        toast.error(state.message);
+      }
+      console.error('FORM ERROR: ', state.issues);
+    } else if (state?.message !== '') {
+      toast.success(state.message);
+      setIsOpen(false);
+    } else {
+      console.log('Nothing was returned from the server');
     }
-  }, [isOpen]);
+  }, [state.issues, state.message]);
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -44,13 +49,14 @@ const CreateButton: React.FC<PropsType> = props => {
     resolver: zodResolver(validationSchema),
     defaultValues: {
       name: '',
+      ...(state?.fields ?? {}),
     },
   });
 
   return (
     <>
       <button
-        disabled={props.isLoading}
+        disabled={loading}
         onClick={() => {
           setIsOpen(true);
         }}
@@ -104,9 +110,15 @@ const CreateButton: React.FC<PropsType> = props => {
           </header>
 
           <form
+            action={formAction}
             ref={formRef}
             className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start"
-            onSubmit={handleSubmit(data => props.submitHandler(data, formRef))}
+            onSubmit={e => {
+              e.preventDefault();
+              handleSubmit(() => {
+                formAction(new FormData(formRef.current!));
+              })(e);
+            }}
           >
             {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4"> */}
             <div>
@@ -124,9 +136,6 @@ const CreateButton: React.FC<PropsType> = props => {
                   'appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500',
                   errors.name && 'border-red-500',
                 )}
-                // name="name"
-                // value={categoryData.name}
-                // onChange={handleChange}
                 {...register('name')}
                 type="text"
               />
@@ -140,10 +149,12 @@ const CreateButton: React.FC<PropsType> = props => {
                 onClick={() => setIsOpen(false)}
                 className="rounded-sm bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
+                disabled={loading}
               >
                 Close
               </button>
               <button
+                disabled={loading}
                 onClick={() => {
                   formRef.current?.requestSubmit();
                 }}

@@ -1,37 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useSession } from 'next-auth/react';
+'use client';
+
+import cn from '@/utility/cn';
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
-import { CategoryDataTypes, handleResetState } from '../helpers';
+import { zodResolver } from '@hookform/resolvers/zod';
+import React, { RefObject, useEffect, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { FormDataTypes, validationSchema } from '../schema';
 
 interface PropsType {
   isLoading: boolean;
   submitHandler: (
-    categoryData: CategoryDataTypes,
-    setCategoryData: React.Dispatch<React.SetStateAction<CategoryDataTypes>>,
+    data: FormDataTypes,
+    formRef: RefObject<HTMLFormElement>,
   ) => Promise<void>;
 }
 
 const CreateButton: React.FC<PropsType> = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { data: session } = useSession();
   const popupRef = useRef<HTMLElement>(null);
-  const [categoryData, setCategoryData] = useState<CategoryDataTypes>({});
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (!isOpen) {
-      handleResetState(setCategoryData);
+    if (isOpen) {
+      formRef.current?.reset();
     }
   }, [isOpen]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ): void => {
-    const { name, value } = e.target;
-    setCategoryData(prevData => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -43,6 +36,17 @@ const CreateButton: React.FC<PropsType> = props => {
     }
   };
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormDataTypes>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      name: '',
+    },
+  });
+
   return (
     <>
       <button
@@ -50,7 +54,7 @@ const CreateButton: React.FC<PropsType> = props => {
         onClick={() => {
           setIsOpen(true);
         }}
-        className="items-center flex gap-2 rounded-md bg-green-600 hover:opacity-90 hover:ring-2 hover:ring-green-600 transition duration-200 delay-300 hover:text-opacity-100 text-white py-2 px-3"
+        className="items-center flex gap-2 rounded-sm bg-green-600 hover:opacity-90 hover:ring-2 hover:ring-green-600 transition duration-200 delay-300 hover:text-opacity-100 text-white py-2 px-3"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -72,7 +76,7 @@ const CreateButton: React.FC<PropsType> = props => {
         <article
           ref={popupRef}
           onClick={e => e.stopPropagation()}
-          className={`${isOpen ? 'scale-100 opacity-100' : 'scale-125 opacity-0'} bg-white rounded-lg shadow relative md:w-[60vw] lg:w-[40vw]  text-wrap`}
+          className={`${isOpen ? 'scale-100 opacity-100' : 'scale-125 opacity-0'} bg-white rounded-sm shadow relative md:w-[60vw] lg:w-[40vw]  text-wrap`}
         >
           <header className="flex items-center align-middle justify-between px-4 py-2 border-b rounded-t">
             <h3 className="text-gray-900 text-lg lg:text-xl font-semibold uppercase">
@@ -81,7 +85,7 @@ const CreateButton: React.FC<PropsType> = props => {
             <button
               onClick={() => setIsOpen(false)}
               type="button"
-              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
+              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-sm text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
               data-modal-toggle="default-modal"
             >
               <svg
@@ -99,42 +103,51 @@ const CreateButton: React.FC<PropsType> = props => {
             </button>
           </header>
 
-          <div className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start">
+          <form
+            ref={formRef}
+            className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start"
+            onSubmit={handleSubmit(data => props.submitHandler(data, formRef))}
+          >
             {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4"> */}
             <div>
               <label
-                className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
+                className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
                 htmlFor="grid-password"
               >
-                Category Name*
+                <span className="uppercase"></span>Category Name*
+                <span className="text-red-700 text-wrap block text-xs">
+                  {errors.name && errors.name.message}
+                </span>
               </label>
               <input
-                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                name="name"
-                value={categoryData.name}
-                onChange={handleChange}
+                className={cn(
+                  'appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500',
+                  errors.name && 'border-red-500',
+                )}
+                // name="name"
+                // value={categoryData.name}
+                // onChange={handleChange}
+                {...register('name')}
                 type="text"
-                required
               />
             </div>
             {/* </div> */}
-          </div>
+          </form>
 
           <footer className="flex items-center px-4 py-2 border-t justify-end gap-6 border-gray-200 rounded-b">
             <div className="buttons space-x-2 ">
               <button
                 onClick={() => setIsOpen(false)}
-                className="rounded-md bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-8 py-2 uppercase"
+                className="rounded-sm bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
               >
                 Close
               </button>
               <button
                 onClick={() => {
-                  props.submitHandler(categoryData, setCategoryData);
-                  setIsOpen(false);
+                  formRef.current?.requestSubmit();
                 }}
-                className="rounded-md bg-blue-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-8 py-2 uppercase"
+                className="rounded-sm bg-blue-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
               >
                 Submit

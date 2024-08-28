@@ -1,17 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import CreateButton from './Create';
-import fetchData from '@/utility/fetchData';
-import { toast } from 'sonner';
 import ExtendableTd from '@/components/ExtendableTd';
-import DeleteButton from './Delete';
-import { useSession } from 'next-auth/react';
-import { CategoryDataTypes, handleResetState } from '../helpers';
-import EditButton from './Edit';
-import moment from 'moment-timezone';
 import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
+import fetchData from '@/utility/fetchData';
+import moment from 'moment-timezone';
+import { useSession } from 'next-auth/react';
+import { revalidatePath } from 'next/cache';
+import { useRouter } from 'next/navigation';
+import React, { RefObject, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { CategoryDataTypes } from '../type';
+import CreateButton from './Create';
+import DeleteButton from './Delete';
+import EditButton from './Edit';
 
 const Table = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,16 +20,10 @@ const Table = () => {
   const { data: session } = useSession();
 
   const createNewCategory = async (
-    categoryData: CategoryDataTypes,
-    setCategoryData: React.Dispatch<React.SetStateAction<CategoryDataTypes>>,
+    data: CategoryDataTypes,
+    formRef: RefObject<HTMLFormElement>,
   ): Promise<void> => {
     try {
-      if (!categoryData.name) {
-        toast.error('Please fill in all required fields');
-        handleResetState(setCategoryData);
-        return;
-      }
-
       // setIsLoading(true);
 
       let url: string =
@@ -39,15 +34,15 @@ const Table = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(categoryData),
+        body: JSON.stringify(data),
       };
 
       let response = await fetchData(url, options);
 
       if (response.ok) {
         toast.success('New category added successfully');
-        handleResetState(setCategoryData);
-        getAllCategories();
+        formRef.current?.reset();
+        revalidatePath('/categories');
       } else {
         toast.error(response.data);
       }
@@ -88,80 +83,81 @@ const Table = () => {
     }
   };
 
-  const deleteCategory = async (
-    categoryData: CategoryDataTypes,
-  ): Promise<void> => {
-    try {
-      // setIsLoading(true);
+  // const deleteCategory = async (
+  //   categoryData: CategoryDataTypes,
+  // ): Promise<void> => {
+  //   try {
+  //     // setIsLoading(true);
 
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/category?action=delete-category';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ categoryId: categoryData._id }),
-      };
+  //     let url: string =
+  //       process.env.NEXT_PUBLIC_BASE_URL +
+  //       '/api/category?action=delete-category';
+  //     let options: {} = {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ categoryId: categoryData._id }),
+  //     };
 
-      let response = await fetchData(url, options);
+  //     let response = await fetchData(url, options);
 
-      if (response.ok) {
-        toast.success('Category deleted successfully');
-        getAllCategories();
-      } else {
-        toast.error(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while deleting the category');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //     if (response.ok) {
+  //       toast.success('Category deleted successfully');
+  //       getAllCategories();
+  //     } else {
+  //       toast.error(response.data);
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     toast.error('An error occurred while deleting the category');
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
-  const editCategory = async (
-    categoryId: string | undefined,
-    categoryData: CategoryDataTypes,
-    editedData: CategoryDataTypes,
-    setEditedData: React.Dispatch<React.SetStateAction<CategoryDataTypes>>,
-  ): Promise<void> => {
-    try {
-      if (!editedData.name) {
-        toast.error('Please fill in all required fields');
-        handleResetState(setEditedData);
-        return;
-      }
+  // const editCategory = async (
+  //   categoryId: string | undefined,
+  //   categoryData: CategoryDataTypes,
+  //   editedData: CategoryDataTypes,
+  //   setEditedData: React.Dispatch<React.SetStateAction<CategoryDataTypes>>,
+  // ): Promise<void> => {
+  //   try {
+  //     // if (!editedData.name) {
+  //     //   toast.error('Please fill in all required fields');
+  //     //   handleResetState(setEditedData);
+  //     //   return;
+  //     // }
 
-      // setIsLoading(true);
+  //     // // setIsLoading(true);
 
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL + '/api/category?action=edit-category';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ categoryId, editedData }),
-      };
+  //     // let url: string =
+  //     //   process.env.NEXT_PUBLIC_BASE_URL + '/api/category?action=edit-category';
+  //     // let options: {} = {
+  //     //   method: 'POST',
+  //     //   headers: {
+  //     //     'Content-Type': 'application/json',
+  //     //   },
+  //     //   body: JSON.stringify({ categoryId, editedData }),
+  //     // };
 
-      let response = await fetchData(url, options);
+  //     // let response = await fetchData(url, options);
 
-      if (response.ok) {
-        toast.success('Category data edited successfully');
-        handleResetState(setEditedData);
-        getAllCategories();
-      } else {
-        toast.error(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while submitting the form');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //     // if (response.ok) {
+  //     //   toast.success('Category data edited successfully');
+  //     //   handleResetState(setEditedData);
+  //     //   getAllCategories();
+  //     // } else {
+  //     //   toast.error(response.data);
+  //     // }
+  //     return void 0;
+  //   } catch (error) {
+  //     console.error(error);
+  //     toast.error('An error occurred while submitting the form');
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   useEffect(() => {
     getAllCategories();
@@ -184,9 +180,9 @@ const Table = () => {
                 <th className="font-bold">S/N</th>
                 <th className="font-bold">Category Name</th>
                 <th className="font-bold">Creation Date</th>
-                {session?.user?.role === 'administrator' && (
+                {/* {session?.user?.role === 'administrator' && (
                   <th className="font-bold">Action</th>
-                )}
+                )} */}
               </tr>
             </thead>
             <tbody>
@@ -210,15 +206,15 @@ const Table = () => {
                       >
                         <div className="inline-block">
                           <div className="flex gap-2">
-                            <EditButton
+                            {/* <EditButton
                               isLoading={isLoading}
                               categoryData={item}
                               submitHandler={editCategory}
-                            />
-                            <DeleteButton
+                            /> */}
+                            {/* <DeleteButton
                               categoryData={item}
                               submitHandler={deleteCategory}
-                            />
+                            /> */}
                           </div>
                         </div>
                       </td>

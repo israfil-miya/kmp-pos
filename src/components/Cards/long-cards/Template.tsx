@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
 import cn from '@/utility/cn';
+import React from 'react';
 
 interface Props {
   className?: string;
@@ -15,7 +15,7 @@ const Template: React.FC<Props> = props => {
   return (
     <div
       className={cn(
-        'p-4 flex-row flex flex-1 items-center justify-between rounded-md',
+        'p-4 flex-row flex flex-1 items-center justify-between rounded-sm',
         props.className,
       )}
     >
@@ -26,7 +26,7 @@ const Template: React.FC<Props> = props => {
 
       <div
         className={cn(
-          'text-4xl p-3 text-nowrap items-center flex rounded-md',
+          'text-4xl p-3 text-nowrap items-center flex rounded-sm',
           props.iconClassName,
         )}
       >

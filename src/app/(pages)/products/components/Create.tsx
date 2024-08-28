@@ -85,7 +85,7 @@ const CreateButton: React.FC<PropsType> = props => {
         onClick={() => {
           setIsOpen(true);
         }}
-        className="items-center flex gap-2 rounded-md bg-green-600 hover:opacity-90 hover:ring-2 hover:ring-green-600 transition duration-200 delay-300 hover:text-opacity-100 text-white py-2 px-3"
+        className="items-center flex gap-2 rounded-sm bg-green-600 hover:opacity-90 hover:ring-2 hover:ring-green-600 transition duration-200 delay-300 hover:text-opacity-100 text-white py-2 px-3"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -107,7 +107,7 @@ const CreateButton: React.FC<PropsType> = props => {
         <article
           ref={popupRef}
           onClick={e => e.stopPropagation()}
-          className={`${isOpen ? 'scale-100 opacity-100' : 'scale-125 opacity-0'} bg-white rounded-lg shadow relative md:w-[60vw] lg:w-[40vw]  text-wrap`}
+          className={`${isOpen ? 'scale-100 opacity-100' : 'scale-125 opacity-0'} bg-white rounded-sm shadow relative md:w-[60vw] lg:w-[40vw]  text-wrap`}
         >
           <header className="flex items-center align-middle justify-between px-4 py-2 border-b rounded-t">
             <h3 className="text-gray-900 text-lg lg:text-xl font-semibold uppercase">
@@ -116,7 +116,7 @@ const CreateButton: React.FC<PropsType> = props => {
             <button
               onClick={() => setIsOpen(false)}
               type="button"
-              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
+              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-sm text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
               data-modal-toggle="default-modal"
             >
               <svg
@@ -141,7 +141,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   Batch*{' '}
                   <span className="cursor-pointer has-tooltip text-xs">
                     &#9432;
-                    <span className="tooltip italic font-medium rounded-md text-xs shadow-lg p-1 px-2 bg-gray-100 ml-2">
+                    <span className="tooltip italic font-medium rounded-sm text-xs shadow-lg p-1 px-2 bg-gray-100 ml-2">
                       Auto generated
                     </span>
                   </span>
@@ -184,7 +184,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   <button
                     id="storesDropdown"
                     data-dropdown-toggle="dropdown1"
-                    className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                     type="button"
                   >
                     Select
@@ -193,7 +193,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   {/* Dropdown Menu */}
                   <div
                     id="dropdown1"
-                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 py-2.5"
+                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-sm shadow dark:bg-gray-700 py-2.5"
                   >
                     <ul
                       aria-labelledby="storesDropdown"
@@ -246,7 +246,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   <button
                     id="categoriesDropdown"
                     data-dropdown-toggle="dropdown2"
-                    className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                     type="button"
                   >
                     Select
@@ -255,7 +255,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   {/* Dropdown Menu */}
                   <div
                     id="dropdown2"
-                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 py-2.5"
+                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-sm shadow dark:bg-gray-700 py-2.5"
                   >
                     <ul
                       aria-labelledby="categoriesDropdown"
@@ -308,7 +308,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   <button
                     id="suppliersDropdown"
                     data-dropdown-toggle="dropdown3"
-                    className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                     type="button"
                   >
                     Select
@@ -317,7 +317,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   {/* Dropdown Menu */}
                   <div
                     id="dropdown3"
-                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 py-2.5"
+                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-sm shadow dark:bg-gray-700 py-2.5"
                   >
                     <ul
                       aria-labelledby="suppliersDropdown"
@@ -392,7 +392,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   Selling Price
                   <span className="cursor-pointer text-xs has-tooltip">
                     &#9432;
-                    <span className="tooltip italic font-medium rounded-md text-xs shadow-lg p-1 px-2 bg-gray-100 ml-2">
+                    <span className="tooltip italic font-medium rounded-sm text-xs shadow-lg p-1 px-2 bg-gray-100 ml-2">
                       Default to cost price if not given
                     </span>
                   </span>
@@ -452,7 +452,7 @@ const CreateButton: React.FC<PropsType> = props => {
             <div className="buttons space-x-2 ">
               <button
                 onClick={() => setIsOpen(false)}
-                className="rounded-md bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-8 py-2 uppercase"
+                className="rounded-sm bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
               >
                 Close
@@ -462,7 +462,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   props.submitHandler(productData, setProductData);
                   setIsOpen(false);
                 }}
-                className="rounded-md bg-blue-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-8 py-2 uppercase"
+                className="rounded-sm bg-blue-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
               >
                 Submit

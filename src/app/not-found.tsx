@@ -1,7 +1,7 @@
 'use client';
 import '@/app/globals.css';
-import React from 'react';
 import { useRouter } from 'next/navigation';
+import React from 'react';
 
 const NotFound = () => {
   const router = useRouter();
@@ -16,13 +16,13 @@ const NotFound = () => {
 
         <div className="flex flex-row gap-3">
           <button
-            className="bg-cyan-600 rounded-md hover:opacity-90 hover:ring-4 hover:ring-cyan-600 transition duration-200 delay-300 hover:text-opacity-100 text-white px-4 py-2"
+            className="bg-cyan-600 rounded-sm hover:opacity-90 hover:ring-4 hover:ring-cyan-600 transition duration-200 delay-300 hover:text-opacity-100 text-white px-4 py-2"
             onClick={() => router.back()}
           >
             Go back
           </button>
           <button
-            className="bg-blue-600 rounded-md hover:opacity-90 hover:ring-4 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 text-white px-4 py-2"
+            className="bg-blue-600 rounded-sm hover:opacity-90 hover:ring-4 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 text-white px-4 py-2"
             onClick={() => router.replace('/')}
           >
             Go home

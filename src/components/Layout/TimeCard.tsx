@@ -6,7 +6,7 @@ import Moment from 'react-moment';
 
 const Timecard: React.FC = () => {
   return (
-    <div className="flex flex-col text-center border-1 border rounded-md overflow-hidden">
+    <div className="flex flex-col text-center border-1 border rounded-sm overflow-hidden">
       <div
         className="text-md text-black font-semibold bg-gray-300 px-6"
         suppressHydrationWarning={true}

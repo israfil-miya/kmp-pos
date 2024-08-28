@@ -1,10 +1,10 @@
 'use client';
 
-import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import '@/app/globals.css';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import '@/app/globals.css';
+import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 const LoginForm = () => {
   const [creds, setCreds] = useState<{ email: string; password: string }>({
@@ -97,7 +97,7 @@ const LoginForm = () => {
       <button
         type="submit"
         disabled={loading}
-        className="rounded-md w-full bg-black text-white font-bold hover:bg-gray-800 px-8 py-2.5 focus:outline-none"
+        className="rounded-sm w-full bg-black text-white font-bold hover:bg-gray-800 px-8 py-2.5 focus:outline-none"
       >
         {loading ? 'Logging in...' : 'Login'}
       </button>

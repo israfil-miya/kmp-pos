@@ -1,8 +1,11 @@
 'use server';
 import Category from '@/models/Categories';
+import {
+  extractValidationMessages,
+  mapFormDataToFields,
+} from '@/utility/actionHelpers';
 import dbConnect from '@/utility/dbConnect';
 import mongoose from 'mongoose';
-import { revalidatePath } from 'next/cache';
 import { validationSchema as schema } from './schema';
 dbConnect();
 
@@ -23,10 +26,7 @@ export const createNewCategory = async (
     parsed = schema.safeParse(formData);
 
     if (!parsed.success) {
-      const fields: Record<string, string> = {};
-      for (const key of Object.keys(formData)) {
-        fields[key] = formData[key].toString();
-      }
+      const fields = mapFormDataToFields(formData);
       return {
         error: true,
         message: 'Invalid form data',
@@ -62,9 +62,7 @@ export const createNewCategory = async (
   } catch (error: any) {
     // MongoDB validation errors
     if (error instanceof mongoose.Error.ValidationError) {
-      const validationIssues = Object.values(error.errors).map(
-        (err: any) => err.message,
-      );
+      const validationIssues = extractValidationMessages(error);
       return {
         error: true,
         message: 'Invalid form data',

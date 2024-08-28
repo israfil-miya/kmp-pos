@@ -3,6 +3,7 @@
 import cn from '@/utility/cn';
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
 import React, { useActionState, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -10,26 +11,29 @@ import { createNewCategory } from '../actions';
 import { FormDataTypes, validationSchema } from '../schema';
 
 const CreateButton: React.FC = props => {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const popupRef = useRef<HTMLElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, loading] = useActionState(createNewCategory, {
+    error: false,
     message: '',
   });
 
   useEffect(() => {
-    if (!state.issues?.length) {
+    if (state.error) {
       if (state?.message !== '') {
         toast.error(state.message);
       }
       console.error('FORM ERROR: ', state.issues);
     } else if (state?.message !== '') {
       toast.success(state.message);
+      formRef.current?.reset();
       setIsOpen(false);
     } else {
       console.log('Nothing was returned from the server');
     }
-  }, [state.issues, state.message]);
+  }, [state]);
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -161,7 +165,7 @@ const CreateButton: React.FC = props => {
                 className="rounded-sm bg-blue-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
               >
-                Submit
+                {loading ? 'Submitting...' : 'Submit'}
               </button>
             </div>
           </footer>

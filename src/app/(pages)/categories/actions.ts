@@ -1,10 +1,13 @@
 'use server';
-import fetchData from '@/utility/fetchData';
+import Category from '@/models/Categories';
+import dbConnect from '@/utility/dbConnect';
+import mongoose from 'mongoose';
 import { revalidatePath } from 'next/cache';
-import { RefObject } from 'react';
 import { validationSchema as schema } from './schema';
+dbConnect();
 
 export type FormState = {
+  error: boolean;
   message: string;
   fields?: Record<string, string>;
   issues?: string[];
@@ -14,9 +17,10 @@ export const createNewCategory = async (
   prevState: FormState,
   data: FormData,
 ): Promise<FormState> => {
+  let parsed;
   try {
     const formData = Object.fromEntries(data);
-    const parsed = schema.safeParse(formData);
+    parsed = schema.safeParse(formData);
 
     if (!parsed.success) {
       const fields: Record<string, string> = {};
@@ -24,36 +28,56 @@ export const createNewCategory = async (
         fields[key] = formData[key].toString();
       }
       return {
+        error: true,
         message: 'Invalid form data',
         fields,
         issues: parsed.error.issues.map(issue => issue.message),
       };
     }
 
-    let url: string =
-      process.env.NEXT_PUBLIC_BASE_URL +
-      '/api/category?action=create-new-category';
-    let options: {} = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const categoryData = await Category.findOneAndUpdate(
+      {
+        name: parsed.data.name,
       },
-      body: JSON.stringify(data),
-    };
+      parsed.data,
+      {
+        upsert: true,
+        new: true,
+        runValidators: true, // Ensures validation rules are applied
+      },
+    );
 
-    let response = await fetchData(url, options);
-
-    if (response.ok) {
-      revalidatePath('/categories');
+    if (categoryData) {
       return {
+        error: false,
         message: 'New category added successfully',
-        fields: parsed.data,
       };
     } else {
-      return { message: response.data as string, fields: parsed.data };
+      return {
+        error: true,
+        message: 'Failed to add the new category',
+        fields: parsed.data,
+      };
     }
-  } catch (error) {
+  } catch (error: any) {
+    // MongoDB validation errors
+    if (error instanceof mongoose.Error.ValidationError) {
+      const validationIssues = Object.values(error.errors).map(
+        (err: any) => err.message,
+      );
+      return {
+        error: true,
+        message: 'Invalid form data',
+        fields: parsed?.data,
+        issues: validationIssues,
+      };
+    }
+
     console.error(error);
-    return { message: 'An error occurred while submitting the form' };
+    return {
+      error: true,
+      message: 'An error occurred while submitting the form',
+      fields: parsed?.data,
+    };
   }
 };

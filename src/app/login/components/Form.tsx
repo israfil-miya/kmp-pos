@@ -1,57 +1,64 @@
 'use client';
 
 import '@/app/globals.css';
-import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import React, {
+  ChangeEvent,
+  FormEvent,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { handleSignIn } from '../actions';
+import { LoginDataTypes, validationSchema } from '../schema';
 
 const LoginForm = () => {
-  const [creds, setCreds] = useState<{ email: string; password: string }>({
-    email: '',
-    password: '',
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, formAction, loading] = useActionState(handleSignIn, {
+    error: false,
+    message: '',
   });
-  const [loading, setLoading] = useState<boolean>(false);
-  const router = useRouter();
-  let handleSignInSubmit = async (
-    e: FormEvent<HTMLFormElement>,
-  ): Promise<void> => {
-    e.preventDefault();
-    setLoading(true);
 
-    try {
-      const result = await signIn('credentials', {
-        redirect: false,
-        email: creds.email,
-        password: creds.password,
-        callbackUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/`,
-      });
-
-      if (result?.error) {
-        setLoading(false);
-        if (result.error === 'CredentialsSignin') {
-          toast.error('Invalid email or password', {
-            id: 'invalid-creds',
-          });
-        } else {
-          toast.error('An error occurred', { id: 'error' });
-        }
-      } else if (result?.ok) {
-        router.push('/');
-        setLoading(false);
+  useEffect(() => {
+    if (state.error) {
+      if (state?.message !== '') {
+        toast.error(state.message);
       }
-    } catch (error) {
-      toast.error('An unexpected error occurred', { id: 'unexpected-error' });
-      throw error;
+    } else if (state?.message !== '') {
+      toast.success(state.message);
+      formRef.current?.reset();
+    } else {
+      console.log('Nothing was returned from the server');
     }
-  };
+  }, [state]);
 
-  let handleOnChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    setCreds({ ...creds, [e.target.name]: e.target.value });
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginDataTypes>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      ...(state?.fields ?? {}),
+    },
+  });
 
   return (
-    <form onSubmit={handleSignInSubmit}>
+    <form
+      action={formAction}
+      ref={formRef}
+      onSubmit={e => {
+        e.preventDefault();
+        handleSubmit(() => {
+          formAction(new FormData(formRef.current!));
+        })(e);
+      }}
+    >
       <div className="flex flex-col mb-2">
         <div className="w-full">
           <div>
@@ -64,9 +71,7 @@ const LoginForm = () => {
             <input
               className="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
               required
-              name="email"
-              value={creds.email}
-              onChange={handleOnChange}
+              {...register('email')}
               type="email"
               id="email-input"
               placeholder="johndoe@pos.com"
@@ -83,10 +88,8 @@ const LoginForm = () => {
             <input
               className="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
               type="password"
-              name="password"
               required
-              value={creds.password}
-              onChange={handleOnChange}
+              {...register('password')}
               id="password-input"
               placeholder="*******"
             />

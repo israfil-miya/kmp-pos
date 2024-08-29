@@ -2,6 +2,7 @@
 import Category from '@/models/Categories';
 import {
   extractDbErrorMessages,
+  flattenObject,
   mapFormDataToFields,
 } from '@/utility/actionHelpers';
 import dbConnect from '@/utility/dbConnect';
@@ -110,7 +111,7 @@ export const deleteCategory = async (
   data: FormData,
 ): Promise<FormState> => {
   try {
-    const categoryId = data.get('categoryId');
+    const categoryId = data.get('_id');
 
     if (!categoryId) {
       return {
@@ -162,11 +163,22 @@ export const editCategory = async (
       };
     }
 
+    let categoryId = parsed.data._id;
+    delete parsed.data._id;
+
+    if (!categoryId) {
+      return {
+        error: true,
+        message: 'Category ID is missing',
+      };
+    }
+
     const categoryData = await Category.findByIdAndUpdate(
-      parsed.data._id,
+      categoryId,
       parsed.data,
       {
         new: true,
+        lean: true,
       },
     );
 
@@ -175,6 +187,7 @@ export const editCategory = async (
       return {
         error: false,
         message: 'Category edited successfully',
+        fields: flattenObject(categoryData),
       };
     } else {
       return {

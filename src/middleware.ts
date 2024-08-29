@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
-import NextAuth from 'next-auth';
 import { authConfig } from '@/auth.config';
+import NextAuth from 'next-auth';
+import { NextResponse } from 'next/server';
 
 const PUBLIC_ROUTES = ['/login', '/api/user', '/api/auth/*']; // Public routes
 const ROOT = '/login'; // Root path
@@ -33,6 +33,6 @@ export default auth((req: any) => {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|images/khalek-molla-high-resolution-logo.png|_next/image|icon.ico).*)',
+    '/((?!api|_next/static|images/khalek-molla-high-resolution-logo-transparent.png|_next/image|icon.ico).*)',
   ],
 };

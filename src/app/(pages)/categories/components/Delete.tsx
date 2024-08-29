@@ -24,7 +24,6 @@ const DeleteButton: React.FC<PropsType> = props => {
       if (state?.message !== '') {
         toast.error(state.message);
       }
-      console.error('FORM ERROR: ', state.issues);
     } else if (state?.message !== '') {
       toast.success(state.message);
       setIsOpen(false);
@@ -102,7 +101,7 @@ const DeleteButton: React.FC<PropsType> = props => {
               disabled={loading}
               onClick={() => {
                 const formData = new FormData();
-                formData.append('categoryId', props.categoryData._id!);
+                formData.append('_id', props.categoryData._id!);
                 formAction(formData);
               }}
               type="button"

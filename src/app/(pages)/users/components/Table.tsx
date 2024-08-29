@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import CreateButton from './Create';
-import fetchData from '@/utility/fetchData';
-import { toast } from 'sonner';
 import ExtendableTd from '@/components/ExtendableTd';
-import DeleteButton from './Delete';
+import fetchData from '@/utility/fetchData';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { UserDataTypes, handleResetState } from '../helpers';
+import CreateButton from './Create';
+import DeleteButton from './Delete';
 import EditButton from './Edit';
 
 const Table = () => {
@@ -257,7 +257,7 @@ const Table = () => {
                 users.map((item: UserDataTypes, index: number) => (
                   <tr key={item._id}>
                     <td>{index + 1}</td>
-                    <td>{item.full_name}</td>
+                    <td className="text-wrap">{item.full_name}</td>
                     <td>{item.email}</td>
                     <td className="capitalize">{item.role}</td>
                     <td className="capitalize">{item.store}</td>

@@ -72,11 +72,7 @@ let Table: React.FC<{ data: FormState }> = ({ data }) => {
                       >
                         <div className="inline-block">
                           <div className="flex gap-2">
-                            {/* <EditButton
-                              isLoading={isLoading}
-                              categoryData={item}
-                              submitHandler={editCategory}
-                            /> */}
+                            <EditButton categoryData={item} />
                             <DeleteButton categoryData={item} />
                           </div>
                         </div>

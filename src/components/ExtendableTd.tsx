@@ -28,7 +28,10 @@ const ExtandableTd: React.FC<PropsType> = props => {
   if (data === undefined) return null;
 
   return (
-    <td className="text-wrap p-0 m-0" style={{ minWidth: '250px' }}>
+    <td
+      className="text-wrap"
+      style={{ padding: '2.5px 10px', minWidth: '250px' }}
+    >
       {showFullText ? (
         <span
           dangerouslySetInnerHTML={{ __html: replaceNewlineWithBr(data) }}

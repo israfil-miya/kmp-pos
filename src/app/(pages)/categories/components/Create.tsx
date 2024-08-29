@@ -24,7 +24,6 @@ const CreateButton: React.FC = props => {
       if (state?.message !== '') {
         toast.error(state.message);
       }
-      console.error('FORM ERROR: ', state.issues);
     } else if (state?.message !== '') {
       toast.success(state.message);
       formRef.current?.reset();

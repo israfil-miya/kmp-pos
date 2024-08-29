@@ -8,6 +8,6 @@ export const mapFormDataToFields = (formData: {
   return fields;
 };
 
-export const extractValidationMessages = (error: any): string[] => {
+export const extractDbErrorMessages = (error: any): string[] => {
   return Object.values(error.errors).map((err: any) => err.message);
 };

@@ -8,10 +8,9 @@ import React, { useActionState, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { createNewCategory } from '../actions';
-import { FormDataTypes, validationSchema } from '../schema';
+import { CategoryDataTypes, validationSchema } from '../schema';
 
 const CreateButton: React.FC = props => {
-  const router = useRouter();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const popupRef = useRef<HTMLElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -49,7 +48,7 @@ const CreateButton: React.FC = props => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormDataTypes>({
+  } = useForm<CategoryDataTypes>({
     resolver: zodResolver(validationSchema),
     defaultValues: {
       name: '',

@@ -22,8 +22,8 @@ const LoginPage = async () => {
             alt="login"
             quality={100}
             width={500}
-            height={80}
-            className="w-[500px] h-[80px]"
+            height={60}
+            className="w-[500px] h-[60px]"
           />
         </div>
         <div className="bg-gray-100 text-black p-6 pb-10 w-96">

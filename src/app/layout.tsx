@@ -1,5 +1,5 @@
-import type { Metadata } from 'next';
 import '@/app/globals.css';
+import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
@@ -17,7 +17,12 @@ export default function RootLayout({
       <body className="">
         <noscript>You need to enable JavaScript to run this app.</noscript>
         {children}
-        <Toaster pauseWhenPageIsHidden richColors position="top-right" />
+        <Toaster
+          closeButton
+          richColors
+          position="top-right"
+          pauseWhenPageIsHidden
+        />
       </body>
     </html>
   );

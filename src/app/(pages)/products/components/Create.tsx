@@ -3,9 +3,15 @@
 import generateUniqueCode from '@/utility/uCodeGenerator';
 import 'flowbite';
 import { initFlowbite } from 'flowbite';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useActionState, useEffect, useRef, useState } from 'react';
+import Select from 'react-select';
 import { useDebouncedCallback } from 'use-debounce';
-import { ProductDataTypes, handleResetState } from '../helpers';
+import { handleResetState } from '../helpers';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Controller, useForm } from 'react-hook-form';
+import { createNewProduct } from '../actions';
+import { ProductDataTypes, validationSchema } from '../schema';
 
 interface PropsType {
   isLoading: boolean;
@@ -21,51 +27,15 @@ interface PropsType {
 const CreateButton: React.FC<PropsType> = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const popupRef = useRef<HTMLElement>(null);
-  const [productData, setProductData] = useState<ProductDataTypes>({});
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, formAction, loading] = useActionState(createNewProduct, {
+    error: false,
+    message: '',
+  });
 
   useEffect(() => {
     initFlowbite();
   }, []);
-
-  const debouncedBatch = useDebouncedCallback(value => {
-    if (!value) {
-      setProductData(prevData => ({ ...prevData, batch: '' }));
-      return;
-    }
-    let generatedBatch = generateUniqueCode(value);
-    setProductData(prevData => ({ ...prevData, batch: generatedBatch }));
-  }, 1500);
-
-  useEffect(() => {
-    if (!isOpen) {
-      handleResetState(setProductData);
-    }
-  }, [isOpen]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ): void => {
-    const { name, value, type } = e.target;
-
-    if (type === 'checkbox') {
-      setProductData((prevData: ProductDataTypes) => {
-        const currentValues =
-          (prevData[name as keyof ProductDataTypes] as string[]) || [];
-
-        return {
-          ...prevData,
-          [name as keyof ProductDataTypes]: currentValues.includes(value)
-            ? currentValues.filter(s => s !== value)
-            : [...currentValues, value],
-        };
-      });
-    } else {
-      setProductData(prevData => ({
-        ...prevData,
-        [name]: type === 'number' ? +value : value,
-      }));
-    }
-  };
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -78,10 +48,65 @@ const CreateButton: React.FC<PropsType> = props => {
     }
   };
 
+  const {
+    register,
+    handleSubmit,
+    watch,
+    control,
+    setValue,
+    formState: { errors },
+  } = useForm<ProductDataTypes>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      batch: '',
+      name: '',
+      description: '',
+      cost_price: 0,
+      selling_price: 0,
+      quantity: 0,
+      supplier: [],
+      category: [],
+      store: [],
+      mft_date: '',
+      exp_date: '',
+      ...(state?.fields ?? {}),
+    },
+  });
+
+  const nameValue = watch('name');
+
+  const storeOptions = props.storesList.map(store => ({
+    value: store,
+    label: store.charAt(0).toUpperCase() + store.slice(1),
+  }));
+
+  const categoryOptions = props.categoriesList.map(category => ({
+    value: category,
+    label: category.charAt(0).toUpperCase() + category.slice(1),
+  }));
+
+  const supplierOptions = props.suppliersList.map(supplier => ({
+    value: supplier,
+    label: supplier.charAt(0).toUpperCase() + supplier.slice(1),
+  }));
+
+  // Debounced batch generation
+  const debouncedGenerateBatch = useDebouncedCallback((value: string) => {
+    if (value) {
+      const generatedBatchCode = generateUniqueCode(value);
+      setValue('batch', generatedBatchCode);
+    } else {
+      setValue('batch', '');
+    }
+  }, 1500);
+
+  useEffect(() => {
+    debouncedGenerateBatch(nameValue);
+  }, [nameValue, debouncedGenerateBatch]);
   return (
     <>
       <button
-        disabled={props.isLoading}
+        disabled={loading}
         onClick={() => {
           setIsOpen(true);
         }}
@@ -134,7 +159,17 @@ const CreateButton: React.FC<PropsType> = props => {
             </button>
           </header>
 
-          <div className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start">
+          <form
+            action={formAction}
+            ref={formRef}
+            className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start"
+            onSubmit={e => {
+              e.preventDefault();
+              handleSubmit(() => {
+                formAction(new FormData(formRef.current!));
+              })(e);
+            }}
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4">
               <div>
                 <label className="uppercase tracking-wide text-gray-700 text-sm font-bold flex items-center gap-2 mb-2">
@@ -147,13 +182,11 @@ const CreateButton: React.FC<PropsType> = props => {
                   </span>
                 </label>
                 <input
+                  {...register('batch')}
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  type="text"
                   required
                   disabled
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  // name="batch"
-                  value={productData.batch}
-                  // onChange={handleChange}
-                  type="text"
                 />
               </div>
 
@@ -162,13 +195,8 @@ const CreateButton: React.FC<PropsType> = props => {
                   Name*
                 </label>
                 <input
+                  {...register('name')}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="name"
-                  value={productData.name}
-                  onChange={e => {
-                    handleChange(e);
-                    debouncedBatch(e.target.value);
-                  }}
                   type="text"
                   required
                 />
@@ -179,61 +207,30 @@ const CreateButton: React.FC<PropsType> = props => {
                   Store*
                 </label>
 
-                <div className="flex items-center space-x-0">
-                  {/* Dropdown Button */}
-                  <button
-                    id="storesDropdown"
-                    data-dropdown-toggle="dropdown1"
-                    className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    type="button"
-                  >
-                    Select
-                  </button>
-
-                  {/* Dropdown Menu */}
-                  <div
-                    id="dropdown1"
-                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-sm shadow dark:bg-gray-700 py-2.5"
-                  >
-                    <ul
-                      aria-labelledby="storesDropdown"
-                      className="text-sm text-gray-700 capitalize dark:text-gray-200 overflow-auto max-h-28"
-                    >
-                      {props.storesList.map((store, index) => (
-                        <li
-                          key={`${store}_${index}`}
-                          className="flex items-center py-1 px-3"
-                        >
-                          <input
-                            className="form-check-input cursor-pointer mr-2 h-4 w-4 border border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
-                            type="checkbox"
-                            name="store"
-                            value={store}
-                            id={`checkbox_edit_${store}_${index}`}
-                            checked={productData.store?.includes(store)}
-                            onChange={handleChange}
-                          />
-                          <label
-                            className="form-check-label cursor-pointer select-none text-gray-700"
-                            htmlFor={`checkbox_edit_${store}_${index}`}
-                          >
-                            {store}
-                          </label>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Input Field */}
-                  <input
-                    disabled
-                    required
-                    type="text"
-                    className="flex-grow appearance-none block w-full rounded-s-none bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    placeholder="Add stores by selecting from dropdown"
-                    value={productData.store?.join('+') || ''}
-                  />
-                </div>
+                <Controller
+                  name="store"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={storeOptions}
+                      isMulti
+                      closeMenuOnSelect={false}
+                      placeholder="Select stores"
+                      className="flex-grow text-nowrap py-3 px-3 appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                      classNamePrefix="react-select"
+                      // Map selected values back to the option objects
+                      value={storeOptions.filter(option =>
+                        field.value.includes(option.value),
+                      )}
+                      onChange={selectedOptions =>
+                        field.onChange(
+                          selectedOptions.map(option => option.value),
+                        )
+                      }
+                    />
+                  )}
+                />
               </div>
 
               <div>
@@ -241,61 +238,30 @@ const CreateButton: React.FC<PropsType> = props => {
                   Category*
                 </label>
 
-                <div className="flex items-center space-x-0">
-                  {/* Dropdown Button */}
-                  <button
-                    id="categoriesDropdown"
-                    data-dropdown-toggle="dropdown2"
-                    className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    type="button"
-                  >
-                    Select
-                  </button>
-
-                  {/* Dropdown Menu */}
-                  <div
-                    id="dropdown2"
-                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-sm shadow dark:bg-gray-700 py-2.5"
-                  >
-                    <ul
-                      aria-labelledby="categoriesDropdown"
-                      className="text-sm text-gray-700 capitalize dark:text-gray-200 overflow-auto max-h-28"
-                    >
-                      {props.categoriesList.map((category, index) => (
-                        <li
-                          key={`${category}_${index}`}
-                          className="flex items-center py-1 px-3"
-                        >
-                          <input
-                            className="form-check-input cursor-pointer mr-2 h-4 w-4 border border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
-                            type="checkbox"
-                            name="category"
-                            value={category}
-                            id={`checkbox_edit_${category}_${index}`}
-                            checked={productData.category?.includes(category)}
-                            onChange={handleChange}
-                          />
-                          <label
-                            className="form-check-label cursor-pointer select-none text-gray-700"
-                            htmlFor={`checkbox_edit_${category}_${index}`}
-                          >
-                            {category}
-                          </label>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Input Field */}
-                  <input
-                    disabled
-                    required
-                    type="text"
-                    className="flex-grow appearance-none block w-full rounded-s-none bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    placeholder="Add categories by selecting from dropdown"
-                    value={productData.category?.join('+') || ''}
-                  />
-                </div>
+                <Controller
+                  name="category"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={categoryOptions}
+                      isMulti
+                      closeMenuOnSelect={false}
+                      placeholder="Select categories"
+                      className="flex-grow text-nowrap py-3 px-3 appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                      classNamePrefix="react-select"
+                      // Map selected values back to the option objects
+                      value={categoryOptions.filter(option =>
+                        field.value.includes(option.value),
+                      )}
+                      onChange={selectedOptions =>
+                        field.onChange(
+                          selectedOptions.map(option => option.value),
+                        )
+                      }
+                    />
+                  )}
+                />
               </div>
 
               <div>
@@ -303,61 +269,30 @@ const CreateButton: React.FC<PropsType> = props => {
                   Supplier*
                 </label>
 
-                <div className="flex items-center space-x-0">
-                  {/* Dropdown Button */}
-                  <button
-                    id="suppliersDropdown"
-                    data-dropdown-toggle="dropdown3"
-                    className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    type="button"
-                  >
-                    Select
-                  </button>
-
-                  {/* Dropdown Menu */}
-                  <div
-                    id="dropdown3"
-                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-sm shadow dark:bg-gray-700 py-2.5"
-                  >
-                    <ul
-                      aria-labelledby="suppliersDropdown"
-                      className="text-sm text-gray-700 capitalize dark:text-gray-200 overflow-auto max-h-28"
-                    >
-                      {props.suppliersList.map((supplier, index) => (
-                        <li
-                          key={`${supplier}_${index}`}
-                          className="flex items-center py-1 px-3"
-                        >
-                          <input
-                            className="form-check-input cursor-pointer mr-2 h-4 w-4 border border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
-                            type="checkbox"
-                            name="supplier"
-                            value={supplier}
-                            id={`checkbox_edit_${supplier}_${index}`}
-                            checked={productData.supplier?.includes(supplier)}
-                            onChange={handleChange}
-                          />
-                          <label
-                            className="form-check-label cursor-pointer select-none text-gray-700"
-                            htmlFor={`checkbox_edit_${supplier}_${index}`}
-                          >
-                            {supplier}
-                          </label>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Input Field */}
-                  <input
-                    required
-                    disabled
-                    type="text"
-                    className="flex-grow appearance-none block w-full rounded-s-none bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    placeholder="Add suppliers by selecting from dropdown"
-                    value={productData.supplier?.join('+') || ''}
-                  />
-                </div>
+                <Controller
+                  name="supplier"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={supplierOptions}
+                      isMulti
+                      closeMenuOnSelect={false}
+                      placeholder="Select suppliers"
+                      className="flex-grow text-nowrap py-3 px-3 appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                      classNamePrefix="react-select"
+                      // Map selected values back to the option objects
+                      value={supplierOptions.filter(option =>
+                        field.value.includes(option.value),
+                      )}
+                      onChange={selectedOptions =>
+                        field.onChange(
+                          selectedOptions.map(option => option.value),
+                        )
+                      }
+                    />
+                  )}
+                />
               </div>
 
               <div>
@@ -365,44 +300,34 @@ const CreateButton: React.FC<PropsType> = props => {
                   Quantity*
                 </label>
                 <input
+                  {...register('quantity')}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="quantity"
-                  value={productData.quantity}
-                  onChange={handleChange}
-                  type="number"
-                  required
-                />
-              </div>
-              <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Cost Price*
-                </label>
-                <input
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="cost_price"
-                  value={productData.cost_price}
-                  onChange={handleChange}
                   type="number"
                   required
                 />
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold flex items-center gap-2 mb-2">
-                  Selling Price
-                  <span className="cursor-pointer text-xs has-tooltip">
-                    &#9432;
-                    <span className="tooltip italic font-medium rounded-sm text-xs shadow-lg p-1 px-2 bg-gray-100 ml-2">
-                      Default to cost price if not given
-                    </span>
-                  </span>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Cost Price*
                 </label>
                 <input
+                  {...register('cost_price')}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="selling_price"
-                  value={productData.selling_price}
-                  onChange={handleChange}
                   type="number"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  Selling Price
+                </label>
+                <input
+                  {...register('selling_price')}
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  type="number"
+                  required
                 />
               </div>
 
@@ -411,10 +336,8 @@ const CreateButton: React.FC<PropsType> = props => {
                   Mft. Date
                 </label>
                 <input
+                  {...register('mft_date')}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="mft_date"
-                  value={productData.mft_date}
-                  onChange={handleChange}
                   type="date"
                 />
               </div>
@@ -424,10 +347,8 @@ const CreateButton: React.FC<PropsType> = props => {
                   Exp. Date
                 </label>
                 <input
+                  {...register('exp_date')}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="exp_date"
-                  value={productData.exp_date}
-                  onChange={handleChange}
                   type="date"
                 />
               </div>
@@ -437,16 +358,14 @@ const CreateButton: React.FC<PropsType> = props => {
                   Description
                 </label>
                 <textarea
+                  {...register('description')}
                   rows={5}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="description"
-                  value={productData.description}
-                  onChange={handleChange}
                   placeholder="What's the product about?"
                 />
               </div>
             </div>
-          </div>
+          </form>
 
           <footer className="flex items-center px-4 py-2 border-t justify-end gap-6 border-gray-200 rounded-b">
             <div className="buttons space-x-2 ">
@@ -454,18 +373,19 @@ const CreateButton: React.FC<PropsType> = props => {
                 onClick={() => setIsOpen(false)}
                 className="rounded-sm bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
+                disabled={loading}
               >
                 Close
               </button>
               <button
+                disabled={loading}
                 onClick={() => {
-                  props.submitHandler(productData, setProductData);
-                  setIsOpen(false);
+                  formRef.current?.requestSubmit();
                 }}
                 className="rounded-sm bg-blue-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
               >
-                Submit
+                {loading ? 'Submitting...' : 'Submit'}
               </button>
             </div>
           </footer>

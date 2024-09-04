@@ -10,6 +10,7 @@ import { handleResetState } from '../helpers';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { createNewProduct } from '../actions';
 import { ProductDataTypes, validationSchema } from '../schema';
 
@@ -36,6 +37,20 @@ const CreateButton: React.FC<PropsType> = props => {
   useEffect(() => {
     initFlowbite();
   }, []);
+
+  useEffect(() => {
+    if (state.error) {
+      if (state?.message !== '') {
+        toast.error(state.message);
+      }
+    } else if (state?.message !== '') {
+      toast.success(state.message);
+      formRef.current?.reset();
+      setIsOpen(false);
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [state]);
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -172,39 +187,49 @@ const CreateButton: React.FC<PropsType> = props => {
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4">
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold flex items-center gap-2 mb-2">
-                  Batch*{' '}
-                  <span className="cursor-pointer has-tooltip text-xs">
-                    &#9432;
-                    <span className="tooltip italic font-medium rounded-sm text-xs shadow-lg p-1 px-2 bg-gray-100 ml-2">
-                      Auto generated
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase flex items-center gap-2">
+                    Batch*
+                    <span className="cursor-pointer has-tooltip text-xs">
+                      &#9432;
+                      <span className="tooltip italic font-medium rounded-sm text-xs shadow-lg p-1 px-2 bg-gray-100 ml-2">
+                        Auto generated
+                      </span>
                     </span>
                   </span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.batch && errors.batch?.message}
+                  </span>
                 </label>
+
                 <input
                   {...register('batch')}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   type="text"
-                  required
-                  disabled
+                  readOnly
                 />
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Name*
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Name*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.name && errors.name.message}
+                  </span>
                 </label>
                 <input
                   {...register('name')}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   type="text"
-                  required
                 />
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Store*
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Store*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.store && errors.store?.message}
+                  </span>
                 </label>
 
                 <Controller
@@ -217,7 +242,7 @@ const CreateButton: React.FC<PropsType> = props => {
                       isMulti
                       closeMenuOnSelect={false}
                       placeholder="Select stores"
-                      className="flex-grow text-nowrap py-3 px-3 appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                      // className="flex-grow text-nowrap py-3 px-3 appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                       classNamePrefix="react-select"
                       // Map selected values back to the option objects
                       value={storeOptions.filter(option =>
@@ -234,8 +259,11 @@ const CreateButton: React.FC<PropsType> = props => {
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Category*
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  <span className="uppercase">Category*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.category && errors.category?.message}
+                  </span>
                 </label>
 
                 <Controller
@@ -248,7 +276,7 @@ const CreateButton: React.FC<PropsType> = props => {
                       isMulti
                       closeMenuOnSelect={false}
                       placeholder="Select categories"
-                      className="flex-grow text-nowrap py-3 px-3 appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                      // className="flex-grow text-nowrap py-3 px-3 appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                       classNamePrefix="react-select"
                       // Map selected values back to the option objects
                       value={categoryOptions.filter(option =>
@@ -265,8 +293,11 @@ const CreateButton: React.FC<PropsType> = props => {
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Supplier*
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Supplier*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.supplier && errors.supplier?.message}
+                  </span>
                 </label>
 
                 <Controller
@@ -279,7 +310,7 @@ const CreateButton: React.FC<PropsType> = props => {
                       isMulti
                       closeMenuOnSelect={false}
                       placeholder="Select suppliers"
-                      className="flex-grow text-nowrap py-3 px-3 appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                      // className="flex-grow text-nowrap py-3 px-3 appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                       classNamePrefix="react-select"
                       // Map selected values back to the option objects
                       value={supplierOptions.filter(option =>
@@ -296,44 +327,53 @@ const CreateButton: React.FC<PropsType> = props => {
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Quantity*
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Quantity*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.quantity && errors.quantity?.message}
+                  </span>
                 </label>
                 <input
-                  {...register('quantity')}
+                  {...register('quantity', { valueAsNumber: true })}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   type="number"
-                  required
                 />
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Cost Price*
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Cost Price*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.cost_price && errors.cost_price?.message}
+                  </span>
                 </label>
                 <input
-                  {...register('cost_price')}
+                  {...register('cost_price', { valueAsNumber: true })}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   type="number"
-                  required
                 />
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Selling Price
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Selling Price*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.selling_price && errors.selling_price?.message}
+                  </span>
                 </label>
                 <input
-                  {...register('selling_price')}
+                  {...register('selling_price', { valueAsNumber: true })}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   type="number"
-                  required
                 />
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Mft. Date
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Mft. Date</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.mft_date && errors.mft_date?.message}
+                  </span>
                 </label>
                 <input
                   {...register('mft_date')}
@@ -343,8 +383,11 @@ const CreateButton: React.FC<PropsType> = props => {
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Exp. Date
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Exp. Date</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.exp_date && errors.exp_date?.message}
+                  </span>
                 </label>
                 <input
                   {...register('exp_date')}
@@ -354,8 +397,11 @@ const CreateButton: React.FC<PropsType> = props => {
               </div>
 
               <div>
-                <label className="block uppercase tracking-wide text-gray-700 text-sm font-bold mb-2">
-                  Description
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Description</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.description && errors.description?.message}
+                  </span>
                 </label>
                 <textarea
                   {...register('description')}

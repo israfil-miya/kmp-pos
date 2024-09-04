@@ -14,7 +14,7 @@ dbConnect();
 export type FormState = {
   error: boolean;
   message: string;
-  fields?: Record<string, string | number | string[]>;
+  fields?: Record<string, string | number | string[] | boolean>;
   issues?: string[];
 };
 
@@ -25,9 +25,10 @@ export const createNewProduct = async (
   let parsed;
   try {
     const formData = Object.fromEntries(data);
-    parsed = schema.safeParse(formData);
+    parsed = await schema.safeParseAsync(formData);
 
     if (!parsed.success) {
+      console.log('parsed.error', parsed.error, 'parsed.data', parsed.data);
       const fields = mapFormDataToFields(formData);
       return {
         error: true,
@@ -64,6 +65,8 @@ export const createNewProduct = async (
     }
   } catch (error: any) {
     // MongoDB validation errors
+
+    console.log('data', parsed?.data);
     if (error instanceof mongoose.Error.ValidationError) {
       const validationIssues = extractDbErrorMessages(error);
       return {

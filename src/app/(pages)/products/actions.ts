@@ -4,6 +4,7 @@ import {
   extractDbErrorMessages,
   flattenObject,
   mapFormDataToFields,
+  parseFormData,
 } from '@/utility/actionHelpers';
 import dbConnect from '@/utility/dbConnect';
 import mongoose from 'mongoose';
@@ -24,8 +25,12 @@ export const createNewProduct = async (
 ): Promise<FormState> => {
   let parsed;
   try {
-    const formData = Object.fromEntries(data);
-    parsed = await schema.safeParseAsync(formData);
+    console.log('formData', data);
+    const formData = parseFormData(data, ['store', 'category', 'supplier']);
+
+    parsed = schema.safeParse(formData);
+
+    console.log('parsed', parsed);
 
     if (!parsed.success) {
       console.log('parsed.error', parsed.error, 'parsed.data', parsed.data);

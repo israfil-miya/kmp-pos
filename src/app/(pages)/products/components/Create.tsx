@@ -15,14 +15,9 @@ import { createNewProduct } from '../actions';
 import { ProductDataTypes, validationSchema } from '../schema';
 
 interface PropsType {
-  isLoading: boolean;
   storesList: string[];
   categoriesList: string[];
   suppliersList: string[];
-  submitHandler: (
-    productData: ProductDataTypes,
-    setProductData: React.Dispatch<React.SetStateAction<ProductDataTypes>>,
-  ) => Promise<void>;
 }
 
 const CreateButton: React.FC<PropsType> = props => {

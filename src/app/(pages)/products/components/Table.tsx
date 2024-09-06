@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { FormState } from '../actions';
 import { ProductDataTypes, handleResetState } from '../helpers';
 import CreateButton from './Create';
 import DeleteButton from './Delete';
@@ -22,7 +23,14 @@ interface ProductsState {
   items?: ProductDataTypes[];
 }
 
-const Table = () => {
+interface TableDataProps {
+  storeNames: FormState;
+  categoryNames: FormState;
+  supplierNames: FormState;
+  data: FormState;
+}
+
+const Table: React.FC<TableDataProps> = props => {
   const [isLoading, setIsLoading] = useState(false);
   const [products, setProducts] = useState<ProductsState>({
     pagination: {
@@ -119,49 +127,6 @@ const Table = () => {
     }
 
     return true;
-  };
-
-  const createNewProduct = async (
-    productData: ProductDataTypes,
-    setProductData: React.Dispatch<React.SetStateAction<ProductDataTypes>>,
-  ): Promise<void> => {
-    try {
-      console.log(productData);
-
-      if (!inputValidations(productData)) {
-        // handleResetState(setProductData);
-        return;
-      }
-
-      // setIsLoading(true);
-
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/product?action=create-new-product';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productData),
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        toast.success('New product added successfully');
-        handleResetState(setProductData);
-        if (!isFiltered) await getAllProducts();
-        else await getAllProductsFiltered();
-      } else {
-        toast.error(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while submitting the form');
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const getAllProducts = async (): Promise<void> => {
@@ -310,111 +275,44 @@ const Table = () => {
     }
   };
 
-  const getStores = async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL + '/api/store?action=get-all-stores';
-      let options: {} = {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        let stores: string[] = [];
-
-        stores = response.data.map((store: { name: string }) => store.name);
-
-        setStores(stores);
-      } else {
-        toast.error(response.data);
+  useEffect(() => {
+    if (props.storeNames.error) {
+      if (props.storeNames?.message !== '') {
+        toast.error(props.storeNames.message);
       }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while retrieving stores data');
-    } finally {
-      setIsLoading(false);
+    } else if (props.storeNames?.message !== '') {
+      setStores(JSON.parse(props.storeNames.message));
+    } else {
+      console.log('Nothing was returned from the server');
     }
-  };
+  }, [props.storeNames]);
 
-  const getCategories = async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/category?action=get-all-categories';
-      let options: {} = {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        let categories: string[] = [];
-
-        categories = response.data.map(
-          (category: { name: string }) => category.name,
-        );
-
-        setCategories(categories);
-      } else {
-        toast.error(response.data);
+  useEffect(() => {
+    if (props.categoryNames.error) {
+      if (props.categoryNames?.message !== '') {
+        toast.error(props.categoryNames.message);
       }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while retrieving categories data');
-    } finally {
-      setIsLoading(false);
+    } else if (props.categoryNames?.message !== '') {
+      setCategories(JSON.parse(props.categoryNames.message));
+    } else {
+      console.log('Nothing was returned from the server');
     }
-  };
+  }, [props.categoryNames]);
 
-  const getSuppliers = async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/supplier?action=get-all-suppliers-name';
-      let options: {} = {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        let suppliers: string[] = [];
-        suppliers = response.data.map(
-          (supplier: { name: string }) => supplier.name,
-        );
-        setSuppliers(suppliers);
-      } else {
-        toast.error(response.data);
+  useEffect(() => {
+    if (props.supplierNames.error) {
+      if (props.supplierNames?.message !== '') {
+        toast.error(props.supplierNames.message);
       }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while retrieving suppliers data');
-    } finally {
-      setIsLoading(false);
+    } else if (props.supplierNames?.message !== '') {
+      setSuppliers(JSON.parse(props.supplierNames.message));
+    } else {
+      console.log('Nothing was returned from the server');
     }
-  };
+  }, [props.supplierNames]);
 
   useEffect(() => {
     getAllProducts();
-    getStores();
-    getCategories();
-    getSuppliers();
   }, []);
 
   function handlePrevious() {
@@ -540,9 +438,7 @@ const Table = () => {
         <CreateButton
           suppliersList={suppliers}
           categoriesList={categories}
-          isLoading={isLoading}
           storesList={stores}
-          submitHandler={createNewProduct}
         />
       </div>
 

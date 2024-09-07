@@ -6,12 +6,14 @@ export const validationSchema = z
     batch: z.string().length(8, 'Batch must be 8 characters long'),
     name: z.string().min(1, 'Name is required'),
     cost_price: z.coerce
-      .number()
+      .number({ invalid_type_error: 'Cost price must be a number' })
       .gte(1, 'Cost price must be greater than zero'),
     selling_price: z.coerce
-      .number()
+      .number({ invalid_type_error: 'Cost price must be a number' })
       .gte(1, 'Selling price must be greater than zero'),
-    quantity: z.coerce.number().nonnegative('Quantity cannot be in negative'),
+    quantity: z.coerce
+      .number({ invalid_type_error: 'Cost price must be a number' })
+      .nonnegative('Quantity cannot be in negative'),
     supplier: z.array(z.string()).min(1, 'Supplier is required'),
     category: z.array(z.string()).min(1, 'Category is required'),
     store: z.array(z.string()).min(1, 'Store is required'),
@@ -81,3 +83,21 @@ export const validationSchema = z
   );
 
 export type ProductDataTypes = z.infer<typeof validationSchema>;
+
+export interface RegexQuery {
+  $regex: string;
+  $options: string;
+}
+
+export interface Query {
+  batch?: RegexQuery;
+  name?: RegexQuery;
+  supplier?: RegexQuery;
+  category?: RegexQuery;
+  store?: RegexQuery;
+}
+
+export type RegexFields = Extract<
+  keyof Query,
+  'batch' | 'name' | 'supplier' | 'category' | 'store'
+>;

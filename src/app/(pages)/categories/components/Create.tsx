@@ -19,20 +19,6 @@ const CreateButton: React.FC = props => {
     message: '',
   });
 
-  useEffect(() => {
-    if (state.error) {
-      if (state?.message !== '') {
-        toast.error(state.message);
-      }
-    } else if (state?.message !== '') {
-      toast.success(state.message);
-      formRef.current?.reset();
-      setIsOpen(false);
-    } else {
-      console.log('Nothing was returned from the server');
-    }
-  }, [state]);
-
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
       popupRef.current &&
@@ -46,6 +32,7 @@ const CreateButton: React.FC = props => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<CategoryDataTypes>({
     resolver: zodResolver(validationSchema),
@@ -54,6 +41,20 @@ const CreateButton: React.FC = props => {
       ...(state?.fields ?? {}),
     },
   });
+
+  useEffect(() => {
+    if (state.error) {
+      if (state?.message !== '') {
+        toast.error(state.message);
+      }
+    } else if (state?.message !== '') {
+      toast.success(state.message);
+      reset();
+      setIsOpen(false);
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [state, reset]);
 
   return (
     <>

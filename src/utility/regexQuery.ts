@@ -2,7 +2,7 @@ import {
   Query as product_Query,
   RegexFields as product_RegexFields,
   RegexQuery as product_RegexQuery,
-} from '@/app/api/product/types';
+} from '@/app/(pages)/products/schema';
 import {
   Query as supplier_Query,
   RegexFields as supplier_RegexFields,

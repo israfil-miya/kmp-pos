@@ -8,8 +8,13 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { FormState } from '../actions';
-import { ProductDataTypes, handleResetState } from '../helpers';
+import {
+  FormState,
+  getAllProducts as getAllProductsAction,
+  getAllProductsFiltered as getAllProductsFilteredAction,
+} from '../actions';
+import { handleResetState } from '../helpers';
+import { ProductDataTypes } from '../schema';
 import CreateButton from './Create';
 import DeleteButton from './Delete';
 import EditButton from './Edit';
@@ -133,31 +138,22 @@ const Table: React.FC<TableDataProps> = props => {
     try {
       // setIsLoading(true);
 
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/product?action=get-all-products';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          filtered: false,
-          paginated: true,
-          item_per_page: itemPerPage,
-          page,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({}),
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        setProducts(response.data);
+      let response = await getAllProductsAction({
+        page: page,
+        itemsPerPage: itemPerPage,
+      });
+      if (response.error) {
+        if (response?.message !== '') {
+          toast.error(response.message);
+        }
+      } else if (response?.message !== '') {
+        setProducts(JSON.parse(response.message));
       } else {
-        toast.error(response.data);
+        console.log('Nothing was returned from the server');
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred while retrieving categories data');
+      toast.error('An error occurred while retrieving products data');
     } finally {
       setIsLoading(false);
     }
@@ -167,113 +163,69 @@ const Table: React.FC<TableDataProps> = props => {
     try {
       // setIsLoading(true);
 
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/product?action=get-all-products';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          filtered: true,
-          paginated: true,
-          item_per_page: itemPerPage,
-          page,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...filters,
-        }),
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        setProducts(response.data);
-        setIsFiltered(true);
+      let response = await getAllProductsFilteredAction({
+        page: page,
+        itemsPerPage: itemPerPage,
+        filters: filters,
+      });
+      if (response.error) {
+        if (response?.message !== '') {
+          toast.error(response.message);
+        }
+      } else if (response?.message !== '') {
+        setProducts(JSON.parse(response.message));
       } else {
-        toast.error(response.data);
+        console.log('Nothing was returned from the server');
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred while retrieving categories data');
+      toast.error('An error occurred while retrieving products data');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const deleteProduct = async (
-    productData: ProductDataTypes,
-  ): Promise<void> => {
-    try {
-      // setIsLoading(true);
+  // const editProduct = async (
+  //   productId: string | undefined,
+  //   productData: ProductDataTypes,
+  //   editedData: ProductDataTypes,
+  //   setEditedData: React.Dispatch<React.SetStateAction<ProductDataTypes>>,
+  // ): Promise<void> => {
+  //   try {
+  //     if (!inputValidations(editedData)) {
+  //       handleResetState(setEditedData);
+  //       return;
+  //     }
 
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL + '/api/product?action=delete-product';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ productId: productData._id }),
-      };
+  //     // setIsLoading(true);
 
-      let response = await fetchData(url, options);
+  //     let url: string =
+  //       process.env.NEXT_PUBLIC_BASE_URL + '/api/product?action=edit-product';
+  //     let options: {} = {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ productId, editedData }),
+  //     };
 
-      if (response.ok) {
-        toast.success('Product deleted successfully');
-        if (!isFiltered) await getAllProducts();
-        else await getAllProductsFiltered();
-      } else {
-        toast.error(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while deleting the product');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //     let response = await fetchData(url, options);
 
-  const editProduct = async (
-    productId: string | undefined,
-    productData: ProductDataTypes,
-    editedData: ProductDataTypes,
-    setEditedData: React.Dispatch<React.SetStateAction<ProductDataTypes>>,
-  ): Promise<void> => {
-    try {
-      if (!inputValidations(editedData)) {
-        handleResetState(setEditedData);
-        return;
-      }
-
-      // setIsLoading(true);
-
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL + '/api/product?action=edit-product';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ productId, editedData }),
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        toast.success('Product data edited successfully');
-        handleResetState(setEditedData);
-        if (!isFiltered) await getAllProducts();
-        else await getAllProductsFiltered();
-      } else {
-        toast.error(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while submitting the form');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //     if (response.ok) {
+  //       toast.success('Product data edited successfully');
+  //       handleResetState(setEditedData);
+  //       if (!isFiltered) await getAllProducts();
+  //       else await getAllProductsFiltered();
+  //     } else {
+  //       toast.error(response.data);
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     toast.error('An error occurred while submitting the form');
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   useEffect(() => {
     if (props.storeNames.error) {
@@ -312,8 +264,16 @@ const Table: React.FC<TableDataProps> = props => {
   }, [props.supplierNames]);
 
   useEffect(() => {
-    getAllProducts();
-  }, []);
+    if (props.data.error) {
+      if (props.data?.message !== '') {
+        toast.error(props.data.message);
+      }
+    } else if (props.data?.message !== '') {
+      setProducts(JSON.parse(props.data.message));
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [props.data]);
 
   function handlePrevious() {
     setPage(p => {
@@ -543,18 +503,15 @@ const Table: React.FC<TableDataProps> = props => {
                         >
                           <div className="inline-block">
                             <div className="flex gap-2">
-                              <EditButton
+                              {/* <EditButton
                                 storesList={stores}
                                 categoriesList={categories}
                                 suppliersList={suppliers}
                                 isLoading={isLoading}
                                 productData={item}
-                                submitHandler={editProduct}
-                              />
-                              <DeleteButton
-                                productData={item}
-                                submitHandler={deleteProduct}
-                              />
+                                submitHandler={(a: any) => {}}
+                              /> */}
+                              <DeleteButton productData={item} />
                               {/* <button>Print Product Barcode</button> */}
                             </div>
                           </div>

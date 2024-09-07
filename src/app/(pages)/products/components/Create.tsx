@@ -29,24 +29,6 @@ const CreateButton: React.FC<PropsType> = props => {
     message: '',
   });
 
-  useEffect(() => {
-    initFlowbite();
-  }, []);
-
-  useEffect(() => {
-    if (state.error) {
-      if (state?.message !== '') {
-        toast.error(state.message);
-      }
-    } else if (state?.message !== '') {
-      toast.success(state.message);
-      formRef.current?.reset();
-      setIsOpen(false);
-    } else {
-      console.log('Nothing was returned from the server');
-    }
-  }, [state]);
-
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
       popupRef.current &&
@@ -64,6 +46,7 @@ const CreateButton: React.FC<PropsType> = props => {
     watch,
     control,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<ProductDataTypes>({
     resolver: zodResolver(validationSchema),
@@ -113,6 +96,25 @@ const CreateButton: React.FC<PropsType> = props => {
   useEffect(() => {
     debouncedGenerateBatch(nameValue);
   }, [nameValue, debouncedGenerateBatch]);
+
+  useEffect(() => {
+    initFlowbite();
+  }, []);
+
+  useEffect(() => {
+    if (state.error) {
+      if (state?.message !== '') {
+        toast.error(state.message);
+      }
+    } else if (state?.message !== '') {
+      toast.success(state.message);
+      reset();
+      setIsOpen(false);
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [state, reset]);
+
   return (
     <>
       <button

@@ -16,8 +16,7 @@ const ProductsPage = async () => {
   const supplierNames = await getAllSupplierNames();
   const products = await getAllProducts({
     page: 1,
-    items_per_page: 30,
-    filtered: false,
+    itemsPerPage: 30,
   });
 
   return (

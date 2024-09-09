@@ -1,16 +1,14 @@
 'use client';
 
 import generateUniqueCode from '@/utility/uCodeGenerator';
+import { zodResolver } from '@hookform/resolvers/zod';
 import 'flowbite';
 import { initFlowbite } from 'flowbite';
 import React, { useActionState, useEffect, useRef, useState } from 'react';
-import Select from 'react-select';
-import { useDebouncedCallback } from 'use-debounce';
-import { handleResetState } from '../helpers';
-
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
+import Select from 'react-select';
 import { toast } from 'sonner';
+import { useDebouncedCallback } from 'use-debounce';
 import { createNewProduct } from '../actions';
 import { ProductDataTypes, validationSchema } from '../schema';
 

@@ -503,14 +503,12 @@ const Table: React.FC<TableDataProps> = props => {
                         >
                           <div className="inline-block">
                             <div className="flex gap-2">
-                              {/* <EditButton
+                              <EditButton
                                 storesList={stores}
                                 categoriesList={categories}
                                 suppliersList={suppliers}
-                                isLoading={isLoading}
                                 productData={item}
-                                submitHandler={(a: any) => {}}
-                              /> */}
+                              />
                               <DeleteButton productData={item} />
                               {/* <button>Print Product Barcode</button> */}
                             </div>

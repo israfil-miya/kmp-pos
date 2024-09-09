@@ -2,7 +2,6 @@
 import Category from '@/models/Categories';
 import {
   extractDbErrorMessages,
-  flattenObject,
   mapFormDataToFields,
 } from '@/utility/actionHelpers';
 import dbConnect from '@/utility/dbConnect';
@@ -178,7 +177,6 @@ export const editCategory = async (
       parsed.data,
       {
         new: true,
-        lean: true,
       },
     );
 
@@ -187,7 +185,7 @@ export const editCategory = async (
       return {
         error: false,
         message: 'Category edited successfully',
-        fields: flattenObject(categoryData),
+        fields: categoryData,
       };
     } else {
       return {

@@ -5,7 +5,6 @@ import Store from '@/models/Stores';
 import Supplier from '@/models/Suppliers';
 import {
   extractDbErrorMessages,
-  flattenObject,
   mapFormDataToFields,
   parseFormData,
 } from '@/utility/actionHelpers';
@@ -380,7 +379,6 @@ export const editProduct = async (
       parsed.data,
       {
         new: true,
-        lean: true,
       },
     );
 
@@ -389,7 +387,7 @@ export const editProduct = async (
       return {
         error: false,
         message: 'Product edited successfully',
-        fields: flattenObject(productData),
+        fields: productData,
       };
     } else {
       return {

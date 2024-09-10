@@ -13,7 +13,7 @@ dbConnect();
 export type FormState = {
   error: boolean;
   message: string;
-  fields?: Record<string, string | number>;
+  fields?: Record<string, string | number | Date>;
   issues?: string[];
 };
 
@@ -185,7 +185,7 @@ export const editCategory = async (
       return {
         error: false,
         message: 'Category edited successfully',
-        fields: categoryData,
+        fields: categoryData.toObject(),
       };
     } else {
       return {

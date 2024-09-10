@@ -106,7 +106,9 @@ const CreateButton: React.FC<PropsType> = props => {
       }
     } else if (state?.message !== '') {
       toast.success(state.message);
-      reset();
+      if (state.fields) {
+        reset(state.fields as ProductDataTypes);
+      }
       setIsOpen(false);
     } else {
       console.log('Nothing was returned from the server');

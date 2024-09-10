@@ -42,7 +42,6 @@ const EditButton: React.FC<PropsType> = props => {
   const {
     register,
     handleSubmit,
-    watch,
     control,
     setValue,
     reset,
@@ -89,52 +88,25 @@ const EditButton: React.FC<PropsType> = props => {
   }, []);
 
   useEffect(() => {
-    if (state?.fields) {
-      // Update stores
-      if (state.fields.store) {
-        setValue(
-          'store',
-          storeOptions.filter(option =>
-            state.fields.store.includes(option.value),
-          ),
-        );
-      }
-
-      // Update categories
-      if (state.fields.category) {
-        setValue(
-          'category',
-          categoryOptions.filter(option =>
-            state.fields.category.includes(option.value),
-          ),
-        );
-      }
-
-      // Update suppliers
-      if (state.fields.supplier) {
-        setValue(
-          'supplier',
-          supplierOptions.filter(option =>
-            state.fields.supplier.includes(option.value),
-          ),
-        );
-      }
-    }
-  }, [state?.fields, setValue, storeOptions, categoryOptions, supplierOptions]);
-
-  useEffect(() => {
     if (state.error) {
       if (state?.message !== '') {
         toast.error(state.message);
       }
     } else if (state?.message !== '') {
       toast.success(state.message);
-      reset();
+      if (state.fields) {
+        reset(state.fields as ProductDataTypes);
+      }
       setIsOpen(false);
     } else {
       console.log('Nothing was returned from the server');
     }
   }, [state, reset]);
+
+  // create a useEffect hook that listens to the form errors and logs them to the console
+  useEffect(() => {
+    console.log('Form errors', errors);
+  }, [errors]);
 
   return (
     <>

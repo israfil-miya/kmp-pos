@@ -19,7 +19,7 @@ dbConnect();
 export type FormState = {
   error: boolean;
   message: string;
-  fields?: Record<string, string | number | string[] | boolean>;
+  fields?: Record<string, string | number | string[] | boolean | Date>;
   issues?: string[];
 };
 
@@ -387,7 +387,7 @@ export const editProduct = async (
       return {
         error: false,
         message: 'Product edited successfully',
-        fields: productData,
+        fields: productData.toObject(),
       };
     } else {
       return {

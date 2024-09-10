@@ -52,7 +52,7 @@ const EditButton: React.FC<PropsType> = props => {
     } else if (state?.message !== '') {
       toast.success(state.message);
       if (state.fields) {
-        reset(state.fields);
+        reset(state.fields as CategoryDataTypes);
       }
       setIsOpen(false);
     } else {

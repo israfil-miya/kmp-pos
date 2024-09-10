@@ -23,8 +23,8 @@ export const validationSchema = z
     exp_date: z.optional(z.string()).default(''),
     in_stock: z.optional(z.number()), // used for stock management (1 = in stock, 0 = out of stock)
     _id: z.optional(z.string()),
-    createdAt: z.optional(z.string()),
-    updatedAt: z.optional(z.string()),
+    createdAt: z.optional(z.union([z.date(), z.string()])),
+    updatedAt: z.optional(z.union([z.date(), z.string()])),
     __v: z.optional(z.number()),
   })
   .refine(data => data.selling_price >= data.cost_price, {

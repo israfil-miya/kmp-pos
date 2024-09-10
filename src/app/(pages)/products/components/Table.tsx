@@ -388,12 +388,7 @@ const Table: React.FC<TableDataProps> = props => {
             <option value={50}>50</option>
             <option value={100}>100</option>
           </select>
-          <FilterButton
-            isLoading={isLoading}
-            submitHandler={getAllProductsFiltered}
-            setFilters={setFilters}
-            filters={filters}
-          />
+          <FilterButton setFilters={setFilters} setIsFiltered={setIsFiltered} />
         </div>
         <CreateButton
           suppliersList={suppliers}

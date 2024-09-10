@@ -49,7 +49,9 @@ const CreateButton: React.FC = props => {
       }
     } else if (state?.message !== '') {
       toast.success(state.message);
-      reset();
+      if (state.fields) {
+        reset(state.fields as CategoryDataTypes);
+      }
       setIsOpen(false);
     } else {
       console.log('Nothing was returned from the server');

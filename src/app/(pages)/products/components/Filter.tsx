@@ -1,58 +1,66 @@
 'use client';
 
 import cn from '@/utility/cn';
-import React, { useRef, useState } from 'react';
+import generateUniqueCode from '@/utility/uCodeGenerator';
+import { zodResolver } from '@hookform/resolvers/zod';
+import 'flowbite';
+import { initFlowbite } from 'flowbite';
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import Select from 'react-select';
+import { toast } from 'sonner';
+import { useDebouncedCallback } from 'use-debounce';
+import { getAllProductsFiltered } from '../actions';
+import { ProductDataTypes, validationSchema } from '../schema';
 
 interface PropsType {
-  className?: string;
-  submitHandler: () => void;
-  filters: {
-    searchText: string;
-  };
-  setFilters: React.Dispatch<React.SetStateAction<any>>;
-  isLoading: boolean;
+  page: number;
+  itemPerPage: number;
+  setFilters: Dispatch<SetStateAction<{ searchText: string }>>;
+  setIsFiltered: Dispatch<SetStateAction<boolean>>;
 }
 
 const FilterButton: React.FC<PropsType> = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { filters, setFilters } = props;
   const popupRef = useRef<HTMLElement>(null);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ): void => {
-    const { name, value } = e.target;
-    setFilters((prevData: {}) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleResetFilters = () => {
-    setFilters({
-      searchText: '',
-    });
-  };
+  const formRef = useRef<HTMLFormElement>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
       popupRef.current &&
       !popupRef.current.contains(e.target as Node) &&
-      !popupRef.current.querySelector('input:focus, textarea:focus')
+      !popupRef.current.querySelector('input:focus, textarea:focus') &&
+      !popupRef.current.querySelector('button:focus')
     ) {
       setIsOpen(false);
     }
   };
 
+  const {
+    reset,
+    register,
+    formState: { errors },
+  } = useForm<{ searchText: string }>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      searchText: '',
+    },
+  });
+
   return (
     <>
       <button
+        disabled={loading}
         onClick={() => setIsOpen(true)}
         type="button"
-        className={cn(
-          `flex items-center gap-2 rounded-sm bg-blue-600 hover:opacity-90 hover:ring-4 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 text-white px-3 py-2`,
-          props.className,
-        )}
+        className="flex items-center gap-2 rounded-sm bg-blue-600 hover:opacity-90 hover:ring-4 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 text-white px-3 py-2"
       >
         Filter
         <svg

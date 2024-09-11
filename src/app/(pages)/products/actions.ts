@@ -129,26 +129,22 @@ export const createNewProduct = async (
 };
 
 export const getAllProductsFiltered = async (data: {
-  page: number;
   itemsPerPage: number;
   filters: {
     searchText: string;
   };
 }): Promise<FormState> => {
   try {
-    const page = data.page;
     const itemsPerPage = data.itemsPerPage;
     const { searchText } = data.filters;
 
-    const skip = (page - 1) * itemsPerPage;
-
     const query: Query = {};
 
-    addRegexField(query, 'name', searchText);
-    addRegexField(query, 'batch', searchText, true);
-    addRegexField(query, 'category', searchText);
-    addRegexField(query, 'supplier', searchText);
-    addRegexField(query, 'store', searchText);
+    addRegexField(query, 'name', searchText.trim());
+    addRegexField(query, 'batch', searchText.trim(), true);
+    addRegexField(query, 'category', searchText.trim());
+    addRegexField(query, 'supplier', searchText.trim());
+    addRegexField(query, 'store', searchText.trim());
 
     const searchQuery =
       Object.keys(query).length > 0
@@ -176,9 +172,7 @@ export const getAllProductsFiltered = async (data: {
         },
       },
       { $sort: sortQuery },
-      { $skip: skip },
       { $limit: itemsPerPage },
-      // { $project: { in_stock: 0 } }, // remove the in_stock field from the final output
     ]);
 
     const pageCount: number = Math.ceil(count / itemsPerPage);

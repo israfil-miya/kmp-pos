@@ -69,20 +69,6 @@ const EditButton: React.FC<PropsType> = props => {
     label: supplier.charAt(0).toUpperCase() + supplier.slice(1),
   }));
 
-  // // Debounced batch generation
-  // const debouncedGenerateBatch = useDebouncedCallback((value: string) => {
-  //   if (value) {
-  //     const generatedBatchCode = generateUniqueCode(value);
-  //     setValue('batch', generatedBatchCode);
-  //   } else {
-  //     setValue('batch', '');
-  //   }
-  // }, 1500);
-
-  // useEffect(() => {
-  //   debouncedGenerateBatch(nameValue);
-  // }, [nameValue, debouncedGenerateBatch]);
-
   useEffect(() => {
     initFlowbite();
   }, []);

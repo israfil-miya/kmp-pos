@@ -1,58 +1,85 @@
 'use client';
 
-import cn from '@/utility/cn';
-import generateUniqueCode from '@/utility/uCodeGenerator';
 import { zodResolver } from '@hookform/resolvers/zod';
-import 'flowbite';
-import { initFlowbite } from 'flowbite';
-import React, {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import Select from 'react-select';
+import React, { useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { useDebouncedCallback } from 'use-debounce';
-import { getAllProductsFiltered } from '../actions';
-import { ProductDataTypes, validationSchema } from '../schema';
+import { z } from 'zod';
+import { getAllProducts, getAllProductsFiltered } from '../actions';
+import { ProductsState } from './Table';
+
+const validationSchema = z.object({
+  searchText: z.string().min(1, { message: 'Search text is required' }),
+});
+
+type FilterTypes = z.infer<typeof validationSchema>;
 
 interface PropsType {
   page: number;
-  itemPerPage: number;
-  setFilters: Dispatch<SetStateAction<{ searchText: string }>>;
-  setIsFiltered: Dispatch<SetStateAction<boolean>>;
+  itemsPerPage: number;
+  setFilters: React.Dispatch<React.SetStateAction<FilterTypes>>;
+  setIsFiltered: React.Dispatch<React.SetStateAction<boolean>>;
+  setProducts: React.Dispatch<React.SetStateAction<ProductsState>>;
 }
 
-const FilterButton: React.FC<PropsType> = props => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+const FilterButton: React.FC<PropsType> = ({
+  page,
+  itemsPerPage,
+  setFilters,
+  setIsFiltered,
+  setProducts,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const popupRef = useRef<HTMLElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+
+  const {
+    register,
+    watch,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FilterTypes>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: { searchText: '' },
+  });
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
       popupRef.current &&
       !popupRef.current.contains(e.target as Node) &&
-      !popupRef.current.querySelector('input:focus, textarea:focus') &&
-      !popupRef.current.querySelector('button:focus')
+      !popupRef.current.querySelector('input:focus')
     ) {
       setIsOpen(false);
     }
   };
 
-  const {
-    reset,
-    register,
-    formState: { errors },
-  } = useForm<{ searchText: string }>({
-    resolver: zodResolver(validationSchema),
-    defaultValues: {
-      searchText: '',
-    },
-  });
+  const formSubmit = async (): Promise<void> => {
+    try {
+      setLoading(true);
+      const searchText = watch('searchText');
+      const response = searchText
+        ? await getAllProductsFiltered({
+            itemsPerPage,
+            filters: { searchText },
+          })
+        : await getAllProducts({ page, itemsPerPage });
+
+      if (response?.error) {
+        toast.error(response?.message || 'Error fetching products');
+      } else {
+        setProducts(JSON.parse(response.message));
+        setIsFiltered(!!searchText);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while retrieving products data');
+    } finally {
+      setLoading(false);
+      setFilters({ searchText: watch('searchText') });
+    }
+  };
 
   return (
     <>
@@ -106,37 +133,48 @@ const FilterButton: React.FC<PropsType> = props => {
               </svg>
             </button>
           </header>
-          <div className="overflow-y-scroll max-h-[70vh] p-4">
+          <form
+            action={formSubmit}
+            ref={formRef}
+            className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start"
+            onSubmit={handleSubmit(formSubmit)}
+          >
             <div className="w-full">
-              <label className="uppercase tracking-wide text-gray-700 text-sm font-bold flex gap-2 mb-2">
-                String Search
+              <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                <span className="uppercase">Search Text*</span>
+                <span className="text-red-700 text-wrap block text-xs">
+                  {errors.searchText && errors.searchText.message}
+                </span>
               </label>
 
               <input
                 placeholder="Search for any text"
-                name="searchText"
-                value={filters.searchText}
-                onChange={handleChange}
+                {...register('searchText')}
                 className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
               />
             </div>
-          </div>
+          </form>
           <footer className="flex space-x-2 items-center px-4 py-2 border-t justify-end border-gray-200 rounded-b">
             <button
-              onClick={handleResetFilters}
+              onClick={() => {
+                reset();
+                formSubmit();
+              }}
               className="rounded-sm bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
               type="button"
-              disabled={props.isLoading}
+              disabled={loading}
             >
               Reset
             </button>
             <button
-              onClick={props.submitHandler}
+              disabled={loading}
+              onClick={() => {
+                formRef.current?.requestSubmit();
+              }}
               className="rounded-sm bg-blue-600 text-white   hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
               type="button"
-              disabled={props.isLoading}
             >
-              Search
+              {loading ? 'Searching...' : 'Search'}
             </button>
           </footer>
         </article>

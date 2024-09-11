@@ -13,14 +13,13 @@ import {
   getAllProducts as getAllProductsAction,
   getAllProductsFiltered as getAllProductsFilteredAction,
 } from '../actions';
-import { handleResetState } from '../helpers';
 import { ProductDataTypes } from '../schema';
 import CreateButton from './Create';
 import DeleteButton from './Delete';
 import EditButton from './Edit';
 import FilterButton from './Filter';
 
-interface ProductsState {
+export interface ProductsState {
   pagination?: {
     count: number;
     pageCount: number;
@@ -55,7 +54,7 @@ const Table: React.FC<TableDataProps> = props => {
   const [isFiltered, setIsFiltered] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [pageCount, setPageCount] = useState<number>(0);
-  const [itemPerPage, setItemPerPage] = useState<number>(30);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(30);
 
   const prevPageCount = useRef<number>(0);
   const prevPage = useRef<number>(1);
@@ -64,83 +63,13 @@ const Table: React.FC<TableDataProps> = props => {
     searchText: '',
   });
 
-  const inputValidations = (productData: ProductDataTypes): boolean => {
-    if (
-      !productData.batch ||
-      !productData.name ||
-      !productData.category?.length ||
-      !productData.store?.length ||
-      !productData.supplier?.length ||
-      productData.quantity == undefined ||
-      productData.cost_price == undefined
-    ) {
-      console.log(
-        !productData.batch,
-        !productData.name,
-        productData.category?.length,
-        productData.store?.length,
-        productData.supplier?.length,
-        productData.quantity == undefined,
-        productData.cost_price == undefined,
-      );
-      toast.error('Please fill in all required fields');
-
-      return false;
-    }
-
-    if (productData.exp_date) {
-      if (moment(productData.exp_date).isBefore(moment())) {
-        toast.error('Expiry date cannot be in the past');
-
-        return false;
-      }
-      if (moment(productData.exp_date).isSame(moment())) {
-        toast.error('Expiry date cannot be today');
-
-        return false;
-      }
-      if (
-        productData.mft_date &&
-        moment(productData.exp_date) <= moment(productData.mft_date)
-      ) {
-        toast.error('Expiry date cannot be before manufacturing date');
-
-        return false;
-      }
-    }
-
-    if (productData.selling_price !== undefined) {
-      if (productData.selling_price < productData.cost_price) {
-        console.log(
-          productData.selling_price,
-          productData.cost_price,
-          productData.selling_price < productData.cost_price,
-          productData.selling_price > productData.cost_price,
-          typeof productData.selling_price == 'number',
-        );
-        toast.error('Selling price must be equal or greater than cost price');
-
-        return false;
-      }
-      if (productData.selling_price < 0) {
-        toast.error('Selling price cannot be negative');
-
-        return false;
-      }
-    } else {
-      productData.selling_price = productData.cost_price;
-    }
-
-    return true;
-  };
-
   const getAllProducts = async (): Promise<void> => {
     try {
       // setIsLoading(true);
 
       let response = await getAllProductsAction({
         page: page,
-        itemsPerPage: itemPerPage,
+        itemsPerPage: itemsPerPage,
       });
       if (response.error) {
         if (response?.message !== '') {
@@ -164,8 +93,7 @@ const Table: React.FC<TableDataProps> = props => {
       // setIsLoading(true);
 
       let response = await getAllProductsFilteredAction({
-        page: page,
-        itemsPerPage: itemPerPage,
+        itemsPerPage: itemsPerPage,
         filters: filters,
       });
       if (response.error) {
@@ -174,6 +102,7 @@ const Table: React.FC<TableDataProps> = props => {
         }
       } else if (response?.message !== '') {
         setProducts(JSON.parse(response.message));
+        setIsFiltered(true);
       } else {
         console.log('Nothing was returned from the server');
       }
@@ -184,48 +113,6 @@ const Table: React.FC<TableDataProps> = props => {
       setIsLoading(false);
     }
   };
-
-  // const editProduct = async (
-  //   productId: string | undefined,
-  //   productData: ProductDataTypes,
-  //   editedData: ProductDataTypes,
-  //   setEditedData: React.Dispatch<React.SetStateAction<ProductDataTypes>>,
-  // ): Promise<void> => {
-  //   try {
-  //     if (!inputValidations(editedData)) {
-  //       handleResetState(setEditedData);
-  //       return;
-  //     }
-
-  //     // setIsLoading(true);
-
-  //     let url: string =
-  //       process.env.NEXT_PUBLIC_BASE_URL + '/api/product?action=edit-product';
-  //     let options: {} = {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ productId, editedData }),
-  //     };
-
-  //     let response = await fetchData(url, options);
-
-  //     if (response.ok) {
-  //       toast.success('Product data edited successfully');
-  //       handleResetState(setEditedData);
-  //       if (!isFiltered) await getAllProducts();
-  //       else await getAllProductsFiltered();
-  //     } else {
-  //       toast.error(response.data);
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //     toast.error('An error occurred while submitting the form');
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
 
   useEffect(() => {
     if (props.storeNames.error) {
@@ -311,14 +198,14 @@ const Table: React.FC<TableDataProps> = props => {
   }, [products?.pagination?.pageCount]);
 
   useEffect(() => {
-    // Reset to first page when itemPerPage changes
+    // Reset to first page when itemsPerPage changes
     prevPageCount.current = 0;
     prevPage.current = 1;
     setPage(1);
 
     if (!isFiltered) getAllProducts();
     else getAllProductsFiltered();
-  }, [itemPerPage]);
+  }, [itemsPerPage]);
 
   return (
     <>
@@ -378,9 +265,8 @@ const Table: React.FC<TableDataProps> = props => {
           </div>
 
           <select
-            value={itemPerPage}
-            onChange={e => setItemPerPage(parseInt(e.target.value))}
-            // defaultValue={30}
+            value={itemsPerPage}
+            onChange={e => setItemsPerPage(parseInt(e.target.value))}
             required
             className="appearance-none bg-gray-200 text-gray-700 border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           >
@@ -388,7 +274,13 @@ const Table: React.FC<TableDataProps> = props => {
             <option value={50}>50</option>
             <option value={100}>100</option>
           </select>
-          <FilterButton setFilters={setFilters} setIsFiltered={setIsFiltered} />
+          <FilterButton
+            page={page}
+            itemsPerPage={itemsPerPage}
+            setFilters={setFilters}
+            setIsFiltered={setIsFiltered}
+            setProducts={setProducts}
+          />
         </div>
         <CreateButton
           suppliersList={suppliers}

@@ -61,6 +61,7 @@ const FilterButton: React.FC<PropsType> = ({
       const searchText = watch('searchText');
       const response = searchText
         ? await getAllProductsFiltered({
+            page: 1,
             itemsPerPage,
             filters: { searchText },
           })

@@ -21,23 +21,19 @@ const LoginForm = () => {
         password: data.password,
       });
 
-      if (result?.ok) {
-        toast.success('Logged in successfully');
-        router.replace('/');
-        return;
-      } else {
+      if (result?.error) {
         if (result?.error === 'CredentialsSignin') {
           toast.error('Invalid email or password');
-          return;
         } else {
           toast.error('An error occurred');
-          return;
         }
+      } else {
+        toast.success('Logged in successfully');
+        router.replace('/');
       }
     } catch (error) {
       console.error(error);
       toast.error('An error occurred while submitting the form');
-      return;
     }
   };
 

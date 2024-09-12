@@ -93,6 +93,7 @@ const Table: React.FC<TableDataProps> = props => {
       // setIsLoading(true);
 
       let response = await getAllProductsFilteredAction({
+        page: isFiltered ? page : 1,
         itemsPerPage: itemsPerPage,
         filters: filters,
       });

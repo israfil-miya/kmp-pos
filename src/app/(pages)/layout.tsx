@@ -3,7 +3,7 @@ import { auth } from '@/auth';
 import PageOutline from '@/components/Layout/PageOutline';
 import { SessionProvider } from 'next-auth/react';
 
-export default async function DashboardLayout({
+export default async function PageLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

@@ -12,7 +12,7 @@
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
     "clsx": "^2.1.1",
-    "flowbite": "^2.5.1",
+    "flowbite": "2.3.0",
     "flowbite-react": "^0.10.1",
     "moment-timezone": "^0.5.45",
     "mongoose": "^8.5.5",

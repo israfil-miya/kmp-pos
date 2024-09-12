@@ -3,8 +3,8 @@ import { z } from 'zod';
 export const validationSchema = z.object({
   name: z.string().trim().min(1, 'Name is required'),
   _id: z.optional(z.string()),
-  createdAt: z.optional(z.date()),
-  updatedAt: z.optional(z.date()),
+  createdAt: z.optional(z.union([z.date(), z.string()])),
+  updatedAt: z.optional(z.union([z.date(), z.string()])),
   __v: z.optional(z.number()),
 });
 

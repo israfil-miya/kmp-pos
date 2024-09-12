@@ -129,12 +129,14 @@ export const createNewProduct = async (
 };
 
 export const getAllProductsFiltered = async (data: {
+  page: number;
   itemsPerPage: number;
   filters: {
     searchText: string;
   };
 }): Promise<FormState> => {
   try {
+    const page = data.page;
     const itemsPerPage = data.itemsPerPage;
     const { searchText } = data.filters;
 
@@ -157,6 +159,8 @@ export const getAllProductsFiltered = async (data: {
 
     const count: number = await Product.countDocuments(searchQuery);
 
+    const skip = (page - 1) * itemsPerPage;
+
     let sortQuery: Record<string, 1 | -1> = {
       in_stock: -1,
       createdAt: -1,
@@ -172,6 +176,7 @@ export const getAllProductsFiltered = async (data: {
         },
       },
       { $sort: sortQuery },
+      { $skip: skip },
       { $limit: itemsPerPage },
     ]);
 

@@ -1,6 +1,5 @@
 'use client';
 
-import cn from '@/utility/cn';
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -136,10 +135,7 @@ const CreateButton: React.FC = props => {
                 </span>
               </label>
               <input
-                className={cn(
-                  'appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500',
-                  errors.name && 'border-red-500',
-                )}
+                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                 {...register('name')}
                 type="text"
               />

@@ -19,7 +19,7 @@ dbConnect();
 export type FormState = {
   error: boolean;
   message: string;
-  fields?: Record<string, string | number | string[] | boolean | Date>;
+  fields?: Record<any, any>;
   issues?: string[];
 };
 

@@ -13,7 +13,7 @@ dbConnect();
 export type FormState = {
   error: boolean;
   message: string;
-  fields?: Record<string, string | number | Date>;
+  fields?: Record<any, any>;
   issues?: string[];
 };
 

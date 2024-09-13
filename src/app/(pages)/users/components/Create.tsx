@@ -1,7 +1,14 @@
+'use client';
+
+import cn from '@/utility/cn';
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
-import { useSession } from 'next-auth/react';
-import React, { useEffect, useRef, useState } from 'react';
-import { UserDataTypes, handleResetState } from '../helpers';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import React, { useActionState, useEffect, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { createNewUser } from '../actions';
+import { UserDataTypes, validationSchema } from '../schema';
 
 interface PropsType {
   isLoading: boolean;
@@ -14,25 +21,12 @@ interface PropsType {
 
 const CreateButton: React.FC<PropsType> = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { data: session } = useSession();
   const popupRef = useRef<HTMLElement>(null);
-  const [userData, setUserData] = useState<UserDataTypes>({});
-
-  useEffect(() => {
-    if (!isOpen) {
-      handleResetState(setUserData);
-    }
-  }, [isOpen]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ): void => {
-    const { name, value } = e.target;
-    setUserData(prevData => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, formAction, loading] = useActionState(createNewUser, {
+    error: false,
+    message: '',
+  });
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -44,10 +38,39 @@ const CreateButton: React.FC<PropsType> = props => {
     }
   };
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<UserDataTypes>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      full_name: '',
+      ...(state?.fields ?? {}),
+    },
+  });
+
+  useEffect(() => {
+    if (state.error) {
+      if (state?.message !== '') {
+        toast.error(state.message);
+      }
+    } else if (state?.message !== '') {
+      toast.success(state.message);
+      if (state.fields) {
+        reset(state.fields as UserDataTypes);
+      }
+      setIsOpen(false);
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [state, reset]);
+
   return (
     <>
       <button
-        disabled={props.isLoading}
+        disabled={loading}
         onClick={() => {
           setIsOpen(true);
         }}
@@ -100,20 +123,31 @@ const CreateButton: React.FC<PropsType> = props => {
             </button>
           </header>
 
-          <div className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start">
+          <form
+            action={formAction}
+            ref={formRef}
+            onSubmit={e => {
+              e.preventDefault();
+              handleSubmit(() => {
+                formAction(new FormData(formRef.current!));
+              })(e);
+            }}
+            className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4">
               <div>
                 <label
-                  className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
+                  className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
                   htmlFor="grid-password"
                 >
-                  Full Name*
+                  <span className="uppercase">Full Name*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.full_name && errors.full_name.message}
+                  </span>
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="full_name"
-                  value={userData.full_name}
-                  onChange={handleChange}
+                  {...register('full_name')}
                   type="text"
                   required
                 />
@@ -121,16 +155,17 @@ const CreateButton: React.FC<PropsType> = props => {
 
               <div>
                 <label
-                  className="uppercase tracking-wide text-gray-700 text-sm font-bold flex gap-2 mb-2"
+                  className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
                   htmlFor="grid-password"
                 >
-                  Email*
+                  <span className="uppercase">Email*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.email && errors.email.message}
+                  </span>
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="email"
-                  value={userData.email}
-                  onChange={handleChange}
+                  {...register('email')}
                   type="email"
                   required
                 />
@@ -138,16 +173,17 @@ const CreateButton: React.FC<PropsType> = props => {
 
               <div>
                 <label
-                  className="uppercase tracking-wide text-gray-700 text-sm font-bold flex gap-2 mb-2"
+                  className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
                   htmlFor="grid-password"
                 >
-                  Password*
+                  <span className="uppercase">Password*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.password && errors.password.message}
+                  </span>
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="password"
-                  value={userData.password}
-                  onChange={handleChange}
+                  {...register('password')}
                   type="text"
                   required
                 />
@@ -162,31 +198,22 @@ const CreateButton: React.FC<PropsType> = props => {
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="phone"
-                  value={userData.phone}
-                  onChange={handleChange}
+                  {...register('phone')}
                   type="text"
                 />
               </div>
 
               <div>
                 <label
-                  className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
-                  htmlFor="grid-last-name"
+                  className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
+                  htmlFor="grid-password"
                 >
-                  Role*
+                  <span className="uppercase">Role*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.role && errors.role.message}
+                  </span>
                 </label>
-                <select
-                  value={userData.role}
-                  onChange={e =>
-                    setUserData(prevData => ({
-                      ...prevData,
-                      role: e.target.value,
-                    }))
-                  }
-                  required
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                >
+                <select className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
                   <option value={''} className="text-gray-400">
                     Select user role
                   </option>
@@ -203,17 +230,7 @@ const CreateButton: React.FC<PropsType> = props => {
                 >
                   Store
                 </label>
-                <select
-                  value={userData.store}
-                  onChange={e =>
-                    setUserData(prevData => ({
-                      ...prevData,
-                      store: e.target.value,
-                    }))
-                  }
-                  required
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                >
+                <select className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
                   <option value={''} className="text-gray-400">
                     Select store
                   </option>
@@ -241,13 +258,11 @@ const CreateButton: React.FC<PropsType> = props => {
                 <textarea
                   rows={5}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="note"
-                  value={userData.note}
-                  onChange={handleChange}
+                  {...register('note')}
                 />
               </div>
             </div>
-          </div>
+          </form>
 
           <footer className="flex items-center px-4 py-2 border-t justify-end gap-6 border-gray-200 rounded-b">
             <div className="buttons space-x-2 ">
@@ -255,18 +270,19 @@ const CreateButton: React.FC<PropsType> = props => {
                 onClick={() => setIsOpen(false)}
                 className="rounded-sm bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
+                disabled={loading}
               >
                 Close
               </button>
               <button
+                disabled={loading}
                 onClick={() => {
-                  props.submitHandler(userData, setUserData);
-                  setIsOpen(false);
+                  formRef.current?.requestSubmit();
                 }}
                 className="rounded-sm bg-blue-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
               >
-                Submit
+                {loading ? 'Submitting...' : 'Submit'}
               </button>
             </div>
           </footer>

@@ -1,6 +1,5 @@
 'use client';
 
-import cn from '@/utility/cn';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useActionState, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -142,10 +141,7 @@ const EditButton: React.FC<PropsType> = props => {
                 </span>
               </label>
               <input
-                className={cn(
-                  'appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500',
-                  errors.name && 'border-red-500',
-                )}
+                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                 {...register('name')}
                 type="text"
               />

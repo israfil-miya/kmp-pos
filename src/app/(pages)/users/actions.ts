@@ -1,5 +1,6 @@
 'use server';
-import Category from '@/models/Categories';
+import Store from '@/models/Stores';
+import User from '@/models/Users';
 import {
   extractDbErrorMessages,
   mapFormDataToFields,
@@ -13,11 +14,11 @@ dbConnect();
 export type FormState = {
   error: boolean;
   message: string;
-  fields?: Record<string, string | number | Date>;
+  fields?: Record<any, any>;
   issues?: string[];
 };
 
-export const createNewCategory = async (
+export const createNewUser = async (
   prevState: FormState,
   data: FormData,
 ): Promise<FormState> => {
@@ -36,9 +37,9 @@ export const createNewCategory = async (
       };
     }
 
-    const categoryData = await Category.findOneAndUpdate(
+    const userData = await User.findOneAndUpdate(
       {
-        name: parsed.data.name,
+        full_name: parsed.data.full_name,
       },
       parsed.data,
       {
@@ -48,16 +49,16 @@ export const createNewCategory = async (
       },
     );
 
-    if (categoryData) {
-      revalidatePath('/categories');
+    if (userData) {
+      revalidatePath('/users');
       return {
         error: false,
-        message: 'New category added successfully',
+        message: 'New user added successfully',
       };
     } else {
       return {
         error: true,
-        message: 'Failed to add the new category',
+        message: 'Failed to add the new user',
         fields: parsed.data,
       };
     }
@@ -82,68 +83,68 @@ export const createNewCategory = async (
   }
 };
 
-export const getAllCategories = async (): Promise<FormState> => {
+export const getAllUsers = async (): Promise<FormState> => {
   try {
-    const categoryData = await Category.find({});
+    const userData = await User.find({});
 
-    if (categoryData) {
+    if (userData) {
       return {
         error: false,
-        message: JSON.stringify(categoryData),
+        message: JSON.stringify(userData),
       };
     } else {
       return {
         error: true,
-        message: "Couldn't retrieve categories data",
+        message: "Couldn't retrieve users data",
       };
     }
   } catch (error: any) {
     return {
       error: true,
-      message: 'An error occurred while retrieving categories data',
+      message: 'An error occurred while retrieving users data',
     };
   }
 };
 
-export const deleteCategory = async (
+export const deleteUser = async (
   prevState: FormState,
   data: FormData,
 ): Promise<FormState> => {
   try {
-    const categoryId = data.get('_id');
+    const userId = data.get('_id');
 
-    if (!categoryId) {
+    if (!userId) {
       return {
         error: true,
-        message: 'Category ID is required',
+        message: 'User ID is required',
       };
     }
 
-    const categoryData = await Category.findOneAndDelete({
-      _id: categoryId,
+    const userData = await User.findOneAndDelete({
+      _id: userId,
     });
 
-    if (categoryData) {
-      revalidatePath('/categories');
+    if (userData) {
+      revalidatePath('/users');
       return {
         error: false,
-        message: 'Category deleted successfully',
+        message: 'User deleted successfully',
       };
     } else {
       return {
         error: true,
-        message: 'Unable to delete the category',
+        message: 'Unable to delete the user',
       };
     }
   } catch (error: any) {
     return {
       error: true,
-      message: 'An error occurred while deleting the category',
+      message: 'An error occurred while deleting the user',
     };
   }
 };
 
-export const editCategory = async (
+export const editUser = async (
   prevState: FormState,
   data: FormData,
 ): Promise<FormState> => {
@@ -162,35 +163,31 @@ export const editCategory = async (
       };
     }
 
-    let categoryId = parsed.data._id;
+    let userId = parsed.data._id;
     delete parsed.data._id;
 
-    if (!categoryId) {
+    if (!userId) {
       return {
         error: true,
-        message: 'Category ID is missing',
+        message: 'User ID is missing',
       };
     }
 
-    const categoryData = await Category.findByIdAndUpdate(
-      categoryId,
-      parsed.data,
-      {
-        new: true,
-      },
-    );
+    const userData = await User.findByIdAndUpdate(userId, parsed.data, {
+      new: true,
+    });
 
-    if (categoryData) {
-      revalidatePath('/categories');
+    if (userData) {
+      revalidatePath('/users');
       return {
         error: false,
-        message: 'Category edited successfully',
-        fields: categoryData.toObject(),
+        message: 'User edited successfully',
+        fields: userData.toObject(),
       };
     } else {
       return {
         error: true,
-        message: 'Failed to edit the category',
+        message: 'Failed to edit the user',
         fields: parsed.data,
       };
     }
@@ -211,6 +208,31 @@ export const editCategory = async (
       error: true,
       message: 'An error occurred while submitting the form',
       fields: parsed?.data,
+    };
+  }
+};
+
+export const getAllStoreNames = async (): Promise<FormState> => {
+  try {
+    const stores = await Store.find({}, { name: 1, _id: 0 }).lean();
+
+    const storeNames = stores.map(store => store.name);
+
+    if (stores && storeNames.length) {
+      return {
+        error: false,
+        message: JSON.stringify(storeNames),
+      };
+    } else {
+      return {
+        error: true,
+        message: "Couldn't retrieve store names",
+      };
+    }
+  } catch (error: any) {
+    return {
+      error: true,
+      message: 'An error occurred while retrieving store names',
     };
   }
 };

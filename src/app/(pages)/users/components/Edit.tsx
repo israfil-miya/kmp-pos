@@ -1,44 +1,29 @@
+'use client';
+
+import cn from '@/utility/cn';
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
-import { useSession } from 'next-auth/react';
-import React, { useEffect, useRef, useState } from 'react';
-import { UserDataTypes, handleResetState } from '../helpers';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import React, { useActionState, useEffect, useRef, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import Select from 'react-select';
+import { toast } from 'sonner';
+import { editUser } from '../actions';
+import { UserDataTypes, validationSchema } from '../schema';
 
 interface PropsType {
+  storeNames: string[];
   userData: UserDataTypes;
-  isLoading: boolean;
-  storesName: string[];
-  submitHandler: (
-    userId: string | undefined,
-    userData: UserDataTypes,
-    editedData: UserDataTypes,
-    setEditedData: React.Dispatch<React.SetStateAction<UserDataTypes>>,
-  ) => Promise<void>;
 }
 
 const EditButton: React.FC<PropsType> = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { data: session } = useSession();
   const popupRef = useRef<HTMLElement>(null);
-
-  const [editedData, setEditedData] = useState<UserDataTypes>({});
-
-  useEffect(() => {
-    if (!isOpen) {
-      handleResetState(setEditedData);
-    } else {
-      setEditedData(props.userData);
-    }
-  }, [isOpen]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ): void => {
-    const { name, value } = e.target;
-    setEditedData(prevData => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, formAction, loading] = useActionState(editUser, {
+    error: false,
+    message: '',
+  });
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -50,10 +35,51 @@ const EditButton: React.FC<PropsType> = props => {
     }
   };
 
+  const storeOptions = props.storeNames.map(store => ({
+    value: store,
+    label: store.charAt(0).toUpperCase() + store.slice(1),
+  }));
+
+  const roleOptions = [
+    { value: 'administrator', label: 'Administrator' },
+    { value: 'cashier', label: 'Cashier' },
+    { value: 'manager', label: 'Manager' },
+  ];
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm<UserDataTypes>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      ...props.userData,
+      ...(state?.fields ?? {}),
+    },
+  });
+
+  useEffect(() => {
+    if (state.error) {
+      if (state?.message !== '') {
+        toast.error(state.message);
+      }
+    } else if (state?.message !== '') {
+      toast.success(state.message);
+      if (state.fields) {
+        reset(state.fields as UserDataTypes);
+      }
+      setIsOpen(false);
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [state, reset]);
+
   return (
     <>
       <button
-        disabled={props.isLoading}
+        disabled={loading}
         onClick={() => {
           setIsOpen(true);
         }}
@@ -84,7 +110,7 @@ const EditButton: React.FC<PropsType> = props => {
           className={`${isOpen ? 'scale-100 opacity-100' : 'scale-125 opacity-0'} bg-white rounded-sm shadow relative md:w-[60vw] lg:w-[40vw]  text-wrap`}
         >
           <header className="flex items-center align-middle justify-between px-4 py-2 border-b rounded-t">
-            <h3 className="text-gray-900 text-lg lg:text-xl font-semibold dark:text-white uppercase">
+            <h3 className="text-gray-900 text-lg lg:text-xl font-semibold uppercase">
               Edit User
             </h3>
             <button
@@ -107,52 +133,68 @@ const EditButton: React.FC<PropsType> = props => {
               </svg>
             </button>
           </header>
-          <div className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start">
+
+          <form
+            action={formAction}
+            ref={formRef}
+            className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start"
+            onSubmit={e => {
+              e.preventDefault();
+              handleSubmit(() => {
+                const formData = new FormData(formRef.current!);
+                formData.append('_id', props.userData._id!);
+                formAction(formData);
+              })(e);
+            }}
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4">
               <div>
                 <label
-                  className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
+                  className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
                   htmlFor="grid-password"
                 >
-                  Full Name
+                  <span className="uppercase">Full Name*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.full_name && errors.full_name.message}
+                  </span>
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="full_name"
-                  value={editedData.full_name}
-                  onChange={handleChange}
+                  {...register('full_name')}
                   type="text"
                 />
               </div>
 
               <div>
                 <label
-                  className="uppercase tracking-wide text-gray-700 text-sm font-bold flex gap-2 mb-2"
+                  className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
                   htmlFor="grid-password"
                 >
-                  Email
+                  <span className="uppercase">Email*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.email && errors.email.message}
+                  </span>
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="email"
-                  value={editedData.email}
-                  onChange={handleChange}
+                  {...register('email')}
                   type="email"
                 />
               </div>
 
               <div>
                 <label
-                  className="uppercase tracking-wide text-gray-700 text-sm font-bold flex gap-2 mb-2"
+                  className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
                   htmlFor="grid-password"
                 >
-                  Password
+                  <span className="uppercase">Password*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.password && errors.password.message}
+                  </span>
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="password"
-                  value={editedData.password}
-                  onChange={handleChange}
+                  {...register('password')}
                   type="text"
                 />
               </div>
@@ -166,73 +208,67 @@ const EditButton: React.FC<PropsType> = props => {
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="phone"
-                  value={editedData.phone}
-                  onChange={handleChange}
+                  {...register('phone')}
                   type="text"
                 />
               </div>
 
               <div>
                 <label
-                  className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
-                  htmlFor="grid-last-name"
+                  className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
+                  htmlFor="grid-password"
                 >
-                  Role
+                  <span className="uppercase">Role*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.role && errors.role.message}
+                  </span>
                 </label>
-                <select
-                  value={editedData.role}
-                  onChange={e =>
-                    setEditedData((prevData: UserDataTypes) => ({
-                      ...prevData,
-                      role: e.target.value,
-                    }))
-                  }
-                  required
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                >
-                  <option value={''} className="text-gray-400">
-                    Select user role
-                  </option>
-                  <option value="administrator">Administrator</option>
-                  <option value="cashier">Cashier</option>
-                  <option value="manager">Manager</option>
-                </select>
+                <Controller
+                  name="role"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      isClearable={true}
+                      options={roleOptions}
+                      placeholder="Select user role"
+                      classNamePrefix="react-select"
+                      value={roleOptions.find(
+                        option => option.value === field.value,
+                      )}
+                      onChange={option => field.onChange(option?.value)}
+                    />
+                  )}
+                />
               </div>
 
               <div>
                 <label
-                  className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
-                  htmlFor="grid-last-name"
+                  className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
+                  htmlFor="grid-password"
                 >
-                  Store
+                  <span className="uppercase">Store*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.store && errors.store.message}
+                  </span>
                 </label>
-                <select
-                  value={editedData.store}
-                  onChange={e =>
-                    setEditedData((prevData: UserDataTypes) => ({
-                      ...prevData,
-                      store: e.target.value,
-                    }))
-                  }
-                  required
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                >
-                  <option value={''} className="text-gray-400">
-                    Select store
-                  </option>
-                  {props.storesName.map((storeName: string) => {
-                    return (
-                      <option
-                        key={storeName}
-                        className="capitalize"
-                        value={storeName}
-                      >
-                        {storeName}
-                      </option>
-                    );
-                  })}
-                </select>
+                <Controller
+                  name="store"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={storeOptions}
+                      isClearable={true}
+                      placeholder="Select store"
+                      classNamePrefix="react-select"
+                      value={storeOptions.find(
+                        option => option.value === field.value,
+                      )}
+                      onChange={option => field.onChange(option?.value)}
+                    />
+                  )}
+                />
               </div>
 
               <div>
@@ -245,13 +281,11 @@ const EditButton: React.FC<PropsType> = props => {
                 <textarea
                   rows={5}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="note"
-                  value={editedData.note}
-                  onChange={handleChange}
+                  {...register('note')}
                 />
               </div>
             </div>
-          </div>
+          </form>
 
           <footer className="flex items-center px-4 py-2 border-t justify-end gap-6 border-gray-200 rounded-b">
             <div className="buttons space-x-2 ">
@@ -259,23 +293,19 @@ const EditButton: React.FC<PropsType> = props => {
                 onClick={() => setIsOpen(false)}
                 className="rounded-sm bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
+                disabled={loading}
               >
                 Close
               </button>
               <button
+                disabled={loading}
                 onClick={() => {
-                  props.submitHandler(
-                    props.userData?._id,
-                    props.userData,
-                    editedData,
-                    setEditedData,
-                  );
-                  setIsOpen(false);
+                  formRef.current?.requestSubmit();
                 }}
                 className="rounded-sm bg-blue-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
               >
-                Submit
+                {loading ? 'Submitting...' : 'Submit'}
               </button>
             </div>
           </footer>

@@ -18,6 +18,7 @@ interface TableDataProps {
 }
 
 let Table: React.FC<TableDataProps> = props => {
+  const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<UserDataTypes[]>([]);
   const [storeNames, setStoreNames] = useState<string[]>([]);
   const { data: session } = useSession();
@@ -120,7 +121,7 @@ let Table: React.FC<TableDataProps> = props => {
         {`
           th,
           td {
-            padding: 2.5px 10px;
+            padding: 5px 10px;
           }
         `}
       </style>

@@ -425,7 +425,7 @@ const Table: React.FC<TableDataProps> = props => {
         {`
           th,
           td {
-            padding: 2.5px 10px;
+            padding: 5px 10px;
           }
         `}
       </style>

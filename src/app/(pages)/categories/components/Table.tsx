@@ -13,7 +13,6 @@ import DeleteButton from './Delete';
 import EditButton from './Edit';
 
 let Table: React.FC<{ data: FormState }> = ({ data }) => {
-  const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState<CategoryDataTypes[]>([]);
   const { data: session } = useSession();
 
@@ -36,70 +35,66 @@ let Table: React.FC<{ data: FormState }> = ({ data }) => {
         <CreateButton />
       </div>
 
-      {isLoading && <p className="text-center">Loading...</p>}
-
-      {!isLoading && (
-        <div className="table-responsive text-nowrap text-sm">
-          <table className="table table-bordered table-striped">
-            <thead>
-              <tr>
-                <th className="font-bold">S/N</th>
-                <th className="font-bold">Category Name</th>
-                <th className="font-bold">Creation Date</th>
-                {session?.user?.role === 'administrator' && (
-                  <th className="font-bold">Action</th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {categories.length !== 0 ? (
-                categories.map((item: CategoryDataTypes, index: number) => (
-                  <tr key={item._id}>
-                    <td>{index + 1}</td>
-                    <td className="capitalize">{item.name}</td>
-                    <td>
-                      {item.createdAt
-                        ? moment(
-                            convertToDDMMYYYY(item?.createdAt),
-                            'DD-MM-YYYY',
-                          ).format('Do MMMM, YYYY')
-                        : null}
-                    </td>
-                    {session?.user?.role === 'administrator' && (
-                      <td
-                        className="text-center"
-                        style={{ verticalAlign: 'middle' }}
-                      >
-                        <div className="inline-block">
-                          <div className="flex gap-2">
-                            <EditButton categoryData={item} />
-                            <DeleteButton categoryData={item} />
-                          </div>
-                        </div>
-                      </td>
-                    )}
-                  </tr>
-                ))
-              ) : (
-                <tr key={0}>
-                  <td
-                    colSpan={session?.user?.role === 'administrator' ? 4 : 3}
-                    className="align-center text-center"
-                  >
-                    No Category To Show.
-                  </td>
-                </tr>
+      <div className="table-responsive text-nowrap text-sm">
+        <table className="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th className="font-bold">S/N</th>
+              <th className="font-bold">Category Name</th>
+              <th className="font-bold">Creation Date</th>
+              {session?.user?.role === 'administrator' && (
+                <th className="font-bold">Action</th>
               )}
-            </tbody>
-          </table>
-        </div>
-      )}
+            </tr>
+          </thead>
+          <tbody>
+            {categories.length !== 0 ? (
+              categories.map((item: CategoryDataTypes, index: number) => (
+                <tr key={item._id}>
+                  <td>{index + 1}</td>
+                  <td className="capitalize">{item.name}</td>
+                  <td>
+                    {item.createdAt
+                      ? moment(
+                          convertToDDMMYYYY(item?.createdAt),
+                          'DD-MM-YYYY',
+                        ).format('Do MMMM, YYYY')
+                      : null}
+                  </td>
+                  {session?.user?.role === 'administrator' && (
+                    <td
+                      className="text-center"
+                      style={{ verticalAlign: 'middle' }}
+                    >
+                      <div className="inline-block">
+                        <div className="flex gap-2">
+                          <EditButton categoryData={item} />
+                          <DeleteButton categoryData={item} />
+                        </div>
+                      </div>
+                    </td>
+                  )}
+                </tr>
+              ))
+            ) : (
+              <tr key={0}>
+                <td
+                  colSpan={session?.user?.role === 'administrator' ? 4 : 3}
+                  className="align-center text-center"
+                >
+                  No Category To Show.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       <style jsx>
         {`
           th,
           td {
-            padding: 2.5px 10px;
+            padding: 5px 10px;
           }
         `}
       </style>

@@ -27,6 +27,8 @@ export const createNewUser = async (
     const formData = Object.fromEntries(data);
     parsed = schema.safeParse(formData);
 
+    console.log(parsed.data);
+
     if (!parsed.success) {
       const fields = mapFormDataToFields(formData);
       return {
@@ -39,7 +41,7 @@ export const createNewUser = async (
 
     const userData = await User.findOneAndUpdate(
       {
-        full_name: parsed.data.full_name,
+        email: parsed.data.email,
       },
       parsed.data,
       {
@@ -65,6 +67,7 @@ export const createNewUser = async (
   } catch (error: any) {
     // MongoDB validation errors
     if (error instanceof mongoose.Error.ValidationError) {
+      console.log('ERROR: ', error);
       const validationIssues = extractDbErrorMessages(error);
       return {
         error: true,

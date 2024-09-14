@@ -2,21 +2,20 @@
 
 import cn from '@/utility/cn';
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
+import customSelectStyles from '@/utility/reactSelectStyle';
 import { zodResolver } from '@hookform/resolvers/zod';
+import 'flowbite';
+import { initFlowbite } from 'flowbite';
 import { useRouter } from 'next/navigation';
 import React, { useActionState, useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+import Select from 'react-select';
 import { toast } from 'sonner';
 import { createNewUser } from '../actions';
 import { UserDataTypes, validationSchema } from '../schema';
 
 interface PropsType {
-  isLoading: boolean;
-  storesName: string[];
-  submitHandler: (
-    userData: UserDataTypes,
-    setUserData: React.Dispatch<React.SetStateAction<UserDataTypes>>,
-  ) => Promise<void>;
+  storeNames: string[];
 }
 
 const CreateButton: React.FC<PropsType> = props => {
@@ -27,6 +26,11 @@ const CreateButton: React.FC<PropsType> = props => {
     error: false,
     message: '',
   });
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -38,15 +42,33 @@ const CreateButton: React.FC<PropsType> = props => {
     }
   };
 
+  const storeOptions = props.storeNames.map(store => ({
+    value: store,
+    label: store.charAt(0).toUpperCase() + store.slice(1),
+  }));
+
+  const roleOptions = [
+    { value: 'administrator', label: 'Administrator' },
+    { value: 'cashier', label: 'Cashier' },
+    { value: 'manager', label: 'Manager' },
+  ];
+
   const {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<UserDataTypes>({
     resolver: zodResolver(validationSchema),
     defaultValues: {
       full_name: '',
+      email: '',
+      role: '',
+      store: '',
+      phone: '',
+      note: '',
+      password: '',
       ...(state?.fields ?? {}),
     },
   });
@@ -66,6 +88,10 @@ const CreateButton: React.FC<PropsType> = props => {
       console.log('Nothing was returned from the server');
     }
   }, [state, reset]);
+
+  useEffect(() => {
+    initFlowbite();
+  }, []);
 
   return (
     <>
@@ -126,33 +152,15 @@ const CreateButton: React.FC<PropsType> = props => {
           <form
             action={formAction}
             ref={formRef}
+            className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start"
             onSubmit={e => {
               e.preventDefault();
               handleSubmit(() => {
                 formAction(new FormData(formRef.current!));
               })(e);
             }}
-            className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4">
-              <div>
-                <label
-                  className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
-                  htmlFor="grid-password"
-                >
-                  <span className="uppercase">Full Name*</span>
-                  <span className="text-red-700 text-wrap block text-xs">
-                    {errors.full_name && errors.full_name.message}
-                  </span>
-                </label>
-                <input
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  {...register('full_name')}
-                  type="text"
-                  required
-                />
-              </div>
-
               <div>
                 <label
                   className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
@@ -167,7 +175,6 @@ const CreateButton: React.FC<PropsType> = props => {
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   {...register('email')}
                   type="email"
-                  required
                 />
               </div>
 
@@ -185,7 +192,23 @@ const CreateButton: React.FC<PropsType> = props => {
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   {...register('password')}
                   type="text"
-                  required
+                />
+              </div>
+
+              <div>
+                <label
+                  className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
+                  htmlFor="grid-password"
+                >
+                  <span className="uppercase">Full Name*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.full_name && errors.full_name.message}
+                  </span>
+                </label>
+                <input
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  {...register('full_name')}
+                  type="text"
                 />
               </div>
 
@@ -206,46 +229,70 @@ const CreateButton: React.FC<PropsType> = props => {
               <div>
                 <label
                   className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
-                  htmlFor="grid-password"
+                  htmlFor="role"
                 >
                   <span className="uppercase">Role*</span>
                   <span className="text-red-700 text-wrap block text-xs">
                     {errors.role && errors.role.message}
                   </span>
                 </label>
-                <select className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
-                  <option value={''} className="text-gray-400">
-                    Select user role
-                  </option>
-                  <option value="administrator">Administrator</option>
-                  <option value="cashier">Cashier</option>
-                  <option value="manager">Manager</option>
-                </select>
+                <Controller
+                  name="role"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      options={roleOptions}
+                      isClearable={true}
+                      placeholder="Select role"
+                      classNamePrefix="react-select"
+                      menuPortalTarget={
+                        typeof window !== 'undefined'
+                          ? document.body
+                          : undefined
+                      }
+                      styles={customSelectStyles}
+                      value={roleOptions.find(
+                        option => option.value === field.value,
+                      )}
+                      onChange={option => field.onChange(option?.value)}
+                    />
+                  )}
+                />
               </div>
 
               <div>
                 <label
-                  className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
-                  htmlFor="grid-last-name"
+                  className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
+                  htmlFor="store"
                 >
-                  Store
+                  <span className="uppercase">Store*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.store && errors.store.message}
+                  </span>
                 </label>
-                <select className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
-                  <option value={''} className="text-gray-400">
-                    Select store
-                  </option>
-                  {props.storesName.map((storeName: string) => {
-                    return (
-                      <option
-                        key={storeName}
-                        className="capitalize"
-                        value={storeName}
-                      >
-                        {storeName}
-                      </option>
-                    );
-                  })}
-                </select>
+                <Controller
+                  name="store"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      options={storeOptions}
+                      isClearable={true}
+                      closeMenuOnSelect={false}
+                      placeholder="Select store"
+                      classNamePrefix="react-select"
+                      menuPortalTarget={
+                        typeof window !== 'undefined'
+                          ? document.body
+                          : undefined
+                      }
+                      styles={customSelectStyles}
+                      value={roleOptions.find(
+                        option => option.value === field.value,
+                      )}
+                      onChange={option => field.onChange(option?.value)}
+                    />
+                  )}
+                />
               </div>
 
               <div>

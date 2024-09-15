@@ -1,7 +1,5 @@
 'use server';
-import Category from '@/models/Categories';
-import Product from '@/models/Products';
-import Store from '@/models/Stores';
+
 import Supplier from '@/models/Suppliers';
 import {
   extractDbErrorMessages,
@@ -23,51 +21,51 @@ export type FormState = {
   issues?: string[];
 };
 
-export const deleteProduct = async (
+export const deleteSupplier = async (
   prevState: FormState,
   data: FormData,
 ): Promise<FormState> => {
   try {
-    const productId = data.get('_id');
+    const supplierId = data.get('_id');
 
-    if (!productId) {
+    if (!supplierId) {
       return {
         error: true,
-        message: 'Product ID is required',
+        message: 'Supplier ID is required',
       };
     }
 
-    const productData = await Product.findOneAndDelete({
-      _id: productId,
+    const supplierData = await Supplier.findOneAndDelete({
+      _id: supplierId,
     });
 
-    if (productData) {
-      revalidatePath('/products');
+    if (supplierData) {
+      revalidatePath('/suppliers');
       return {
         error: false,
-        message: 'Product deleted successfully',
+        message: 'Supplier deleted successfully',
       };
     } else {
       return {
         error: true,
-        message: 'Unable to delete the product',
+        message: 'Unable to delete the supplier',
       };
     }
   } catch (error: any) {
     return {
       error: true,
-      message: 'An error occurred while deleting the product',
+      message: 'An error occurred while deleting the supplier',
     };
   }
 };
 
-export const createNewProduct = async (
+export const createNewSupplier = async (
   prevState: FormState,
   data: FormData,
 ): Promise<FormState> => {
   let parsed;
   try {
-    const formData = parseFormData(data, ['store', 'category', 'supplier']);
+    const formData = parseFormData(data);
     parsed = schema.safeParse(formData);
 
     if (!parsed.success) {
@@ -80,7 +78,7 @@ export const createNewProduct = async (
       };
     }
 
-    const productData = await Product.findOneAndUpdate(
+    const supplierData = await Supplier.findOneAndUpdate(
       {
         name: parsed.data.name,
       },
@@ -92,16 +90,16 @@ export const createNewProduct = async (
       },
     );
 
-    if (productData) {
-      revalidatePath('/products');
+    if (supplierData) {
+      revalidatePath('/suppliers');
       return {
         error: false,
-        message: 'New product added successfully',
+        message: 'New supplier added successfully',
       };
     } else {
       return {
         error: true,
-        message: 'Failed to add the new product',
+        message: 'Failed to add the new supplier',
         fields: parsed.data,
       };
     }
@@ -128,7 +126,7 @@ export const createNewProduct = async (
   }
 };
 
-export const getAllProductsFiltered = async (data: {
+export const getAllSuppliersFiltered = async (data: {
   page: number;
   itemsPerPage: number;
   filters: {
@@ -143,10 +141,10 @@ export const getAllProductsFiltered = async (data: {
     const query: Query = {};
 
     addRegexField(query, 'name', searchText.trim());
-    addRegexField(query, 'batch', searchText.trim(), true);
-    addRegexField(query, 'category', searchText.trim());
-    addRegexField(query, 'supplier', searchText.trim());
-    addRegexField(query, 'store', searchText.trim());
+    addRegexField(query, 'company', searchText.trim());
+    addRegexField(query, 'email', searchText.trim());
+    addRegexField(query, 'phone', searchText.trim());
+    addRegexField(query, 'address', searchText.trim());
 
     const searchQuery =
       Object.keys(query).length > 0
@@ -157,24 +155,16 @@ export const getAllProductsFiltered = async (data: {
           }
         : { $or: [{}] };
 
-    const count: number = await Product.countDocuments(searchQuery);
+    const count: number = await Supplier.countDocuments(searchQuery);
 
     const skip = (page - 1) * itemsPerPage;
 
     let sortQuery: Record<string, 1 | -1> = {
-      in_stock: -1,
       createdAt: -1,
     };
 
-    const products = await Product.aggregate([
+    const suppliers = await Supplier.aggregate([
       { $match: searchQuery },
-      {
-        $addFields: {
-          in_stock: {
-            $cond: { if: { $gt: ['$quantity', 0] }, then: 1, else: 0 },
-          },
-        },
-      },
       { $sort: sortQuery },
       { $skip: skip },
       { $limit: itemsPerPage },
@@ -182,34 +172,34 @@ export const getAllProductsFiltered = async (data: {
 
     const pageCount: number = Math.ceil(count / itemsPerPage);
 
-    if (products) {
-      let productsData = {
+    if (suppliers) {
+      let suppliersData = {
         pagination: {
           count,
           pageCount,
         },
-        items: products,
+        items: suppliers,
       };
 
       return {
         error: false,
-        message: JSON.stringify(productsData),
+        message: JSON.stringify(suppliersData),
       };
     } else {
       return {
         error: true,
-        message: "Couldn't retrieve products data",
+        message: "Couldn't retrieve suppliers data",
       };
     }
   } catch (error: any) {
     return {
       error: true,
-      message: 'An error occurred while retrieving products data',
+      message: 'An error occurred while retrieving suppliers data',
     };
   }
 };
 
-export const getAllProducts = async (data: {
+export const getAllSuppliers = async (data: {
   page: number;
   itemsPerPage: number;
 }): Promise<FormState> => {
@@ -218,64 +208,55 @@ export const getAllProducts = async (data: {
     const itemsPerPage = data.itemsPerPage;
 
     let sortQuery: Record<string, 1 | -1> = {
-      in_stock: -1,
       createdAt: -1,
     };
 
     const skip = (page - 1) * itemsPerPage;
 
-    const count: number = await Product.countDocuments({});
+    const count: number = await Supplier.countDocuments({});
 
-    const products = await Product.aggregate([
-      {
-        $addFields: {
-          in_stock: {
-            $cond: { if: { $gt: ['$quantity', 0] }, then: 1, else: 0 },
-          },
-        },
-      },
+    const suppliers = await Supplier.aggregate([
       { $sort: sortQuery },
       { $skip: skip },
       { $limit: itemsPerPage },
-      // { $project: { in_stock: 0 } }, // remove the in_stock field from the final output
     ]);
 
     const pageCount: number = Math.ceil(count / itemsPerPage);
 
-    if (products) {
-      let productsData = {
+    if (suppliers) {
+      let suppliersData = {
         pagination: {
           count,
           pageCount,
         },
-        items: products,
+        items: suppliers,
       };
 
       return {
         error: false,
-        message: JSON.stringify(productsData),
+        message: JSON.stringify(suppliersData),
       };
     } else {
       return {
         error: true,
-        message: "Couldn't retrieve products data",
+        message: "Couldn't retrieve suppliers data",
       };
     }
   } catch (error: any) {
     return {
       error: true,
-      message: 'An error occurred while retrieving products data',
+      message: 'An error occurred while retrieving suppliers data',
     };
   }
 };
 
-export const editProduct = async (
+export const editSupplier = async (
   prevState: FormState,
   data: FormData,
 ): Promise<FormState> => {
   let parsed;
   try {
-    const formData = parseFormData(data, ['store', 'category', 'supplier']);
+    const formData = parseFormData(data);
     parsed = schema.safeParse(formData);
 
     if (!parsed.success) {
@@ -288,35 +269,35 @@ export const editProduct = async (
       };
     }
 
-    let productId = parsed.data._id;
+    let supplierId = parsed.data._id;
     delete parsed.data._id;
 
-    if (!productId) {
+    if (!supplierId) {
       return {
         error: true,
-        message: 'Product ID is missing',
+        message: 'Supplier ID is missing',
       };
     }
 
-    const productData = await Product.findByIdAndUpdate(
-      productId,
+    const supplierData = await Supplier.findByIdAndUpdate(
+      supplierId,
       parsed.data,
       {
         new: true,
       },
     );
 
-    if (productData) {
-      revalidatePath('/products');
+    if (supplierData) {
+      revalidatePath('/suppliers');
       return {
         error: false,
-        message: 'Product edited successfully',
-        fields: productData.toObject(),
+        message: 'Supplier edited successfully',
+        fields: supplierData.toObject(),
       };
     } else {
       return {
         error: true,
-        message: 'Failed to edit the product',
+        message: 'Failed to edit the supplier',
         fields: parsed.data,
       };
     }
@@ -337,81 +318,6 @@ export const editProduct = async (
       error: true,
       message: 'An error occurred while submitting the form',
       fields: parsed?.data,
-    };
-  }
-};
-
-export const getAllStoreNames = async (): Promise<FormState> => {
-  try {
-    const stores = await Store.find({}, { name: 1, _id: 0 }).lean();
-
-    const storeNames = stores.map(store => store.name);
-
-    if (stores && storeNames.length) {
-      return {
-        error: false,
-        message: JSON.stringify(storeNames),
-      };
-    } else {
-      return {
-        error: true,
-        message: "Couldn't retrieve store names",
-      };
-    }
-  } catch (error: any) {
-    return {
-      error: true,
-      message: 'An error occurred while retrieving store names',
-    };
-  }
-};
-
-export const getAllCategoryNames = async (): Promise<FormState> => {
-  try {
-    const categories = await Category.find({}, { name: 1, _id: 0 }).lean();
-
-    const categoryNames = categories.map(category => category.name);
-
-    if (categories && categoryNames.length) {
-      return {
-        error: false,
-        message: JSON.stringify(categoryNames),
-      };
-    } else {
-      return {
-        error: true,
-        message: "Couldn't retrieve category names",
-      };
-    }
-  } catch (error: any) {
-    return {
-      error: true,
-      message: 'An error occurred while retrieving category names',
-    };
-  }
-};
-
-export const getAllSupplierNames = async (): Promise<FormState> => {
-  try {
-    const suppliers = await Supplier.find({}, { name: 1, _id: 0 }).lean();
-
-    const supplierNames = suppliers.map(supplier => supplier.name);
-
-    if (suppliers && supplierNames.length) {
-      return {
-        error: false,
-        message: JSON.stringify(supplierNames),
-      };
-    } else {
-      return {
-        error: true,
-        message: "Couldn't retrieve supplier names",
-      };
-    }
-  } catch (error: any) {
-    return {
-      error: true,
-      message: 'An error occurred while retrieving supplier names',
     };
   }
 };

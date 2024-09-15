@@ -1,58 +1,94 @@
 'use client';
 
-import cn from '@/utility/cn';
+import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
+import { getAllProducts, getAllProductsFiltered } from '../actions';
+import { ProductsState } from './Table';
+
+const validationSchema = z.object({
+  searchText: z.string().min(1, { message: 'Search text is required' }),
+});
+
+type FilterTypes = z.infer<typeof validationSchema>;
 
 interface PropsType {
-  className?: string;
-  submitHandler: () => void;
-  filters: {
-    searchText: string;
-  };
-  setFilters: React.Dispatch<React.SetStateAction<any>>;
-  isLoading: boolean;
+  page: number;
+  itemsPerPage: number;
+  setFilters: React.Dispatch<React.SetStateAction<FilterTypes>>;
+  setIsFiltered: React.Dispatch<React.SetStateAction<boolean>>;
+  setProducts: React.Dispatch<React.SetStateAction<ProductsState>>;
 }
 
-const FilterButton: React.FC<PropsType> = props => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { filters, setFilters } = props;
+const FilterButton: React.FC<PropsType> = ({
+  page,
+  itemsPerPage,
+  setFilters,
+  setIsFiltered,
+  setProducts,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const popupRef = useRef<HTMLElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ): void => {
-    const { name, value } = e.target;
-    setFilters((prevData: {}) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleResetFilters = () => {
-    setFilters({
-      searchText: '',
-    });
-  };
+  const {
+    register,
+    watch,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FilterTypes>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: { searchText: '' },
+  });
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
       popupRef.current &&
       !popupRef.current.contains(e.target as Node) &&
-      !popupRef.current.querySelector('input:focus, textarea:focus')
+      !popupRef.current.querySelector('input:focus')
     ) {
       setIsOpen(false);
+    }
+  };
+
+  const formSubmit = async (): Promise<void> => {
+    try {
+      setLoading(true);
+      const searchText = watch('searchText');
+      const response = searchText
+        ? await getAllProductsFiltered({
+            page: 1,
+            itemsPerPage,
+            filters: { searchText },
+          })
+        : await getAllProducts({ page, itemsPerPage });
+
+      if (response?.error) {
+        toast.error(response?.message || 'Error fetching products');
+      } else {
+        setProducts(JSON.parse(response.message));
+        setIsFiltered(!!searchText);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while retrieving products data');
+    } finally {
+      setLoading(false);
+      setFilters({ searchText: watch('searchText') });
     }
   };
 
   return (
     <>
       <button
+        disabled={loading}
         onClick={() => setIsOpen(true)}
         type="button"
-        className={cn(
-          `flex items-center gap-2 rounded-md bg-blue-600 hover:opacity-90 hover:ring-4 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 text-white px-3 py-2`,
-          props.className,
-        )}
+        className="flex items-center gap-2 rounded-sm bg-blue-600 hover:opacity-90 hover:ring-4 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 text-white px-3 py-2"
       >
         Filter
         <svg
@@ -73,7 +109,7 @@ const FilterButton: React.FC<PropsType> = props => {
         <article
           ref={popupRef}
           onClick={e => e.stopPropagation()}
-          className={`${isOpen ? 'scale-100 opacity-100' : 'scale-125 opacity-0'} bg-white rounded-lg lg:w-[35vw] md:w-[70vw] sm:w-[80vw] shadow relative`}
+          className={`${isOpen ? 'scale-100 opacity-100' : 'scale-125 opacity-0'} bg-white rounded-sm lg:w-[35vw] md:w-[70vw] sm:w-[80vw] shadow relative`}
         >
           <header className="flex items-center align-middle justify-between px-4 py-2 border-b rounded-t">
             <h3 className="text-gray-900 text-lg lg:text-xl font-semibold dark:text-white uppercase">
@@ -82,7 +118,7 @@ const FilterButton: React.FC<PropsType> = props => {
             <button
               onClick={() => setIsOpen(false)}
               type="button"
-              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
+              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-sm text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
             >
               <svg
                 className="w-5 h-5"
@@ -98,37 +134,48 @@ const FilterButton: React.FC<PropsType> = props => {
               </svg>
             </button>
           </header>
-          <div className="overflow-y-scroll max-h-[70vh] p-4">
+          <form
+            action={formSubmit}
+            ref={formRef}
+            className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start"
+            onSubmit={handleSubmit(formSubmit)}
+          >
             <div className="w-full">
-              <label className="uppercase tracking-wide text-gray-700 text-sm font-bold flex gap-2 mb-2">
-                String Search
+              <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                <span className="uppercase">Search Text*</span>
+                <span className="text-red-700 text-wrap block text-xs">
+                  {errors.searchText && errors.searchText.message}
+                </span>
               </label>
 
               <input
                 placeholder="Search for any text"
-                name="searchText"
-                value={filters.searchText}
-                onChange={handleChange}
+                {...register('searchText')}
                 className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
               />
             </div>
-          </div>
+          </form>
           <footer className="flex space-x-2 items-center px-4 py-2 border-t justify-end border-gray-200 rounded-b">
             <button
-              onClick={handleResetFilters}
-              className="rounded-md bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-8 py-2 uppercase"
+              onClick={() => {
+                reset();
+                formSubmit();
+              }}
+              className="rounded-sm bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
               type="button"
-              disabled={props.isLoading}
+              disabled={loading}
             >
               Reset
             </button>
             <button
-              onClick={props.submitHandler}
-              className="rounded-md bg-blue-600 text-white   hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-8 py-2 uppercase"
+              disabled={loading}
+              onClick={() => {
+                formRef.current?.requestSubmit();
+              }}
+              className="rounded-sm bg-blue-600 text-white   hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
               type="button"
-              disabled={props.isLoading}
             >
-              Search
+              {loading ? 'Searching...' : 'Search'}
             </button>
           </footer>
         </article>

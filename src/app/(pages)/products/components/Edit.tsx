@@ -1,67 +1,37 @@
-import { useSession } from 'next-auth/react';
+'use client';
 
+import {
+  setCalculatedZIndex,
+  setClassNameAndIsDisabled,
+  setMenuPortalTarget,
+} from '@/utility/selectHelpers';
+import { zodResolver } from '@hookform/resolvers/zod';
 import 'flowbite';
 import { initFlowbite } from 'flowbite';
-import React, { useEffect, useRef, useState } from 'react';
-import { ProductDataTypes, handleResetState } from '../helpers';
+import React, { useActionState, useEffect, useRef, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import Select from 'react-select';
+import { toast } from 'sonner';
+import { editProduct } from '../actions';
+import { ProductDataTypes, validationSchema } from '../schema';
+
+const baseZIndex = 52;
 
 interface PropsType {
   productData: ProductDataTypes;
   storesList: string[];
   categoriesList: string[];
   suppliersList: string[];
-  isLoading: boolean;
-  submitHandler: (
-    productId: string | undefined,
-    productData: ProductDataTypes,
-    editedData: ProductDataTypes,
-    setEditedData: React.Dispatch<React.SetStateAction<ProductDataTypes>>,
-  ) => Promise<void>;
 }
 
 const EditButton: React.FC<PropsType> = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { data: session } = useSession();
   const popupRef = useRef<HTMLElement>(null);
-
-  const [editedData, setEditedData] = useState<ProductDataTypes>({});
-
-  useEffect(() => {
-    initFlowbite();
-  }, []);
-
-  useEffect(() => {
-    if (!isOpen) {
-      handleResetState(setEditedData);
-    } else {
-      setEditedData(props.productData);
-    }
-  }, [isOpen]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ): void => {
-    const { name, value, type } = e.target;
-
-    if (type === 'checkbox') {
-      setEditedData((prevData: ProductDataTypes) => {
-        const currentValues =
-          (prevData[name as keyof ProductDataTypes] as string[]) || [];
-
-        return {
-          ...prevData,
-          [name as keyof ProductDataTypes]: currentValues.includes(value)
-            ? currentValues.filter(s => s !== value)
-            : [...currentValues, value],
-        };
-      });
-    } else {
-      setEditedData(prevData => ({
-        ...prevData,
-        [name]: type === 'number' ? +value : value,
-      }));
-    }
-  };
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, formAction, loading] = useActionState(editProduct, {
+    error: false,
+    message: '',
+  });
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -74,14 +44,69 @@ const EditButton: React.FC<PropsType> = props => {
     }
   };
 
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<ProductDataTypes>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      ...props.productData,
+      ...(state?.fields ?? {}),
+    },
+  });
+
+  const storeOptions = props.storesList.map(store => ({
+    value: store,
+    label: store.charAt(0).toUpperCase() + store.slice(1),
+  }));
+
+  const categoryOptions = props.categoriesList.map(category => ({
+    value: category,
+    label: category.charAt(0).toUpperCase() + category.slice(1),
+  }));
+
+  const supplierOptions = props.suppliersList.map(supplier => ({
+    value: supplier,
+    label: supplier.charAt(0).toUpperCase() + supplier.slice(1),
+  }));
+
+  useEffect(() => {
+    initFlowbite();
+  }, []);
+
+  useEffect(() => {
+    if (state.error) {
+      if (state?.message !== '') {
+        toast.error(state.message);
+      }
+    } else if (state?.message !== '') {
+      toast.success(state.message);
+      if (state.fields) {
+        reset(state.fields as ProductDataTypes);
+      }
+      setIsOpen(false);
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [state, reset]);
+
+  // create a useEffect hook that listens to the form errors and logs them to the console
+  useEffect(() => {
+    console.log('Form errors', errors);
+  }, [errors]);
+
   return (
     <>
       <button
-        disabled={props.isLoading}
+        disabled={loading}
         onClick={() => {
           setIsOpen(true);
         }}
-        className="items-center gap-2 rounded-md bg-blue-600 hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 text-white p-2"
+        className="items-center gap-2 rounded-sm bg-blue-600 hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 text-white p-2"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -100,12 +125,12 @@ const EditButton: React.FC<PropsType> = props => {
 
       <section
         onClick={handleClickOutside}
-        className={`fixed z-50 inset-0 flex justify-center items-center transition-colors ${isOpen ? 'visible bg-black/20 disable-page-scroll' : 'invisible'} `}
+        className={`fixed z-${baseZIndex} inset-0 flex justify-center items-center transition-colors ${isOpen ? 'visible bg-black/20 disable-page-scroll' : 'invisible'} `}
       >
         <article
           ref={popupRef}
           onClick={e => e.stopPropagation()}
-          className={`${isOpen ? 'scale-100 opacity-100' : 'scale-125 opacity-0'} bg-white rounded-lg shadow relative md:w-[60vw] lg:w-[40vw]  text-wrap`}
+          className={`${isOpen ? 'scale-100 opacity-100' : 'scale-125 opacity-0'} bg-white rounded-sm shadow relative md:w-[60vw] lg:w-[40vw]  text-wrap`}
         >
           <header className="flex items-center align-middle justify-between px-4 py-2 border-b rounded-t">
             <h3 className="text-gray-900 text-lg lg:text-xl font-semibold dark:text-white uppercase">
@@ -114,8 +139,7 @@ const EditButton: React.FC<PropsType> = props => {
             <button
               onClick={() => setIsOpen(false)}
               type="button"
-              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
-              data-modal-toggle="default-modal"
+              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-sm text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
             >
               <svg
                 className="w-5 h-5"
@@ -131,328 +155,276 @@ const EditButton: React.FC<PropsType> = props => {
               </svg>
             </button>
           </header>
-          <div className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start">
+
+          <form
+            action={formAction}
+            ref={formRef}
+            className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start"
+            onSubmit={e => {
+              console.log('Form submitted');
+              e.preventDefault();
+              handleSubmit(() => {
+                const formData = new FormData(formRef.current!);
+                formData.append('_id', props.productData._id!);
+                console.log('Form data', formData);
+                formAction(formData);
+              })(e);
+            }}
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4">
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Batch*
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase flex items-center gap-2">
+                    Batch*
+                    <span className="cursor-pointer has-tooltip text-xs">
+                      &#9432;
+                      <span className="tooltip italic font-medium rounded-sm text-xs shadow-lg p-1 px-2 bg-gray-100 ml-2">
+                        Auto generated
+                      </span>
+                    </span>
+                  </span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.batch && errors.batch?.message}
+                  </span>
+                </label>
+
+                <input
+                  {...register('batch')}
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  type="text"
+                  readOnly
+                />
+              </div>
+
+              <div>
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Name*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.name && errors.name.message}
+                  </span>
                 </label>
                 <input
-                  required
-                  disabled
+                  {...register('name')}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  // name="batch"
-                  value={editedData.batch}
-                  // onChange={handleChange}
                   type="text"
                 />
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Name*
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Store*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.store && errors.store?.message}
+                  </span>
                 </label>
-                <input
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="name"
-                  value={editedData.name}
-                  onChange={handleChange}
-                  type="text"
-                  required
+
+                <Controller
+                  name="store"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      {...setClassNameAndIsDisabled(isOpen)}
+                      options={storeOptions}
+                      isMulti
+                      closeMenuOnSelect={false}
+                      placeholder="Select stores"
+                      classNamePrefix="react-select"
+                      menuPortalTarget={setMenuPortalTarget}
+                      styles={setCalculatedZIndex(baseZIndex)}
+                      // Map selected values back to the option objects
+                      value={storeOptions.filter(option =>
+                        field.value.includes(option.value),
+                      )}
+                      onChange={selectedOptions =>
+                        field.onChange(
+                          selectedOptions.map(option => option.value),
+                        )
+                      }
+                    />
+                  )}
                 />
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Store*
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2">
+                  <span className="uppercase">Category*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.category && errors.category?.message}
+                  </span>
                 </label>
 
-                <div className="flex items-center space-x-0">
-                  {/* Dropdown Button */}
-                  <button
-                    id="storesEditDropdown"
-                    data-dropdown-toggle="dropdown4"
-                    className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    type="button"
-                  >
-                    Select
-                  </button>
-
-                  {/* Dropdown Menu */}
-                  <div
-                    id="dropdown4"
-                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 py-2.5"
-                  >
-                    <ul
-                      aria-labelledby="storesEditDropdown"
-                      className="text-sm text-gray-700 capitalize dark:text-gray-200 overflow-auto max-h-28"
-                    >
-                      {props.storesList.map((store, index) => (
-                        <li
-                          key={`${store}_${index}`}
-                          className="flex items-center py-1 px-3"
-                        >
-                          <input
-                            className="form-check-input cursor-pointer mr-2 h-4 w-4 border border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
-                            type="checkbox"
-                            name="store"
-                            value={store}
-                            id={`checkbox_edit_${store}_${index}`}
-                            checked={editedData.store?.includes(store)}
-                            onChange={handleChange}
-                          />
-                          <label
-                            className="form-check-label cursor-pointer select-none text-gray-700"
-                            htmlFor={`checkbox_edit_${store}_${index}`}
-                          >
-                            {store}
-                          </label>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Input Field */}
-                  <input
-                    disabled
-                    required
-                    type="text"
-                    className="flex-grow appearance-none block w-full rounded-s-none bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    placeholder="Add stores by selecting from dropdown"
-                    value={editedData.store?.join('+') || ''}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Category*
-                </label>
-
-                <div className="flex items-center space-x-0">
-                  {/* Dropdown Button */}
-                  <button
-                    id="categoriesEditDropdown"
-                    data-dropdown-toggle="dropdown5"
-                    className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    type="button"
-                  >
-                    Select
-                  </button>
-
-                  {/* Dropdown Menu */}
-                  <div
-                    id="dropdown5"
-                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 py-2.5"
-                  >
-                    <ul
-                      aria-labelledby="categoriesEditDropdown"
-                      className="text-sm text-gray-700 capitalize dark:text-gray-200 overflow-auto max-h-28"
-                    >
-                      {props.categoriesList.map((category, index) => (
-                        <li
-                          key={`${category}_${index}`}
-                          className="flex items-center py-1 px-3"
-                        >
-                          <input
-                            className="form-check-input cursor-pointer mr-2 h-4 w-4 border border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
-                            type="checkbox"
-                            name="category"
-                            value={category}
-                            id={`checkbox_edit_${category}_${index}`}
-                            checked={editedData.category?.includes(category)}
-                            onChange={handleChange}
-                          />
-                          <label
-                            className="form-check-label cursor-pointer select-none text-gray-700"
-                            htmlFor={`checkbox_edit_${category}_${index}`}
-                          >
-                            {category}
-                          </label>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Input Field */}
-                  <input
-                    disabled
-                    required
-                    type="text"
-                    className="flex-grow appearance-none block w-full rounded-s-none bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    placeholder="Add categories by selecting from dropdown"
-                    value={editedData.category?.join('+') || ''}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Supplier*
-                </label>
-
-                <div className="flex items-center space-x-0">
-                  {/* Dropdown Button */}
-                  <button
-                    id="suppliersEditDropdown"
-                    data-dropdown-toggle="dropdown6"
-                    className="dropdown-toggle flex-grow text-nowrap py-3 px-3 rounded-e-none appearance-none border border-gray-200 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    type="button"
-                  >
-                    Select
-                  </button>
-
-                  {/* Dropdown Menu */}
-                  <div
-                    id="dropdown6"
-                    className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 py-2.5"
-                  >
-                    <ul
-                      aria-labelledby="suppliersEditDropdown"
-                      className="text-sm text-gray-700 capitalize dark:text-gray-200 overflow-auto max-h-28"
-                    >
-                      {props.suppliersList.map((supplier, index) => (
-                        <li
-                          key={`${supplier}_${index}`}
-                          className="flex items-center py-1 px-3"
-                        >
-                          <input
-                            className="form-check-input cursor-pointer mr-2 h-4 w-4 border border-gray-300 rounded text-indigo-600 focus:ring-indigo-500"
-                            type="checkbox"
-                            name="supplier"
-                            value={supplier}
-                            id={`checkbox_edit_${supplier}_${index}`}
-                            checked={editedData.supplier?.includes(supplier)}
-                            onChange={handleChange}
-                          />
-                          <label
-                            className="form-check-label cursor-pointer select-none text-gray-700"
-                            htmlFor={`checkbox_edit_${supplier}_${index}`}
-                          >
-                            {supplier}
-                          </label>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Input Field */}
-                  <input
-                    required
-                    disabled
-                    type="text"
-                    className="flex-grow appearance-none block w-full rounded-s-none bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    placeholder="Add suppliers by selecting from dropdown"
-                    value={editedData.supplier?.join('+') || ''}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Quantity*
-                </label>
-                <input
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="quantity"
-                  value={editedData.quantity}
-                  onChange={handleChange}
-                  type="number"
-                  required
-                />
-              </div>
-              <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Cost Price*
-                </label>
-                <input
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="cost_price"
-                  value={editedData.cost_price}
-                  onChange={handleChange}
-                  type="number"
-                  required
+                <Controller
+                  name="category"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      {...setClassNameAndIsDisabled(isOpen)}
+                      options={categoryOptions}
+                      isMulti
+                      closeMenuOnSelect={false}
+                      placeholder="Select categories"
+                      classNamePrefix="react-select"
+                      menuPortalTarget={setMenuPortalTarget}
+                      styles={setCalculatedZIndex(baseZIndex)}
+                      // Map selected values back to the option objects
+                      value={categoryOptions.filter(option =>
+                        field.value.includes(option.value),
+                      )}
+                      onChange={selectedOptions =>
+                        field.onChange(
+                          selectedOptions.map(option => option.value),
+                        )
+                      }
+                    />
+                  )}
                 />
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Selling Price
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Supplier*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.supplier && errors.supplier?.message}
+                  </span>
+                </label>
+
+                <Controller
+                  name="supplier"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      {...setClassNameAndIsDisabled(isOpen)}
+                      options={supplierOptions}
+                      isMulti
+                      closeMenuOnSelect={false}
+                      placeholder="Select suppliers"
+                      classNamePrefix="react-select"
+                      menuPortalTarget={setMenuPortalTarget}
+                      styles={setCalculatedZIndex(baseZIndex)}
+                      // Map selected values back to the option objects
+                      value={supplierOptions.filter(option =>
+                        field.value.includes(option.value),
+                      )}
+                      onChange={selectedOptions =>
+                        field.onChange(
+                          selectedOptions.map(option => option.value),
+                        )
+                      }
+                    />
+                  )}
+                />
+              </div>
+
+              <div>
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Quantity*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.quantity && errors.quantity?.message}
+                  </span>
                 </label>
                 <input
+                  {...register('quantity', { valueAsNumber: true })}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="selling_price"
-                  value={editedData.selling_price}
-                  onChange={handleChange}
                   type="number"
                 />
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Mft. Date
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Cost Price*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.cost_price && errors.cost_price?.message}
+                  </span>
                 </label>
                 <input
+                  {...register('cost_price', { valueAsNumber: true })}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="mft_date"
-                  value={editedData.mft_date}
-                  onChange={handleChange}
+                  type="number"
+                />
+              </div>
+
+              <div>
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Selling Price*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.selling_price && errors.selling_price?.message}
+                  </span>
+                </label>
+                <input
+                  {...register('selling_price', { valueAsNumber: true })}
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  type="number"
+                />
+              </div>
+
+              <div>
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Mft. Date</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.mft_date && errors.mft_date?.message}
+                  </span>
+                </label>
+                <input
+                  {...register('mft_date')}
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   type="date"
                 />
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Exp. Date
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Exp. Date</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.exp_date && errors.exp_date?.message}
+                  </span>
                 </label>
                 <input
+                  {...register('exp_date')}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="exp_date"
-                  value={editedData.exp_date}
-                  onChange={handleChange}
                   type="date"
                 />
               </div>
 
               <div>
-                <label className="block uppercase tracking-wide text-gray-700 text-sm font-bold mb-2">
-                  Description
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Description</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.description && errors.description?.message}
+                  </span>
                 </label>
                 <textarea
+                  {...register('description')}
                   rows={5}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="description"
-                  value={editedData.description}
-                  onChange={handleChange}
                   placeholder="What's the product about?"
                 />
               </div>
             </div>
-          </div>
+          </form>
 
           <footer className="flex items-center px-4 py-2 border-t justify-end gap-6 border-gray-200 rounded-b">
             <div className="buttons space-x-2 ">
               <button
                 onClick={() => setIsOpen(false)}
-                className="rounded-md bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-8 py-2 uppercase"
+                className="rounded-sm bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
+                disabled={loading}
               >
                 Close
               </button>
               <button
+                disabled={loading}
                 onClick={() => {
-                  props.submitHandler(
-                    props.productData?._id,
-                    props.productData,
-                    editedData,
-                    setEditedData,
-                  );
-                  setIsOpen(false);
+                  formRef.current?.requestSubmit();
+                  console.log('Submitting form', formRef.current);
                 }}
-                className="rounded-md bg-blue-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-8 py-2 uppercase"
+                className="rounded-sm bg-blue-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
               >
-                Submit
+                {loading ? 'Submitting...' : 'Submit'}
               </button>
             </div>
           </footer>

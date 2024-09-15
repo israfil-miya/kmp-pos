@@ -1,10 +1,12 @@
 'use client';
 
+import Link from '@/components/NextLink';
 import cn from '@/utility/cn';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-import Link from 'next/link';
-import React from 'react';
+import { usePathname } from 'next/navigation';
+import React, { useEffect, useRef, useTransition } from 'react';
+import { toast } from 'sonner';
 
 interface NavProps {
   LogoutAction: () => Promise<void>;
@@ -13,11 +15,23 @@ interface NavProps {
 const Nav: React.FC<NavProps> = props => {
   const { data: session } = useSession();
   const userRole = session?.user.role;
+
+  const pathName = usePathname(); // Current path
+  const toastRef = useRef<string | number | null>(); // To store the toast ID
+
+  // show a toast while the user is routing to a different page
+  // show a toast when the page (where the user is going) starts loading and somehow store it in a ref, when the page is loaded, remove the toast
+  // note: this component gets re-rendered when the user navigates to a different page (it's a layout component)
+
   return (
     <nav className="flex flex-col space-y-1">
       <Link
         href="/"
-        className="p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:border-green-400 hover:text-white"
+        className={cn(
+          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:text-white',
+          pathName === '/' &&
+            'bg-gray-900 border-l-4 border-green-400 text-white',
+        )}
       >
         <span className="flex relative left-5">
           <svg
@@ -40,8 +54,10 @@ const Nav: React.FC<NavProps> = props => {
       <Link
         href="/stores"
         className={cn(
-          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:border-green-400 hover:text-white',
+          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:text-white',
           userRole !== 'administrator' && 'hidden',
+          pathName === '/stores' &&
+            'bg-gray-900 border-l-4 border-green-400 text-white',
         )}
       >
         <span className="flex relative left-5">
@@ -61,8 +77,10 @@ const Nav: React.FC<NavProps> = props => {
       <Link
         href="/users"
         className={cn(
-          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:border-green-400 hover:text-white',
+          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:text-white',
           userRole !== 'administrator' && 'hidden',
+          pathName === '/users' &&
+            'bg-gray-900 border-l-4 border-green-400 text-white',
         )}
       >
         <span className="flex relative left-5">
@@ -82,8 +100,10 @@ const Nav: React.FC<NavProps> = props => {
       <Link
         href="/suppliers"
         className={cn(
-          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:border-green-400 hover:text-white',
+          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:text-white',
           userRole === 'cashier' && 'hidden',
+          pathName === '/suppliers' &&
+            'bg-gray-900 border-l-4 border-green-400 text-white',
         )}
       >
         <span className="flex relative left-5">
@@ -102,7 +122,11 @@ const Nav: React.FC<NavProps> = props => {
       </Link>
       <Link
         href="/categories"
-        className="p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:border-green-400 hover:text-white"
+        className={cn(
+          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:text-white',
+          pathName === '/categories' &&
+            'bg-gray-900 border-l-4 border-green-400 text-white',
+        )}
       >
         <span className="flex relative left-5">
           <svg
@@ -121,7 +145,11 @@ const Nav: React.FC<NavProps> = props => {
       </Link>
       <Link
         href="/products"
-        className="p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:border-green-400 hover:text-white"
+        className={cn(
+          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:text-white',
+          pathName === '/products' &&
+            'bg-gray-900 border-l-4 border-green-400 text-white',
+        )}
       >
         <span className="flex relative left-5">
           <svg
@@ -140,8 +168,10 @@ const Nav: React.FC<NavProps> = props => {
       <Link
         href="/pos"
         className={cn(
-          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:border-green-400 hover:text-white',
+          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:text-white',
           userRole !== 'cashier' && 'hidden',
+          pathName === '/pos' &&
+            'bg-gray-900 border-l-4 border-green-400 text-white',
         )}
       >
         <span className="flex relative left-5">
@@ -161,8 +191,10 @@ const Nav: React.FC<NavProps> = props => {
       <Link
         href="/orders"
         className={cn(
-          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:border-green-400 hover:text-white',
+          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:text-white',
           userRole === 'cashier' && 'hidden',
+          pathName === '/orders' &&
+            'bg-gray-900 border-l-4 border-green-400 text-white',
         )}
       >
         <span className="flex relative left-5">
@@ -182,7 +214,11 @@ const Nav: React.FC<NavProps> = props => {
       </Link>
       <Link
         href="/reports"
-        className="p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:border-green-400 hover:text-white"
+        className={cn(
+          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:text-white',
+          pathName === '/reports' &&
+            'bg-gray-900 border-l-4 border-green-400 text-white',
+        )}
       >
         <span className="flex relative left-5">
           <svg
@@ -200,7 +236,12 @@ const Nav: React.FC<NavProps> = props => {
       </Link>
       <Link
         href="/creditors"
-        className="p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:border-green-400 hover:text-white"
+        className={cn(
+          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:text-white',
+          userRole !== 'administrator' && 'hidden',
+          pathName === '/creditors' &&
+            'bg-gray-900 border-l-4 border-green-400 text-white',
+        )}
       >
         <span className="flex relative left-5">
           <svg
@@ -220,8 +261,10 @@ const Nav: React.FC<NavProps> = props => {
       <Link
         href="/expired"
         className={cn(
-          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:border-green-400 hover:text-white',
+          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:text-white',
           userRole === 'cashier' && 'hidden',
+          pathName === '/expired' &&
+            'bg-gray-900 border-l-4 border-green-400 text-white',
         )}
       >
         <span className="flex relative left-5">
@@ -242,8 +285,10 @@ const Nav: React.FC<NavProps> = props => {
       <Link
         href="/barcode"
         className={cn(
-          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:border-green-400 hover:text-white',
+          'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:text-white',
           userRole !== 'administrator' && 'hidden',
+          pathName === '/barcode' &&
+            'bg-gray-900 border-l-4 border-green-400 text-white',
         )}
       >
         <span className="flex relative left-5">
@@ -262,7 +307,7 @@ const Nav: React.FC<NavProps> = props => {
       </Link>
       <p
         onClick={() => props.LogoutAction()}
-        className="p-4 flex items-center select-none hover:bg-gray-900 hover:border-l-4 hover:border-green-400 hover:text-white hover:cursor-pointer"
+        className="p-4 flex items-center select-none hover:bg-gray-900 hover:border-l-4 hover:text-white hover:cursor-pointer"
       >
         <span className="flex relative left-5">
           <svg

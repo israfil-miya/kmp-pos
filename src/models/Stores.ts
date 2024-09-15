@@ -26,6 +26,7 @@ const StoreSchema = new mongoose.Schema<Store>({
 });
 
 const Store =
-  mongoose.models.Store || mongoose.model<Store>('Store', StoreSchema);
+  (mongoose.models.Store as mongoose.Model<Store>) ||
+  mongoose.model<Store>('Store', StoreSchema);
 
 export default Store;

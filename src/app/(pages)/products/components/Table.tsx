@@ -8,13 +8,18 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { ProductDataTypes, handleResetState } from '../helpers';
+import {
+  FormState,
+  getAllProducts as getAllProductsAction,
+  getAllProductsFiltered as getAllProductsFilteredAction,
+} from '../actions';
+import { ProductDataTypes } from '../schema';
 import CreateButton from './Create';
 import DeleteButton from './Delete';
 import EditButton from './Edit';
 import FilterButton from './Filter';
 
-interface ProductsState {
+export interface ProductsState {
   pagination?: {
     count: number;
     pageCount: number;
@@ -22,7 +27,14 @@ interface ProductsState {
   items?: ProductDataTypes[];
 }
 
-const Table = () => {
+interface TableDataProps {
+  storeNames: FormState;
+  categoryNames: FormState;
+  supplierNames: FormState;
+  data: FormState;
+}
+
+const Table: React.FC<TableDataProps> = props => {
   const [isLoading, setIsLoading] = useState(false);
   const [products, setProducts] = useState<ProductsState>({
     pagination: {
@@ -42,7 +54,7 @@ const Table = () => {
   const [isFiltered, setIsFiltered] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [pageCount, setPageCount] = useState<number>(0);
-  const [itemPerPage, setItemPerPage] = useState<number>(30);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(30);
 
   const prevPageCount = useRef<number>(0);
   const prevPage = useRef<number>(1);
@@ -51,148 +63,26 @@ const Table = () => {
     searchText: '',
   });
 
-  const inputValidations = (productData: ProductDataTypes): boolean => {
-    if (
-      !productData.batch ||
-      !productData.name ||
-      !productData.category?.length ||
-      !productData.store?.length ||
-      !productData.supplier?.length ||
-      productData.quantity == undefined ||
-      productData.cost_price == undefined
-    ) {
-      console.log(
-        !productData.batch,
-        !productData.name,
-        productData.category?.length,
-        productData.store?.length,
-        productData.supplier?.length,
-        productData.quantity == undefined,
-        productData.cost_price == undefined,
-      );
-      toast.error('Please fill in all required fields');
-
-      return false;
-    }
-
-    if (productData.exp_date) {
-      if (moment(productData.exp_date).isBefore(moment())) {
-        toast.error('Expiry date cannot be in the past');
-
-        return false;
-      }
-      if (moment(productData.exp_date).isSame(moment())) {
-        toast.error('Expiry date cannot be today');
-
-        return false;
-      }
-      if (
-        productData.mft_date &&
-        moment(productData.exp_date) <= moment(productData.mft_date)
-      ) {
-        toast.error('Expiry date cannot be before manufacturing date');
-
-        return false;
-      }
-    }
-
-    if (productData.selling_price !== undefined) {
-      if (productData.selling_price < productData.cost_price) {
-        console.log(
-          productData.selling_price,
-          productData.cost_price,
-          productData.selling_price < productData.cost_price,
-          productData.selling_price > productData.cost_price,
-          typeof productData.selling_price == 'number',
-        );
-        toast.error('Selling price must be equal or greater than cost price');
-
-        return false;
-      }
-      if (productData.selling_price < 0) {
-        toast.error('Selling price cannot be negative');
-
-        return false;
-      }
-    } else {
-      productData.selling_price = productData.cost_price;
-    }
-
-    return true;
-  };
-
-  const createNewProduct = async (
-    productData: ProductDataTypes,
-    setProductData: React.Dispatch<React.SetStateAction<ProductDataTypes>>,
-  ): Promise<void> => {
-    try {
-      console.log(productData);
-
-      if (!inputValidations(productData)) {
-        // handleResetState(setProductData);
-        return;
-      }
-
-      // setIsLoading(true);
-
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/product?action=create-new-product';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productData),
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        toast.success('New product added successfully');
-        handleResetState(setProductData);
-        if (!isFiltered) await getAllProducts();
-        else await getAllProductsFiltered();
-      } else {
-        toast.error(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while submitting the form');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const getAllProducts = async (): Promise<void> => {
     try {
       // setIsLoading(true);
 
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/product?action=get-all-products';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          filtered: false,
-          paginated: true,
-          item_per_page: itemPerPage,
-          page,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({}),
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        setProducts(response.data);
+      let response = await getAllProductsAction({
+        page: page,
+        itemsPerPage: itemsPerPage,
+      });
+      if (response.error) {
+        if (response?.message !== '') {
+          toast.error(response.message);
+        }
+      } else if (response?.message !== '') {
+        setProducts(JSON.parse(response.message));
       } else {
-        toast.error(response.data);
+        console.log('Nothing was returned from the server');
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred while retrieving categories data');
+      toast.error('An error occurred while retrieving products data');
     } finally {
       setIsLoading(false);
     }
@@ -202,220 +92,76 @@ const Table = () => {
     try {
       // setIsLoading(true);
 
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/product?action=get-all-products';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          filtered: true,
-          paginated: true,
-          item_per_page: itemPerPage,
-          page,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...filters,
-        }),
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        setProducts(response.data);
+      let response = await getAllProductsFilteredAction({
+        page: isFiltered ? page : 1,
+        itemsPerPage: itemsPerPage,
+        filters: filters,
+      });
+      if (response.error) {
+        if (response?.message !== '') {
+          toast.error(response.message);
+        }
+      } else if (response?.message !== '') {
+        setProducts(JSON.parse(response.message));
         setIsFiltered(true);
       } else {
-        toast.error(response.data);
+        console.log('Nothing was returned from the server');
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred while retrieving categories data');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const deleteProduct = async (
-    productData: ProductDataTypes,
-  ): Promise<void> => {
-    try {
-      // setIsLoading(true);
-
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL + '/api/product?action=delete-product';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ productId: productData._id }),
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        toast.success('Product deleted successfully');
-        if (!isFiltered) await getAllProducts();
-        else await getAllProductsFiltered();
-      } else {
-        toast.error(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while deleting the product');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const editProduct = async (
-    productId: string | undefined,
-    productData: ProductDataTypes,
-    editedData: ProductDataTypes,
-    setEditedData: React.Dispatch<React.SetStateAction<ProductDataTypes>>,
-  ): Promise<void> => {
-    try {
-      if (!inputValidations(editedData)) {
-        handleResetState(setEditedData);
-        return;
-      }
-
-      // setIsLoading(true);
-
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL + '/api/product?action=edit-product';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ productId, editedData }),
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        toast.success('Product data edited successfully');
-        handleResetState(setEditedData);
-        if (!isFiltered) await getAllProducts();
-        else await getAllProductsFiltered();
-      } else {
-        toast.error(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while submitting the form');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getStores = async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL + '/api/store?action=get-all-stores';
-      let options: {} = {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        let stores: string[] = [];
-
-        stores = response.data.map((store: { name: string }) => store.name);
-
-        setStores(stores);
-      } else {
-        toast.error(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while retrieving stores data');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getCategories = async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/category?action=get-all-categories';
-      let options: {} = {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        let categories: string[] = [];
-
-        categories = response.data.map(
-          (category: { name: string }) => category.name,
-        );
-
-        setCategories(categories);
-      } else {
-        toast.error(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while retrieving categories data');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getSuppliers = async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/supplier?action=get-all-suppliers-name';
-      let options: {} = {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        let suppliers: string[] = [];
-        suppliers = response.data.map(
-          (supplier: { name: string }) => supplier.name,
-        );
-        setSuppliers(suppliers);
-      } else {
-        toast.error(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while retrieving suppliers data');
+      toast.error('An error occurred while retrieving products data');
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    getAllProducts();
-    getStores();
-    getCategories();
-    getSuppliers();
-  }, []);
+    if (props.storeNames.error) {
+      if (props.storeNames?.message !== '') {
+        toast.error(props.storeNames.message);
+      }
+    } else if (props.storeNames?.message !== '') {
+      setStores(JSON.parse(props.storeNames.message));
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [props.storeNames]);
+
+  useEffect(() => {
+    if (props.categoryNames.error) {
+      if (props.categoryNames?.message !== '') {
+        toast.error(props.categoryNames.message);
+      }
+    } else if (props.categoryNames?.message !== '') {
+      setCategories(JSON.parse(props.categoryNames.message));
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [props.categoryNames]);
+
+  useEffect(() => {
+    if (props.supplierNames.error) {
+      if (props.supplierNames?.message !== '') {
+        toast.error(props.supplierNames.message);
+      }
+    } else if (props.supplierNames?.message !== '') {
+      setSuppliers(JSON.parse(props.supplierNames.message));
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [props.supplierNames]);
+
+  useEffect(() => {
+    if (props.data.error) {
+      if (props.data?.message !== '') {
+        toast.error(props.data.message);
+      }
+    } else if (props.data?.message !== '') {
+      setProducts(JSON.parse(props.data.message));
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [props.data]);
 
   function handlePrevious() {
     setPage(p => {
@@ -453,26 +199,26 @@ const Table = () => {
   }, [products?.pagination?.pageCount]);
 
   useEffect(() => {
-    // Reset to first page when itemPerPage changes
+    // Reset to first page when itemsPerPage changes
     prevPageCount.current = 0;
     prevPage.current = 1;
     setPage(1);
 
     if (!isFiltered) getAllProducts();
     else getAllProductsFiltered();
-  }, [itemPerPage]);
+  }, [itemsPerPage]);
 
   return (
     <>
       <h2 className="text-3xl font-semibold">Products List</h2>
       <div className="flex flex-col sm:flex-row justify-between mb-4 mt-6 gap-2 items-center">
         <div className="items-center flex gap-2">
-          <div className="inline-flex rounded-md" role="group">
+          <div className="inline-flex rounded-sm" role="group">
             <button
               onClick={handlePrevious}
               disabled={page === 1 || pageCount === 0 || isLoading}
               type="button"
-              className="inline-flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded-s-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              className="inline-flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -501,7 +247,7 @@ const Table = () => {
               onClick={handleNext}
               disabled={page === pageCount || pageCount === 0 || isLoading}
               type="button"
-              className="inline-flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded-e-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              className="inline-flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             >
               Next
               <svg
@@ -520,29 +266,27 @@ const Table = () => {
           </div>
 
           <select
-            value={itemPerPage}
-            onChange={e => setItemPerPage(parseInt(e.target.value))}
-            // defaultValue={30}
+            value={itemsPerPage}
+            onChange={e => setItemsPerPage(parseInt(e.target.value))}
             required
-            className="appearance-none bg-gray-200 text-gray-700 border border-gray-200 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+            className="appearance-none bg-gray-200 text-gray-700 border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           >
             <option value={30}>30</option>
             <option value={50}>50</option>
             <option value={100}>100</option>
           </select>
           <FilterButton
-            isLoading={isLoading}
-            submitHandler={getAllProductsFiltered}
+            page={page}
+            itemsPerPage={itemsPerPage}
             setFilters={setFilters}
-            filters={filters}
+            setIsFiltered={setIsFiltered}
+            setProducts={setProducts}
           />
         </div>
         <CreateButton
           suppliersList={suppliers}
           categoriesList={categories}
-          isLoading={isLoading}
           storesList={stores}
-          submitHandler={createNewProduct}
         />
       </div>
 
@@ -651,14 +395,9 @@ const Table = () => {
                                 storesList={stores}
                                 categoriesList={categories}
                                 suppliersList={suppliers}
-                                isLoading={isLoading}
                                 productData={item}
-                                submitHandler={editProduct}
                               />
-                              <DeleteButton
-                                productData={item}
-                                submitHandler={deleteProduct}
-                              />
+                              <DeleteButton productData={item} />
                               {/* <button>Print Product Barcode</button> */}
                             </div>
                           </div>
@@ -686,7 +425,7 @@ const Table = () => {
         {`
           th,
           td {
-            padding: 2.5px 10px;
+            padding: 5px 10px;
           }
         `}
       </style>

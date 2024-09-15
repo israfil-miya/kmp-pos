@@ -290,12 +290,12 @@ const Table = () => {
       <h2 className="text-3xl font-semibold">Suppliers List</h2>
       <div className="flex flex-col sm:flex-row justify-between mb-4 mt-6 gap-2 items-center">
         <div className="items-center flex gap-2">
-          <div className="inline-flex rounded-md" role="group">
+          <div className="inline-flex rounded-sm" role="group">
             <button
               onClick={handlePrevious}
               disabled={page === 1 || pageCount === 0 || isLoading}
               type="button"
-              className="inline-flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded-s-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              className="inline-flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -324,7 +324,7 @@ const Table = () => {
               onClick={handleNext}
               disabled={page === pageCount || pageCount === 0 || isLoading}
               type="button"
-              className="inline-flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded-e-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              className="inline-flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             >
               Next
               <svg
@@ -347,7 +347,7 @@ const Table = () => {
             onChange={e => setItemPerPage(parseInt(e.target.value))}
             // defaultValue={30}
             required
-            className="appearance-none bg-gray-200 text-gray-700 border border-gray-200 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+            className="appearance-none bg-gray-200 text-gray-700 border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           >
             <option value={30}>30</option>
             <option value={50}>50</option>

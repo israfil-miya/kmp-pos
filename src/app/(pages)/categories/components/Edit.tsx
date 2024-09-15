@@ -1,43 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useSession } from 'next-auth/react';
-import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
-import { CategoryDataTypes, handleResetState } from '../helpers';
+'use client';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useActionState, useEffect, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { editCategory } from '../actions';
+import { CategoryDataTypes, validationSchema } from '../schema';
 
 interface PropsType {
   categoryData: CategoryDataTypes;
-  isLoading: boolean;
-  submitHandler: (
-    categoryId: string | undefined,
-    categoryData: CategoryDataTypes,
-    editedData: CategoryDataTypes,
-    setEditedData: React.Dispatch<React.SetStateAction<CategoryDataTypes>>,
-  ) => Promise<void>;
 }
 
 const EditButton: React.FC<PropsType> = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { data: session } = useSession();
   const popupRef = useRef<HTMLElement>(null);
-
-  const [editedData, setEditedData] = useState<CategoryDataTypes>({});
-
-  useEffect(() => {
-    if (!isOpen) {
-      handleResetState(setEditedData);
-    } else {
-      setEditedData(props.categoryData);
-    }
-  }, [isOpen]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ): void => {
-    const { name, value } = e.target;
-    setEditedData(prevData => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, formAction, loading] = useActionState(editCategory, {
+    error: false,
+    message: '',
+  });
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -49,14 +30,43 @@ const EditButton: React.FC<PropsType> = props => {
     }
   };
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CategoryDataTypes>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      ...props.categoryData,
+      ...(state?.fields ?? {}),
+    },
+  });
+
+  useEffect(() => {
+    if (state.error) {
+      if (state?.message !== '') {
+        toast.error(state.message);
+      }
+    } else if (state?.message !== '') {
+      toast.success(state.message);
+      if (state.fields) {
+        reset(state.fields as CategoryDataTypes);
+      }
+      setIsOpen(false);
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [state, reset]);
+
   return (
     <>
       <button
-        disabled={props.isLoading}
+        disabled={loading}
         onClick={() => {
           setIsOpen(true);
         }}
-        className="items-center gap-2 rounded-md bg-blue-600 hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 text-white p-2"
+        className="items-center gap-2 rounded-sm bg-blue-600 hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 text-white p-2"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -80,17 +90,16 @@ const EditButton: React.FC<PropsType> = props => {
         <article
           ref={popupRef}
           onClick={e => e.stopPropagation()}
-          className={`${isOpen ? 'scale-100 opacity-100' : 'scale-125 opacity-0'} bg-white rounded-lg shadow relative md:w-[60vw] lg:w-[40vw]  text-wrap`}
+          className={`${isOpen ? 'scale-100 opacity-100' : 'scale-125 opacity-0'} bg-white rounded-sm shadow relative md:w-[60vw] lg:w-[40vw]  text-wrap`}
         >
           <header className="flex items-center align-middle justify-between px-4 py-2 border-b rounded-t">
-            <h3 className="text-gray-900 text-lg lg:text-xl font-semibold dark:text-white uppercase">
+            <h3 className="text-gray-900 text-lg lg:text-xl font-semibold uppercase">
               Edit Category
             </h3>
             <button
               onClick={() => setIsOpen(false)}
               type="button"
-              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
-              data-modal-toggle="default-modal"
+              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-sm text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
             >
               <svg
                 className="w-5 h-5"
@@ -106,49 +115,59 @@ const EditButton: React.FC<PropsType> = props => {
               </svg>
             </button>
           </header>
-          <div className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start">
+
+          <form
+            action={formAction}
+            ref={formRef}
+            className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start"
+            onSubmit={e => {
+              e.preventDefault();
+              handleSubmit(() => {
+                const formData = new FormData(formRef.current!);
+                formData.append('_id', props.categoryData._id!);
+                formAction(formData);
+              })(e);
+            }}
+          >
             {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4"> */}
             <div>
               <label
-                className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
+                className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
                 htmlFor="grid-password"
               >
-                Category Name
+                <span className="uppercase">Category Name*</span>
+                <span className="text-red-700 text-wrap block text-xs">
+                  {errors.name && errors.name.message}
+                </span>
               </label>
               <input
                 className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                name="name"
-                value={editedData.name}
-                onChange={handleChange}
+                {...register('name')}
                 type="text"
               />
             </div>
             {/* </div> */}
-          </div>
+          </form>
 
           <footer className="flex items-center px-4 py-2 border-t justify-end gap-6 border-gray-200 rounded-b">
             <div className="buttons space-x-2 ">
               <button
                 onClick={() => setIsOpen(false)}
-                className="rounded-md bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-8 py-2 uppercase"
+                className="rounded-sm bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
+                disabled={loading}
               >
                 Close
               </button>
               <button
+                disabled={loading}
                 onClick={() => {
-                  props.submitHandler(
-                    props.categoryData?._id,
-                    props.categoryData,
-                    editedData,
-                    setEditedData,
-                  );
-                  setIsOpen(false);
+                  formRef.current?.requestSubmit();
                 }}
-                className="rounded-md bg-blue-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-8 py-2 uppercase"
+                className="rounded-sm bg-blue-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
               >
-                Submit
+                {loading ? 'Submitting...' : 'Submit'}
               </button>
             </div>
           </footer>

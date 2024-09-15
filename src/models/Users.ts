@@ -39,9 +39,9 @@ const UserSchema = new mongoose.Schema<User>({
     required: [true, 'Password is not given'],
     validate: {
       validator: function (v: string) {
-        return v.trim().length > 0;
+        return v.trim().length >= 6;
       },
-      message: 'Password cannot be empty',
+      message: 'Password must be at least 6 characters',
     },
   },
   role: {
@@ -57,6 +57,8 @@ const UserSchema = new mongoose.Schema<User>({
   store: { type: String, default: null },
 });
 
-const User = mongoose.models.User || mongoose.model<User>('User', UserSchema);
+const User =
+  (mongoose.models.User as mongoose.Model<User>) ||
+  mongoose.model<User>('User', UserSchema);
 
 export default User;

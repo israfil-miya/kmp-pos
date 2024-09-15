@@ -1,12 +1,11 @@
+import User from '@/models/Users';
+import dbConnect from '@/utility/dbConnect';
 import NextAuth from 'next-auth';
-import { authConfig } from './auth.config';
 import Credentials from 'next-auth/providers/credentials';
+import { authConfig } from './auth.config';
+dbConnect();
 
-const BASE_URL: string =
-  process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-
-interface User {
-  id: string;
+interface UserTypes {
   db_id: string;
   full_name: string;
   email: string;
@@ -14,26 +13,26 @@ interface User {
   store: string | null;
 }
 
-async function getUser(email: string, password: string): Promise<User | null> {
+async function getUser(
+  email: string,
+  password: string,
+): Promise<UserTypes | null> {
   try {
-    const res = await fetch(BASE_URL + '/api/user?action=handle-login', {
-      method: 'GET',
-      headers: { email: email, password: password },
+    const userData = await User.findOne({
+      email: email,
+      password: password,
     });
 
-    if (res.status !== 200) {
+    if (!userData) {
       return null;
     }
 
-    const userData = await res.json();
-
-    const user: User = {
-      id: userData._id,
-      db_id: userData._id,
-      full_name: userData.full_name,
-      email: userData.email,
-      role: userData.role,
-      store: userData.store || null,
+    const user: UserTypes = {
+      db_id: userData._id as string,
+      full_name: userData.full_name as string,
+      email: userData.email as string,
+      role: userData.role as string,
+      store: (userData.store as string) || null,
     };
 
     return user;

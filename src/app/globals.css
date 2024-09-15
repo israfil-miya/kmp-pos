@@ -50,3 +50,8 @@ h6 {
 :root:has(.disable-page-scroll) {
   overflow: hidden;
 }
+
+*,
+::backdrop {
+  box-sizing: border-box;
+}

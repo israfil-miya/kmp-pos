@@ -1,72 +1,75 @@
 'use client';
 
-import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import '@/app/globals.css';
+import cn from '@/utility/cn';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import '@/app/globals.css';
+import React from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { LoginDataTypes, validationSchema } from '../schema';
 
 const LoginForm = () => {
-  const [creds, setCreds] = useState<{ email: string; password: string }>({
-    email: '',
-    password: '',
-  });
-  const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
-  let handleSignInSubmit = async (
-    e: FormEvent<HTMLFormElement>,
-  ): Promise<void> => {
-    e.preventDefault();
-    setLoading(true);
 
+  const handleSignIn: SubmitHandler<LoginDataTypes> = async data => {
     try {
       const result = await signIn('credentials', {
         redirect: false,
-        email: creds.email,
-        password: creds.password,
-        callbackUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/`,
+        email: data.email,
+        password: data.password,
       });
 
       if (result?.error) {
-        setLoading(false);
-        if (result.error === 'CredentialsSignin') {
-          toast.error('Invalid email or password', {
-            id: 'invalid-creds',
-          });
+        if (result?.error === 'CredentialsSignin') {
+          toast.error('Invalid email or password');
         } else {
-          toast.error('An error occurred', { id: 'error' });
+          toast.error('An error occurred');
         }
-      } else if (result?.ok) {
-        router.push('/');
-        setLoading(false);
+      } else {
+        toast.success('Logged in successfully');
+        router.replace('/');
       }
     } catch (error) {
-      toast.error('An unexpected error occurred', { id: 'unexpected-error' });
-      throw error;
+      console.error(error);
+      toast.error('An error occurred while submitting the form');
     }
   };
 
-  let handleOnChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    setCreds({ ...creds, [e.target.name]: e.target.value });
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting: loading },
+  } = useForm<LoginDataTypes>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
   return (
-    <form onSubmit={handleSignInSubmit}>
+    <form onSubmit={handleSubmit(handleSignIn)}>
       <div className="flex flex-col mb-2">
         <div className="w-full">
           <div>
             <label
-              className="block uppercase tracking-wide text-sm font-bold mb-2"
-              htmlFor="grid-password"
+              className="tracking-wide text-sm font-bold block mb-2 "
+              htmlFor="email-input"
             >
-              Email Address
+              <span className="uppercase">Email</span>
+              <span className="text-red-700 text-wrap block text-xs">
+                {errors?.email && errors.email.message}
+              </span>
             </label>
             <input
-              className="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              className={cn(
+                'appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500',
+                errors.email && 'border-red-500',
+              )}
               required
-              name="email"
-              value={creds.email}
-              onChange={handleOnChange}
+              {...register('email')}
               type="email"
               id="email-input"
               placeholder="johndoe@pos.com"
@@ -75,18 +78,22 @@ const LoginForm = () => {
 
           <div>
             <label
-              className="block uppercase tracking-wide text-sm font-bold mb-2"
-              htmlFor="grid-password"
+              className="tracking-wide text-sm font-bold block mb-2 "
+              htmlFor="password-input"
             >
-              Password
+              <span className="uppercase">Password</span>
+              <span className="text-red-700 text-wrap block text-xs">
+                {errors?.password && errors.password.message}
+              </span>
             </label>
             <input
-              className="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              className={cn(
+                'appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500',
+                errors.password && 'border-red-500',
+              )}
               type="password"
-              name="password"
               required
-              value={creds.password}
-              onChange={handleOnChange}
+              {...register('password')}
               id="password-input"
               placeholder="*******"
             />
@@ -97,7 +104,7 @@ const LoginForm = () => {
       <button
         type="submit"
         disabled={loading}
-        className="rounded-md w-full bg-black text-white font-bold hover:bg-gray-800 px-8 py-2.5 focus:outline-none"
+        className="rounded-sm w-full bg-black text-white font-bold hover:bg-gray-800 px-8 py-2.5 focus:outline-none"
       >
         {loading ? 'Logging in...' : 'Login'}
       </button>

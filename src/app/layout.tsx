@@ -1,9 +1,9 @@
-import type { Metadata } from 'next';
 import '@/app/globals.css';
+import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
-  title: 'Khalek Molla Plaza - POS',
+  title: 'KMP POS',
   description: 'Khalek Molla Plaza',
 };
 
@@ -13,11 +13,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning={true}>
+    <html lang="en" suppressHydrationWarning>
       <body className="">
         <noscript>You need to enable JavaScript to run this app.</noscript>
         {children}
-        <Toaster pauseWhenPageIsHidden richColors position="top-right" />
+        <Toaster
+          closeButton
+          richColors
+          position="top-right"
+          pauseWhenPageIsHidden
+        />
       </body>
     </html>
   );

@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { editUser } from '../actions';
 import { UserDataTypes, validationSchema } from '../schema';
 
-const baseZIndex = 51;
+const baseZIndex = 52;
 
 interface PropsType {
   storeNames: string[];
@@ -230,21 +230,28 @@ const EditButton: React.FC<PropsType> = props => {
                 <Controller
                   name="role"
                   control={control}
-                  render={({ field }) => (
-                    <Select
-                      {...setClassNameAndIsDisabled(isOpen)}
-                      options={roleOptions}
-                      isClearable={true}
-                      placeholder="Select role"
-                      classNamePrefix="react-select"
-                      menuPortalTarget={setMenuPortalTarget}
-                      styles={setCalculatedZIndex(baseZIndex)}
-                      value={roleOptions.find(
-                        option => option.value === field.value,
-                      )}
-                      onChange={option => field.onChange(option?.value)}
-                    />
-                  )}
+                  render={({ field }) => {
+                    return (
+                      <Select
+                        {...field}
+                        {...setClassNameAndIsDisabled(isOpen)}
+                        options={roleOptions}
+                        isClearable={true}
+                        placeholder="Select role"
+                        classNamePrefix="react-select"
+                        menuPortalTarget={setMenuPortalTarget}
+                        styles={setCalculatedZIndex(baseZIndex)}
+                        value={
+                          roleOptions.find(
+                            option => option.value === field.value,
+                          ) || null
+                        }
+                        onChange={option =>
+                          field.onChange(option ? option.value : '')
+                        }
+                      />
+                    );
+                  }}
                 />
               </div>
 
@@ -253,7 +260,7 @@ const EditButton: React.FC<PropsType> = props => {
                   className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
                   htmlFor="store"
                 >
-                  <span className="uppercase">Store*</span>
+                  <span className="uppercase">Store</span>
                   <span className="text-red-700 text-wrap block text-xs">
                     {errors.store && errors.store.message}
                   </span>
@@ -263,18 +270,22 @@ const EditButton: React.FC<PropsType> = props => {
                   control={control}
                   render={({ field }) => (
                     <Select
+                      {...field}
                       {...setClassNameAndIsDisabled(isOpen)}
                       options={storeOptions}
                       isClearable={true}
-                      closeMenuOnSelect={false}
                       placeholder="Select store"
                       classNamePrefix="react-select"
                       menuPortalTarget={setMenuPortalTarget}
                       styles={setCalculatedZIndex(baseZIndex)}
-                      value={storeOptions.find(
-                        option => option.value === field.value,
-                      )}
-                      onChange={option => field.onChange(option?.value)}
+                      value={
+                        storeOptions.find(
+                          option => option.value === field.value,
+                        ) || null
+                      }
+                      onChange={option =>
+                        field.onChange(option ? option.value : '')
+                      }
                     />
                   )}
                 />

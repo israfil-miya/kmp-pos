@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { editProduct } from '../actions';
 import { ProductDataTypes, validationSchema } from '../schema';
 
-const baseZIndex = 51;
+const baseZIndex = 52;
 
 interface PropsType {
   productData: ProductDataTypes;

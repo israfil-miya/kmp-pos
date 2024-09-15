@@ -239,6 +239,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   control={control}
                   render={({ field }) => (
                     <Select
+                      {...field}
                       {...setClassNameAndIsDisabled(isOpen)}
                       options={roleOptions}
                       isClearable={true}
@@ -246,10 +247,14 @@ const CreateButton: React.FC<PropsType> = props => {
                       classNamePrefix="react-select"
                       menuPortalTarget={setMenuPortalTarget}
                       styles={setCalculatedZIndex(baseZIndex)}
-                      value={roleOptions.find(
-                        option => option.value === field.value,
-                      )}
-                      onChange={option => field.onChange(option?.value)}
+                      value={
+                        roleOptions.find(
+                          option => option.value === field.value,
+                        ) || null
+                      }
+                      onChange={option =>
+                        field.onChange(option ? option.value : '')
+                      }
                     />
                   )}
                 />
@@ -260,7 +265,7 @@ const CreateButton: React.FC<PropsType> = props => {
                   className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
                   htmlFor="store"
                 >
-                  <span className="uppercase">Store*</span>
+                  <span className="uppercase">Store</span>
                   <span className="text-red-700 text-wrap block text-xs">
                     {errors.store && errors.store.message}
                   </span>
@@ -270,18 +275,22 @@ const CreateButton: React.FC<PropsType> = props => {
                   control={control}
                   render={({ field }) => (
                     <Select
+                      {...field}
                       {...setClassNameAndIsDisabled(isOpen)}
                       options={storeOptions}
                       isClearable={true}
-                      closeMenuOnSelect={false}
                       placeholder="Select store"
                       classNamePrefix="react-select"
                       menuPortalTarget={setMenuPortalTarget}
                       styles={setCalculatedZIndex(baseZIndex)}
-                      value={storeOptions.find(
-                        option => option.value === field.value,
-                      )}
-                      onChange={option => field.onChange(option?.value)}
+                      value={
+                        storeOptions.find(
+                          option => option.value === field.value,
+                        ) || null
+                      }
+                      onChange={option =>
+                        field.onChange(option ? option.value : '')
+                      }
                     />
                   )}
                 />

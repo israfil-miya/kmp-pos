@@ -4,7 +4,7 @@ export const validationSchema = z
   .object({
     full_name: z.string().min(2, 'Full name is required'),
     email: z.string().email('Invalid email address'),
-    role: z.string().min(1, 'Role is required'),
+    role: z.string({ message: 'Role is required' }).min(1, 'Role is required'),
     store: z.optional(z.string()),
     phone: z.optional(z.string()),
     note: z.optional(z.string()),

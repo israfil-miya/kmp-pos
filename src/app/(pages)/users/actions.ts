@@ -27,7 +27,7 @@ export const createNewUser = async (
     const formData = Object.fromEntries(data);
     parsed = schema.safeParse(formData);
 
-    console.log(parsed.data);
+    console.log(formData, parsed?.data);
 
     if (!parsed.success) {
       const fields = mapFormDataToFields(formData);
@@ -155,6 +155,8 @@ export const editUser = async (
   try {
     const formData = Object.fromEntries(data);
     parsed = schema.safeParse(formData);
+
+    console.log(formData, parsed?.data);
 
     if (!parsed.success) {
       const fields = mapFormDataToFields(formData);

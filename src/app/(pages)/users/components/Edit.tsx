@@ -1,15 +1,19 @@
 'use client';
 
-import cn from '@/utility/cn';
-import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
+import {
+  setCalculatedZIndex,
+  setClassNameAndIsDisabled,
+  setMenuPortalTarget,
+} from '@/utility/selectHelpers';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
 import React, { useActionState, useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
 import { toast } from 'sonner';
 import { editUser } from '../actions';
 import { UserDataTypes, validationSchema } from '../schema';
+
+const baseZIndex = 51;
 
 interface PropsType {
   storeNames: string[];
@@ -102,7 +106,7 @@ const EditButton: React.FC<PropsType> = props => {
 
       <section
         onClick={handleClickOutside}
-        className={`fixed z-50 inset-0 flex justify-center items-center transition-colors ${isOpen ? 'visible bg-black/20 disable-page-scroll' : 'invisible'} `}
+        className={`fixed z-${baseZIndex} inset-0 flex justify-center items-center transition-colors ${isOpen ? 'visible bg-black/20 disable-page-scroll' : 'invisible'} `}
       >
         <article
           ref={popupRef}
@@ -216,7 +220,7 @@ const EditButton: React.FC<PropsType> = props => {
               <div>
                 <label
                   className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
-                  htmlFor="grid-password"
+                  htmlFor="role"
                 >
                   <span className="uppercase">Role*</span>
                   <span className="text-red-700 text-wrap block text-xs">
@@ -228,11 +232,13 @@ const EditButton: React.FC<PropsType> = props => {
                   control={control}
                   render={({ field }) => (
                     <Select
-                      {...field}
-                      isClearable={true}
+                      {...setClassNameAndIsDisabled(isOpen)}
                       options={roleOptions}
-                      placeholder="Select user role"
+                      isClearable={true}
+                      placeholder="Select role"
                       classNamePrefix="react-select"
+                      menuPortalTarget={setMenuPortalTarget}
+                      styles={setCalculatedZIndex(baseZIndex)}
                       value={roleOptions.find(
                         option => option.value === field.value,
                       )}
@@ -245,7 +251,7 @@ const EditButton: React.FC<PropsType> = props => {
               <div>
                 <label
                   className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
-                  htmlFor="grid-password"
+                  htmlFor="store"
                 >
                   <span className="uppercase">Store*</span>
                   <span className="text-red-700 text-wrap block text-xs">
@@ -257,11 +263,14 @@ const EditButton: React.FC<PropsType> = props => {
                   control={control}
                   render={({ field }) => (
                     <Select
-                      {...field}
+                      {...setClassNameAndIsDisabled(isOpen)}
                       options={storeOptions}
                       isClearable={true}
+                      closeMenuOnSelect={false}
                       placeholder="Select store"
                       classNamePrefix="react-select"
+                      menuPortalTarget={setMenuPortalTarget}
+                      styles={setCalculatedZIndex(baseZIndex)}
                       value={storeOptions.find(
                         option => option.value === field.value,
                       )}

@@ -1,18 +1,21 @@
 'use client';
 
-import cn from '@/utility/cn';
-import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
-import customSelectStyles from '@/utility/reactSelectStyle';
+import {
+  setCalculatedZIndex,
+  setClassNameAndIsDisabled,
+  setMenuPortalTarget,
+} from '@/utility/selectHelpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import 'flowbite';
 import { initFlowbite } from 'flowbite';
-import { useRouter } from 'next/navigation';
 import React, { useActionState, useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
 import { toast } from 'sonner';
 import { createNewUser } from '../actions';
 import { UserDataTypes, validationSchema } from '../schema';
+
+const baseZIndex = 50;
 
 interface PropsType {
   storeNames: string[];
@@ -26,11 +29,6 @@ const CreateButton: React.FC<PropsType> = props => {
     error: false,
     message: '',
   });
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -117,7 +115,7 @@ const CreateButton: React.FC<PropsType> = props => {
 
       <section
         onClick={handleClickOutside}
-        className={`fixed z-50 inset-0 flex justify-center items-center transition-colors ${isOpen ? 'visible bg-black/20 disable-page-scroll' : 'invisible'} `}
+        className={`fixed z-${baseZIndex} inset-0 flex justify-center items-center transition-colors ${isOpen ? 'visible bg-black/20 disable-page-scroll' : 'invisible'} `}
       >
         <article
           ref={popupRef}
@@ -152,7 +150,7 @@ const CreateButton: React.FC<PropsType> = props => {
           <form
             action={formAction}
             ref={formRef}
-            className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start"
+            className="overflow-y-scroll max-h-[70vh] p-4 text-start"
             onSubmit={e => {
               e.preventDefault();
               handleSubmit(() => {
@@ -241,16 +239,13 @@ const CreateButton: React.FC<PropsType> = props => {
                   control={control}
                   render={({ field }) => (
                     <Select
+                      {...setClassNameAndIsDisabled(isOpen)}
                       options={roleOptions}
                       isClearable={true}
                       placeholder="Select role"
                       classNamePrefix="react-select"
-                      menuPortalTarget={
-                        typeof window !== 'undefined'
-                          ? document.body
-                          : undefined
-                      }
-                      styles={customSelectStyles}
+                      menuPortalTarget={setMenuPortalTarget}
+                      styles={setCalculatedZIndex(baseZIndex)}
                       value={roleOptions.find(
                         option => option.value === field.value,
                       )}
@@ -275,18 +270,15 @@ const CreateButton: React.FC<PropsType> = props => {
                   control={control}
                   render={({ field }) => (
                     <Select
+                      {...setClassNameAndIsDisabled(isOpen)}
                       options={storeOptions}
                       isClearable={true}
                       closeMenuOnSelect={false}
                       placeholder="Select store"
                       classNamePrefix="react-select"
-                      menuPortalTarget={
-                        typeof window !== 'undefined'
-                          ? document.body
-                          : undefined
-                      }
-                      styles={customSelectStyles}
-                      value={roleOptions.find(
+                      menuPortalTarget={setMenuPortalTarget}
+                      styles={setCalculatedZIndex(baseZIndex)}
+                      value={storeOptions.find(
                         option => option.value === field.value,
                       )}
                       onChange={option => field.onChange(option?.value)}

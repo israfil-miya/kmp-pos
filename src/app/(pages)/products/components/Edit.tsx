@@ -1,16 +1,21 @@
 'use client';
 
-import generateUniqueCode from '@/utility/uCodeGenerator';
+import {
+  setCalculatedZIndex,
+  setClassNameAndIsDisabled,
+  setMenuPortalTarget,
+} from '@/utility/selectHelpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import 'flowbite';
 import { initFlowbite } from 'flowbite';
-import React, { use, useActionState, useEffect, useRef, useState } from 'react';
+import React, { useActionState, useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
 import { toast } from 'sonner';
-import { useDebouncedCallback } from 'use-debounce';
 import { editProduct } from '../actions';
 import { ProductDataTypes, validationSchema } from '../schema';
+
+const baseZIndex = 51;
 
 interface PropsType {
   productData: ProductDataTypes;
@@ -120,7 +125,7 @@ const EditButton: React.FC<PropsType> = props => {
 
       <section
         onClick={handleClickOutside}
-        className={`fixed z-50 inset-0 flex justify-center items-center transition-colors ${isOpen ? 'visible bg-black/20 disable-page-scroll' : 'invisible'} `}
+        className={`fixed z-${baseZIndex} inset-0 flex justify-center items-center transition-colors ${isOpen ? 'visible bg-black/20 disable-page-scroll' : 'invisible'} `}
       >
         <article
           ref={popupRef}
@@ -219,12 +224,14 @@ const EditButton: React.FC<PropsType> = props => {
                   render={({ field }) => (
                     <Select
                       {...field}
+                      {...setClassNameAndIsDisabled(isOpen)}
                       options={storeOptions}
                       isMulti
                       closeMenuOnSelect={false}
                       placeholder="Select stores"
-                      // className="flex-grow text-nowrap py-3 px-3 appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                       classNamePrefix="react-select"
+                      menuPortalTarget={setMenuPortalTarget}
+                      styles={setCalculatedZIndex(baseZIndex)}
                       // Map selected values back to the option objects
                       value={storeOptions.filter(option =>
                         field.value.includes(option.value),
@@ -253,12 +260,14 @@ const EditButton: React.FC<PropsType> = props => {
                   render={({ field }) => (
                     <Select
                       {...field}
+                      {...setClassNameAndIsDisabled(isOpen)}
                       options={categoryOptions}
                       isMulti
                       closeMenuOnSelect={false}
                       placeholder="Select categories"
-                      // className="flex-grow text-nowrap py-3 px-3 appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                       classNamePrefix="react-select"
+                      menuPortalTarget={setMenuPortalTarget}
+                      styles={setCalculatedZIndex(baseZIndex)}
                       // Map selected values back to the option objects
                       value={categoryOptions.filter(option =>
                         field.value.includes(option.value),
@@ -287,12 +296,14 @@ const EditButton: React.FC<PropsType> = props => {
                   render={({ field }) => (
                     <Select
                       {...field}
+                      {...setClassNameAndIsDisabled(isOpen)}
                       options={supplierOptions}
                       isMulti
                       closeMenuOnSelect={false}
                       placeholder="Select suppliers"
-                      // className="flex-grow text-nowrap py-3 px-3 appearance-none border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                       classNamePrefix="react-select"
+                      menuPortalTarget={setMenuPortalTarget}
+                      styles={setCalculatedZIndex(baseZIndex)}
                       // Map selected values back to the option objects
                       value={supplierOptions.filter(option =>
                         field.value.includes(option.value),

@@ -131,10 +131,7 @@ const EditButton: React.FC<PropsType> = props => {
           >
             {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4"> */}
             <div>
-              <label
-                className="tracking-wide text-gray-700 text-sm font-bold block mb-2 "
-                htmlFor="grid-password"
-              >
+              <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
                 <span className="uppercase">Category Name*</span>
                 <span className="text-red-700 text-wrap block text-xs">
                   {errors.name && errors.name.message}

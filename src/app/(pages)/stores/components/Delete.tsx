@@ -1,15 +1,36 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
-import React, { useState } from 'react';
+import React, { useActionState, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { deleteStore } from '../actions';
+import { StoreDataTypes } from '../schema';
 
 interface PropsType {
-  storeData: { [key: string]: any };
-  submitHandler: (storeData: { [key: string]: any }) => Promise<void>;
+  storeData: StoreDataTypes;
 }
+
 const DeleteButton: React.FC<PropsType> = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { data: session } = useSession();
+
+  const [state, formAction, loading] = useActionState(deleteStore, {
+    error: false,
+    message: '',
+  });
+
+  useEffect(() => {
+    console.log('state', state);
+
+    if (state.error) {
+      if (state?.message !== '') {
+        toast.error(state.message);
+      }
+    } else if (state?.message !== '') {
+      toast.success(state.message);
+      setIsOpen(false);
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [state]);
 
   return (
     <>
@@ -71,18 +92,21 @@ const DeleteButton: React.FC<PropsType> = props => {
               onClick={() => setIsOpen(false)}
               className="rounded-sm bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
               type="button"
+              disabled={loading}
             >
               No
             </button>
             <button
-              onClick={() => {
-                props.submitHandler(props.storeData);
-                setIsOpen(false);
-              }}
               className="rounded-sm bg-red-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-red-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
+              disabled={loading}
+              onClick={() => {
+                const formData = new FormData();
+                formData.append('_id', props.storeData._id!);
+                formAction(formData);
+              }}
               type="button"
             >
-              Yes
+              {loading ? 'Deleting...' : 'Yes'}
             </button>
           </footer>
         </article>

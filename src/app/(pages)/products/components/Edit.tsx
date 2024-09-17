@@ -94,11 +94,6 @@ const EditButton: React.FC<PropsType> = props => {
     }
   }, [state, reset]);
 
-  // create a useEffect hook that listens to the form errors and logs them to the console
-  useEffect(() => {
-    console.log('Form errors', errors);
-  }, [errors]);
-
   return (
     <>
       <button
@@ -419,7 +414,6 @@ const EditButton: React.FC<PropsType> = props => {
                 disabled={loading}
                 onClick={() => {
                   formRef.current?.requestSubmit();
-                  console.log('Submitting form', formRef.current);
                 }}
                 className="rounded-sm bg-blue-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"

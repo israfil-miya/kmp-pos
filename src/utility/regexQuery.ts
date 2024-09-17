@@ -7,7 +7,7 @@ import {
   Query as supplier_Query,
   RegexFields as supplier_RegexFields,
   RegexQuery as supplier_RegexQuery,
-} from '@/app/api/supplier/types';
+} from '@/app/(pages)/suppliers/schema';
 
 type RegexQuery = supplier_RegexQuery | product_RegexQuery;
 type Query = supplier_Query | product_Query;

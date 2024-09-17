@@ -1,65 +1,77 @@
-import { useSession } from 'next-auth/react';
+'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import 'flowbite';
 import { initFlowbite } from 'flowbite';
-import React, { useEffect, useRef, useState } from 'react';
-import { SupplierDataTypes, handleResetState } from '../helpers';
+import React, { useActionState, useEffect, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { editSupplier } from '../actions';
+import { SupplierDataTypes, validationSchema } from '../schema';
+
+const baseZIndex = 52;
 
 interface PropsType {
   supplierData: SupplierDataTypes;
-  isLoading: boolean;
-  submitHandler: (
-    supplierId: string | undefined,
-    supplierData: SupplierDataTypes,
-    editedData: SupplierDataTypes,
-    setEditedData: React.Dispatch<React.SetStateAction<SupplierDataTypes>>,
-  ) => Promise<void>;
 }
 
 const EditButton: React.FC<PropsType> = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { data: session } = useSession();
   const popupRef = useRef<HTMLElement>(null);
-
-  const [editedData, setEditedData] = useState<SupplierDataTypes>({});
-
-  useEffect(() => {
-    initFlowbite();
-  }, []);
-
-  useEffect(() => {
-    if (!isOpen) {
-      handleResetState(setEditedData);
-    } else {
-      setEditedData(props.supplierData);
-    }
-  }, [isOpen]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ): void => {
-    const { name, value } = e.target;
-
-    setEditedData(prevData => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, formAction, loading] = useActionState(editSupplier, {
+    error: false,
+    message: '',
+  });
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
       popupRef.current &&
       !popupRef.current.contains(e.target as Node) &&
-      !popupRef.current.querySelector('input:focus, textarea:focus')
+      !popupRef.current.querySelector('input:focus, textarea:focus') &&
+      !popupRef.current.querySelector('button:focus')
     ) {
       setIsOpen(false);
     }
   };
 
+  useEffect(() => {
+    initFlowbite();
+  }, []);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<SupplierDataTypes>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      ...props.supplierData,
+      ...(state?.fields ?? {}),
+    },
+  });
+
+  useEffect(() => {
+    if (state.error) {
+      if (state?.message !== '') {
+        toast.error(state.message);
+      }
+    } else if (state?.message !== '') {
+      toast.success(state.message);
+      if (state.fields) {
+        reset(state.fields as SupplierDataTypes);
+      }
+      setIsOpen(false);
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [state, reset]);
+
   return (
     <>
       <button
-        disabled={props.isLoading}
+        disabled={loading}
         onClick={() => {
           setIsOpen(true);
         }}
@@ -82,7 +94,7 @@ const EditButton: React.FC<PropsType> = props => {
 
       <section
         onClick={handleClickOutside}
-        className={`fixed z-50 inset-0 flex justify-center items-center transition-colors ${isOpen ? 'visible bg-black/20 disable-page-scroll' : 'invisible'} `}
+        className={`fixed z-${baseZIndex} inset-0 flex justify-center items-center transition-colors ${isOpen ? 'visible bg-black/20 disable-page-scroll' : 'invisible'} `}
       >
         <article
           ref={popupRef}
@@ -113,89 +125,108 @@ const EditButton: React.FC<PropsType> = props => {
               </svg>
             </button>
           </header>
-          <div className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start">
+          <form
+            action={formAction}
+            ref={formRef}
+            className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start"
+            onSubmit={e => {
+              console.log('Form submitted');
+              e.preventDefault();
+              handleSubmit(() => {
+                const formData = new FormData(formRef.current!);
+                formData.append('_id', props.supplierData._id!);
+                console.log('Form data', formData);
+                formAction(formData);
+              })(e);
+            }}
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4">
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Contact Person*
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Contact Person*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.name && errors.name.message}
+                  </span>
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="name"
-                  value={editedData.name}
-                  onChange={handleChange}
-                  type="text"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Email
-                </label>
-                <input
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="email"
-                  value={editedData.email}
-                  onChange={handleChange}
+                  {...register('name')}
                   type="text"
                 />
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Phone
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">E-mail</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.email && errors.email.message}
+                  </span>
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="phone"
-                  value={editedData.phone}
-                  onChange={handleChange}
+                  {...register('email')}
                   type="text"
                 />
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Reg. Date
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Phone</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.phone && errors.phone.message}
+                  </span>
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="reg_date"
-                  value={editedData.reg_date}
-                  onChange={handleChange}
+                  {...register('phone')}
+                  type="text"
+                />
+              </div>
+
+              <div>
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Reg. Date</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.reg_date && errors.reg_date.message}
+                  </span>
+                </label>
+                <input
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  {...register('reg_date')}
                   type="date"
                 />
               </div>
 
               <div>
-                <label className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2">
-                  Company Name
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Company Name</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.company && errors.company.message}
+                  </span>
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="company"
-                  value={editedData.company}
-                  onChange={handleChange}
+                  {...register('company')}
                   type="text"
                 />
               </div>
 
               <div>
-                <label className="block uppercase tracking-wide text-gray-700 text-sm font-bold mb-2">
-                  Address
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Address</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.address && errors.address.message}
+                  </span>
                 </label>
                 <textarea
                   rows={5}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="address"
-                  value={editedData.address}
-                  onChange={handleChange}
+                  {...register('address')}
                   placeholder="Company's headquarter/storehouse location"
                 />
               </div>
             </div>
-          </div>
+          </form>
 
           <footer className="flex items-center px-4 py-2 border-t justify-end gap-6 border-gray-200 rounded-b">
             <div className="buttons space-x-2 ">
@@ -203,23 +234,19 @@ const EditButton: React.FC<PropsType> = props => {
                 onClick={() => setIsOpen(false)}
                 className="rounded-sm bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
+                disabled={loading}
               >
                 Close
               </button>
               <button
+                disabled={loading}
                 onClick={() => {
-                  props.submitHandler(
-                    props.supplierData?._id,
-                    props.supplierData,
-                    editedData,
-                    setEditedData,
-                  );
-                  setIsOpen(false);
+                  formRef.current?.requestSubmit();
                 }}
                 className="rounded-sm bg-blue-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
               >
-                Submit
+                {loading ? 'Submitting...' : 'Submit'}
               </button>
             </div>
           </footer>

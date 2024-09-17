@@ -1,13 +1,15 @@
-import React from 'react';
-import Table from './components/Table';
-import { SessionProvider } from 'next-auth/react';
 import { auth } from '@/auth';
+import { SessionProvider } from 'next-auth/react';
+import React from 'react';
+import { getAllStores } from './actions';
+import Table from './components/Table';
 
 const StoresPage = async () => {
   const session = await auth();
+  const stores = await getAllStores();
   return (
     <SessionProvider session={session}>
-      <Table />
+      <Table data={stores} />
     </SessionProvider>
   );
 };

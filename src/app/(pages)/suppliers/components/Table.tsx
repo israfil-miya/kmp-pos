@@ -7,13 +7,18 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { SupplierDataTypes, handleResetState } from '../helpers';
+import {
+  FormState,
+  getAllSuppliers as getAlSuppliersAction,
+  getAllSuppliersFiltered as getAllSuppliersFilteredAction,
+} from '../actions';
+import { SupplierDataTypes } from '../schema';
 import CreateButton from './Create';
 import DeleteButton from './Delete';
 import EditButton from './Edit';
 import FilterButton from './Filter';
 
-interface SuppliersState {
+export interface SuppliersState {
   pagination?: {
     count: number;
     pageCount: number;
@@ -21,7 +26,11 @@ interface SuppliersState {
   items?: SupplierDataTypes[];
 }
 
-const Table = () => {
+interface TableDataProps {
+  data: FormState;
+}
+
+const Table: React.FC<TableDataProps> = props => {
   const [isLoading, setIsLoading] = useState(false);
   const [suppliers, setSuppliers] = useState<SuppliersState>({
     pagination: {
@@ -37,7 +46,7 @@ const Table = () => {
   const [isFiltered, setIsFiltered] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [pageCount, setPageCount] = useState<number>(0);
-  const [itemPerPage, setItemPerPage] = useState<number>(30);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(30);
 
   const prevPageCount = useRef<number>(0);
   const prevPage = useRef<number>(1);
@@ -46,74 +55,22 @@ const Table = () => {
     searchText: '',
   });
 
-  const createNewSupplier = async (
-    supplierData: SupplierDataTypes,
-    setSupplierData: React.Dispatch<React.SetStateAction<SupplierDataTypes>>,
-  ): Promise<void> => {
-    try {
-      console.log(supplierData);
-
-      if (!supplierData.name) {
-        handleResetState(setSupplierData);
-        return;
-      }
-
-      // setIsLoading(true);
-
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/supplier?action=create-new-supplier';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(supplierData),
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        toast.success('New supplier added successfully');
-        handleResetState(setSupplierData);
-        if (!isFiltered) await getAllSuppliers();
-        else await getAllSuppliersFiltered();
-      } else {
-        toast.error(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while submitting the form');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const getAllSuppliers = async (): Promise<void> => {
     try {
       // setIsLoading(true);
 
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/supplier?action=get-all-suppliers';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          filtered: false,
-          paginated: true,
-          item_per_page: itemPerPage,
-          page,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({}),
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        setSuppliers(response.data);
+      let response = await getAlSuppliersAction({
+        page: page,
+        itemsPerPage: itemsPerPage,
+      });
+      if (response.error) {
+        if (response?.message !== '') {
+          toast.error(response.message);
+        }
+      } else if (response?.message !== '') {
+        setSuppliers(JSON.parse(response.message));
       } else {
-        toast.error(response.data);
+        console.log('Nothing was returned from the server');
       }
     } catch (error) {
       console.error(error);
@@ -127,30 +84,20 @@ const Table = () => {
     try {
       // setIsLoading(true);
 
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/supplier?action=get-all-suppliers';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          filtered: true,
-          paginated: true,
-          item_per_page: itemPerPage,
-          page,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...filters,
-        }),
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        setSuppliers(response.data);
+      let response = await getAllSuppliersFilteredAction({
+        page: isFiltered ? page : 1,
+        itemsPerPage: itemsPerPage,
+        filters: filters,
+      });
+      if (response.error) {
+        if (response?.message !== '') {
+          toast.error(response.message);
+        }
+      } else if (response?.message !== '') {
+        setSuppliers(JSON.parse(response.message));
         setIsFiltered(true);
       } else {
-        toast.error(response.data);
+        console.log('Nothing was returned from the server');
       }
     } catch (error) {
       console.error(error);
@@ -160,92 +107,24 @@ const Table = () => {
     }
   };
 
-  const deleteSupplier = async (
-    supplierData: SupplierDataTypes,
-  ): Promise<void> => {
-    try {
-      // setIsLoading(true);
-
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL +
-        '/api/supplier?action=delete-supplier';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ supplierId: supplierData._id }),
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        toast.success('Supplier deleted successfully');
-        if (!isFiltered) await getAllSuppliers();
-        else await getAllSuppliersFiltered();
-      } else {
-        toast.error(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while deleting the supplier');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const editSupplier = async (
-    supplierId: string | undefined,
-    supplierData: SupplierDataTypes,
-    editedData: SupplierDataTypes,
-    setEditedData: React.Dispatch<React.SetStateAction<SupplierDataTypes>>,
-  ): Promise<void> => {
-    try {
-      if (!editedData.name) {
-        handleResetState(setEditedData);
-        return;
-      }
-
-      // setIsLoading(true);
-
-      let url: string =
-        process.env.NEXT_PUBLIC_BASE_URL + '/api/supplier?action=edit-supplier';
-      let options: {} = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ supplierId, editedData }),
-      };
-
-      let response = await fetchData(url, options);
-
-      if (response.ok) {
-        toast.success('Supplier data edited successfully');
-        handleResetState(setEditedData);
-        if (!isFiltered) await getAllSuppliers();
-        else await getAllSuppliersFiltered();
-      } else {
-        toast.error(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while submitting the form');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getAllSuppliers();
-  }, []);
-
   function handlePrevious() {
     setPage(p => {
       if (p === 1) return p;
       return p - 1;
     });
   }
+
+  useEffect(() => {
+    if (props.data.error) {
+      if (props.data?.message !== '') {
+        toast.error(props.data.message);
+      }
+    } else if (props.data?.message !== '') {
+      setSuppliers(JSON.parse(props.data.message));
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [props.data]);
 
   function handleNext() {
     setPage(p => {
@@ -276,14 +155,14 @@ const Table = () => {
   }, [suppliers?.pagination?.pageCount]);
 
   useEffect(() => {
-    // Reset to first page when itemPerPage changes
+    // Reset to first page when itemsPerPage changes
     prevPageCount.current = 0;
     prevPage.current = 1;
     setPage(1);
 
     if (!isFiltered) getAllSuppliers();
     else getAllSuppliersFiltered();
-  }, [itemPerPage]);
+  }, [itemsPerPage]);
 
   return (
     <>
@@ -343,9 +222,8 @@ const Table = () => {
           </div>
 
           <select
-            value={itemPerPage}
-            onChange={e => setItemPerPage(parseInt(e.target.value))}
-            // defaultValue={30}
+            value={itemsPerPage}
+            onChange={e => setItemsPerPage(parseInt(e.target.value))}
             required
             className="appearance-none bg-gray-200 text-gray-700 border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           >
@@ -354,13 +232,14 @@ const Table = () => {
             <option value={100}>100</option>
           </select>
           <FilterButton
-            isLoading={isLoading}
-            submitHandler={getAllSuppliersFiltered}
+            page={page}
+            itemsPerPage={itemsPerPage}
             setFilters={setFilters}
-            filters={filters}
+            setIsFiltered={setIsFiltered}
+            setSuppliers={setSuppliers}
           />
         </div>
-        <CreateButton isLoading={isLoading} submitHandler={createNewSupplier} />
+        <CreateButton />
       </div>
 
       {isLoading && <p className="text-center">Loading...</p>}
@@ -408,15 +287,8 @@ const Table = () => {
                         >
                           <div className="inline-block">
                             <div className="flex gap-2">
-                              <EditButton
-                                isLoading={isLoading}
-                                supplierData={item}
-                                submitHandler={editSupplier}
-                              />
-                              <DeleteButton
-                                supplierData={item}
-                                submitHandler={deleteSupplier}
-                              />
+                              <EditButton supplierData={item} />
+                              <DeleteButton supplierData={item} />
                             </div>
                           </div>
                         </td>
@@ -443,7 +315,7 @@ const Table = () => {
         {`
           th,
           td {
-            padding: 2.5px 10px;
+            padding: 5px 10px;
           }
         `}
       </style>

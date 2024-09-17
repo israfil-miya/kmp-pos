@@ -9,6 +9,7 @@ import { ProductDataTypes } from '../schema';
 interface PropsType {
   productData: ProductDataTypes;
 }
+
 const DeleteButton: React.FC<PropsType> = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -18,8 +19,6 @@ const DeleteButton: React.FC<PropsType> = props => {
   });
 
   useEffect(() => {
-    console.log('state', state);
-
     if (state.error) {
       if (state?.message !== '') {
         toast.error(state.message);

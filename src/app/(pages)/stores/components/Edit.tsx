@@ -1,43 +1,32 @@
-import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
-import { useSession } from 'next-auth/react';
-import React, { useEffect, useRef, useState } from 'react';
-import { StoreDataTypes, handleResetState } from '../helpers';
+'use client';
+
+import {
+  setCalculatedZIndex,
+  setClassNameAndIsDisabled,
+  setMenuPortalTarget,
+} from '@/utility/selectHelpers';
+import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useActionState, useEffect, useRef, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import Select from 'react-select';
+import { toast } from 'sonner';
+import { editStore } from '../actions';
+import { StoreDataTypes, validationSchema } from '../schema';
+
+const baseZIndex = 52;
 
 interface PropsType {
   storeData: StoreDataTypes;
-  isLoading: boolean;
-  submitHandler: (
-    storeId: string | undefined,
-    storeData: StoreDataTypes,
-    editedData: StoreDataTypes,
-    setEditedData: React.Dispatch<React.SetStateAction<StoreDataTypes>>,
-  ) => Promise<void>;
 }
 
 const EditButton: React.FC<PropsType> = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { data: session } = useSession();
   const popupRef = useRef<HTMLElement>(null);
-
-  const [editedData, setEditedData] = useState<StoreDataTypes>({});
-
-  useEffect(() => {
-    if (!isOpen) {
-      handleResetState(setEditedData);
-    } else {
-      setEditedData(props.storeData);
-    }
-  }, [isOpen]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ): void => {
-    const { name, value } = e.target;
-    setEditedData(prevData => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, formAction, loading] = useActionState(editStore, {
+    error: false,
+    message: '',
+  });
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -49,10 +38,45 @@ const EditButton: React.FC<PropsType> = props => {
     }
   };
 
+  const statusOptions = [
+    { value: 'open', label: 'Open' },
+    { value: 'closed', label: 'Closed' },
+  ];
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm<StoreDataTypes>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      ...props.storeData,
+      ...(state?.fields ?? {}),
+    },
+  });
+
+  useEffect(() => {
+    if (state.error) {
+      if (state?.message !== '') {
+        toast.error(state.message);
+      }
+    } else if (state?.message !== '') {
+      toast.success(state.message);
+      if (state.fields) {
+        reset(state.fields as StoreDataTypes);
+      }
+      setIsOpen(false);
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [state, reset]);
+
   return (
     <>
       <button
-        disabled={props.isLoading}
+        disabled={loading}
         onClick={() => {
           setIsOpen(true);
         }}
@@ -75,7 +99,7 @@ const EditButton: React.FC<PropsType> = props => {
 
       <section
         onClick={handleClickOutside}
-        className={`fixed z-50 inset-0 flex justify-center items-center transition-colors ${isOpen ? 'visible bg-black/20 disable-page-scroll' : 'invisible'} `}
+        className={`fixed z-${baseZIndex} inset-0 flex justify-center items-center transition-colors ${isOpen ? 'visible bg-black/20 disable-page-scroll' : 'invisible'} `}
       >
         <article
           ref={popupRef}
@@ -106,99 +130,112 @@ const EditButton: React.FC<PropsType> = props => {
               </svg>
             </button>
           </header>
-          <div className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start">
+          <form
+            action={formAction}
+            ref={formRef}
+            className="overflow-x-hidden overflow-y-scroll max-h-[70vh] p-4 text-start"
+            onSubmit={e => {
+              e.preventDefault();
+              handleSubmit(() => {
+                const formData = new FormData(formRef.current!);
+                formData.append('_id', props.storeData._id!);
+                formAction(formData);
+              })(e);
+            }}
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4">
               <div>
-                <label
-                  className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
-                  htmlFor="grid-password"
-                >
-                  Store name
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Store Name*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.name && errors.name.message}
+                  </span>
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="name"
-                  value={editedData.name}
-                  onChange={handleChange}
+                  {...register('name')}
                   type="text"
                 />
               </div>
 
               <div>
-                <label
-                  className="uppercase tracking-wide text-gray-700 text-sm font-bold flex gap-2 mb-2"
-                  htmlFor="grid-password"
-                >
-                  Manager
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Manager Name</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.manager && errors.manager.message}
+                  </span>
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="manager"
-                  value={editedData.manager}
-                  onChange={handleChange}
+                  {...register('manager')}
                   type="text"
                 />
               </div>
 
               <div>
-                <label
-                  className="uppercase tracking-wide text-gray-700 text-sm font-bold flex gap-2 mb-2"
-                  htmlFor="grid-password"
-                >
-                  Phone
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Phone</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.phone && errors.phone.message}
+                  </span>
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="phone"
-                  value={editedData.phone}
-                  onChange={handleChange}
+                  {...register('phone')}
                   type="text"
                 />
               </div>
 
               <div>
-                <label
-                  className="uppercase tracking-wide text-gray-700 text-sm font-bold block mb-2"
-                  htmlFor="grid-last-name"
-                >
-                  Status
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Status*</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.status && errors.status.message}
+                  </span>
                 </label>
-                <select
-                  value={editedData.status}
-                  onChange={e =>
-                    setEditedData((prevData: StoreDataTypes) => ({
-                      ...prevData,
-                      status: e.target.value,
-                    }))
-                  }
-                  required
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                >
-                  <option value={''} className="text-gray-400">
-                    Select store status
-                  </option>
-                  <option value="open">Open</option>
-                  <option value="closed">Closed</option>
-                </select>
+                <Controller
+                  name="status"
+                  control={control}
+                  render={({ field }) => {
+                    return (
+                      <Select
+                        {...field}
+                        {...setClassNameAndIsDisabled(isOpen)}
+                        options={statusOptions}
+                        isClearable={true}
+                        placeholder="Select status"
+                        classNamePrefix="react-select"
+                        menuPortalTarget={setMenuPortalTarget}
+                        styles={setCalculatedZIndex(baseZIndex)}
+                        value={
+                          statusOptions.find(
+                            option => option.value === field.value,
+                          ) || null
+                        }
+                        onChange={option =>
+                          field.onChange(option ? option.value : '')
+                        }
+                      />
+                    );
+                  }}
+                />
               </div>
 
               <div>
-                <label
-                  className="block uppercase tracking-wide text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="grid-password"
-                >
-                  Store Location
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">Store Location</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.manager && errors.manager.message}
+                  </span>
                 </label>
                 <textarea
                   rows={5}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  name="location"
-                  value={editedData.location}
-                  onChange={handleChange}
+                  {...register('location')}
                 />
               </div>
             </div>
-          </div>
+          </form>
 
           <footer className="flex items-center px-4 py-2 border-t justify-end gap-6 border-gray-200 rounded-b">
             <div className="buttons space-x-2 ">
@@ -206,23 +243,19 @@ const EditButton: React.FC<PropsType> = props => {
                 onClick={() => setIsOpen(false)}
                 className="rounded-sm bg-gray-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-gray-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
+                disabled={loading}
               >
                 Close
               </button>
               <button
+                disabled={loading}
                 onClick={() => {
-                  props.submitHandler(
-                    props.storeData?._id,
-                    props.storeData,
-                    editedData,
-                    setEditedData,
-                  );
-                  setIsOpen(false);
+                  formRef.current?.requestSubmit();
                 }}
                 className="rounded-sm bg-blue-600 text-white  hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
                 type="button"
               >
-                Submit
+                {loading ? 'Submitting...' : 'Submit'}
               </button>
             </div>
           </footer>

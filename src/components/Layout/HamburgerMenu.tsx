@@ -1,22 +1,20 @@
 'use client';
 import cn from '@/utility/cn';
 import React, { useState } from 'react';
+import { useDrawer } from './ClientLayout';
 
 interface HamburgerMenuProps {
   className?: string;
-  isDrawerOpen: boolean;
-  setIsDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
-const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
-  className,
-  isDrawerOpen,
-  setIsDrawerOpen,
-}) => {
+const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ className }) => {
+  const { toggleSidebar } = useDrawer();
+
   return (
     <>
       <div
         className={cn('hamburger-menu', className)}
-        onClick={() => setIsDrawerOpen(!isDrawerOpen)}
+        onClick={toggleSidebar}
+        aria-label="Open Sidebar"
       >
         <div className="line"></div>
         <div className="line"></div>
@@ -26,13 +24,12 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
         .hamburger-menu {
           display: none;
           cursor: pointer;
-          z-index: 1000;
         }
 
         .line {
           width: 30px;
           height: 3px;
-          background-color: #333;
+          background-color: #fff;
           margin: 5px;
           border-radius: 5px;
         }

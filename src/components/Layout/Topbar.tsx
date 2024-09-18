@@ -1,49 +1,22 @@
+'use client';
 import React from 'react';
 
 import { auth } from '@/auth';
 import crypto from 'crypto';
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Hamburger from './HamburgerMenu';
 
-async function sha256(message: string) {
-  // encode as UTF-8
-  const msgBuffer = new TextEncoder().encode(message);
-
-  // hash the message
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-
-  // convert ArrayBuffer to Array
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-
-  // convert bytes to hex string
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  return hashHex;
-}
-
 interface TopbarProps {
-  isDrawerOpen: boolean;
-  setIsDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  avatarURI: string;
 }
 
-const Topbar: React.FC<TopbarProps> = async ({
-  isDrawerOpen,
-  setIsDrawerOpen,
-}) => {
-  const session = await auth();
-  const avatarURI =
-    'https://gravatar.com/avatar/' +
-    (await sha256(
-      session?.user.email.trim().toLowerCase() || 'johndoe@pos.com',
-    )) +
-    '/?s=400&d=identicon&r=x';
+const Topbar: React.FC<TopbarProps> = ({ avatarURI }) => {
+  const { data: session } = useSession();
   return (
     <header className="w-full border-b border-gray-600 px-10 h-[72px] bg-gray-800 text-white flex flex-row justify-between items-center shadow-[0_4px_6px_rgba(0,0,0,0.06)]">
-      <Hamburger
-        className="block lg:hidden"
-        isDrawerOpen={isDrawerOpen}
-        setIsDrawerOpen={setIsDrawerOpen}
-      />
+      <Hamburger className="block lg:hidden" />
 
       <Image
         src="/images/khalek-molla-high-resolution-logo-white-transparent.png"

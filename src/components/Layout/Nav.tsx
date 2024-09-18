@@ -10,21 +10,17 @@ import { toast } from 'sonner';
 
 interface NavProps {
   LogoutAction: () => Promise<void>;
+  className?: string;
 }
 
 const Nav: React.FC<NavProps> = props => {
   const { data: session } = useSession();
   const userRole = session?.user.role;
 
-  const pathName = usePathname(); // Current path
-  const toastRef = useRef<string | number | null>(); // To store the toast ID
-
-  // show a toast while the user is routing to a different page
-  // show a toast when the page (where the user is going) starts loading and somehow store it in a ref, when the page is loaded, remove the toast
-  // note: this component gets re-rendered when the user navigates to a different page (it's a layout component)
+  const pathName = usePathname();
 
   return (
-    <nav className="flex flex-col space-y-1">
+    <nav className={cn('flex flex-col space-y-1', props.className)}>
       <Link
         href="/"
         className={cn(

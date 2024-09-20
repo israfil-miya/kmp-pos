@@ -1,6 +1,7 @@
 'use client';
-import React from 'react';
-import { useDrawer } from './ClientLayout';
+import 'flowbite';
+import { initFlowbite } from 'flowbite';
+import React, { useEffect } from 'react';
 import Nav from './Nav';
 
 interface SidebarProps {
@@ -8,15 +9,19 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ LogoutAction }) => {
-  const { isSidebarOpen } = useDrawer();
+  useEffect(() => {
+    initFlowbite();
+  }, []);
 
   return (
     <div
-      className={`sidebar lg:block relative z-auto bg-gray-800 w-56 h-[calc(100vh-72px)] overflow-auto text-white gap-6 pb-2 flex-col flex shadow-[4px_0px_10px_rgba(0,0,0,0.06)] ${
-        isSidebarOpen ? '' : 'hidden'
-      }`}
+      id="logo-sidebar"
+      className="fixed top-0 left-0 z-40 w-52 h-screen pt-20 transition-transform -translate-x-full bg-gray-800 border-r border-gray-600 sm:translate-x-0"
+      aria-label="Sidebar"
     >
-      <Nav LogoutAction={LogoutAction} />
+      <div className="h-full pb-4 overflow-y-auto bg-gray-800 text-white">
+        <Nav LogoutAction={LogoutAction} />
+      </div>
     </div>
   );
 };

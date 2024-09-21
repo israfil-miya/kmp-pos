@@ -49,7 +49,7 @@ const ShortCards = () => {
         iconClassName="bg-red-500 text-white"
       />
       <ShortCardTemplate
-        title="Today Invoice"
+        title="Today Invoices"
         description="1"
         icon={
           <svg

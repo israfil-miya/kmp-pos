@@ -200,26 +200,32 @@ const Nav: React.FC<NavProps> = props => {
       </li>
       <li>
         <Link
-          href="/orders"
+          href="/sells"
           className={cn(
             'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:text-white',
             userRole === 'cashier' && 'hidden',
-            pathName === '/orders' &&
+            pathName === '/sells' &&
               'bg-gray-900 border-l-4 border-green-400 text-white',
           )}
         >
           <span className="flex relative left-5">
             <svg
-              className="w-6 h-6 mr-2"
               xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="currentColor"
-              viewBox="0 0 16 16"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              className="w-6 h-6 mr-2"
             >
-              <path d="M4 11H2v3h2zm5-4H7v7h2zm5-5v12h-2V2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1z" />
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+              <path d="M3 6h18" />
+              <path d="M16 10a4 4 0 0 1-8 0" />
             </svg>
-            Orders
+            Sells
           </span>
         </Link>
       </li>
@@ -322,6 +328,40 @@ const Nav: React.FC<NavProps> = props => {
               <path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5M3 4.5a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zm2 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zm2 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zm2 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0z" />
             </svg>
             Barcode
+          </span>
+        </Link>
+      </li>
+      <li>
+        {/* Refund, Buy cost, Misc. costs */}
+        <Link
+          href="/expenses"
+          className={cn(
+            'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:text-white',
+            !['administrator', 'manager'].includes(userRole || '') && 'hidden',
+            pathName === '/barcode' &&
+              'bg-gray-900 border-l-4 border-green-400 text-white',
+          )}
+        >
+          <span className="flex relative left-5">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              className="w-6 h-6 mr-2"
+            >
+              <path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17" />
+              <path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9" />
+              <path d="m2 16 6 6" />
+              <circle cx="16" cy="9" r="2.9" />
+              <circle cx="6" cy="5" r="3" />
+            </svg>
+            Expenses
           </span>
         </Link>
       </li>

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-interface Product {
+export interface Product extends mongoose.Document {
   batch: string;
   name: string;
   description: string;
@@ -19,24 +19,15 @@ const ProductSchema = new mongoose.Schema<Product>(
     batch: {
       type: String,
       required: [true, 'Batch is not given'],
+      unique: true,
+      minlength: [1, 'Batch must be at least 1 character'],
+      maxlength: [8, 'Batch must be at most 8 characters'],
       validate: [
-        {
-          validator: function (v: string) {
-            return v.trim().length > 0;
-          },
-          message: 'Batch cannot be empty',
-        },
         {
           validator: function (v: string) {
             return /^[A-Za-z0-9]+$/.test(v);
           },
           message: 'Batch must contain only alphanumeric characters',
-        },
-        {
-          validator: function (v: string) {
-            return v.trim().length == 8;
-          },
-          message: 'Batch must be 8 characters long',
         },
       ],
     },
@@ -51,32 +42,17 @@ const ProductSchema = new mongoose.Schema<Product>(
     cost_price: {
       type: Number,
       required: [true, 'Cost price is not given'],
-      validate: {
-        validator: function (v: number) {
-          return v > 0;
-        },
-        message: 'Cost price must be greater than zero',
-      },
+      min: [0, 'Cost price cannot be negative'],
     },
     selling_price: {
       type: Number,
       required: [true, 'Selling price is not given'],
-      validate: {
-        validator: function (v: number) {
-          return v > 0;
-        },
-        message: 'Selling price must be greater than zero',
-      },
+      min: [0, 'Selling price cannot be negative'],
     },
     quantity: {
       type: Number,
       default: 0,
-      validate: {
-        validator: function (v: number) {
-          return v >= 0;
-        },
-        message: 'Quantity cannot be negative',
-      },
+      min: [0, 'Quantity cannot be negative'],
     },
     supplier: {
       type: [String],

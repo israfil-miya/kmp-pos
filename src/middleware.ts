@@ -2,7 +2,7 @@ import { authConfig } from '@/auth.config';
 import NextAuth from 'next-auth';
 import { NextResponse } from 'next/server';
 
-const PUBLIC_ROUTES = ['/login', '/api/user', '/api/auth/*']; // Public routes
+const PUBLIC_ROUTES = ['/login', '/api/auth/*']; // Public routes
 const ROOT = '/login'; // Root path
 
 const { auth } = NextAuth(authConfig);

@@ -1,7 +1,7 @@
 import getTodayDate from '@/utility/getTodaysDate';
 import mongoose from 'mongoose';
 
-interface Supplier {
+export interface Supplier extends mongoose.Document {
   name: string;
   company: string;
   reg_date: string;
@@ -14,12 +14,7 @@ const SupplierSchema = new mongoose.Schema<Supplier>({
   name: {
     type: String,
     required: [true, 'Name is not given'],
-    validate: {
-      validator: function (v: string) {
-        return v.trim().length > 0;
-      },
-      message: 'Name cannot be empty',
-    },
+    minlength: [1, 'Name must be at least 1 character'],
   },
   company: {
     type: String,

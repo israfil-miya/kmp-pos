@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { editStore } from '../actions';
 import { StoreDataTypes, validationSchema } from '../schema';
 
-const baseZIndex = 52;
+const baseZIndex = 50; // 52
 
 interface PropsType {
   storeData: StoreDataTypes;

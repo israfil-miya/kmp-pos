@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-interface Store {
+export interface Store extends mongoose.Document {
   name: string;
   location: string;
   manager: string;
@@ -12,17 +12,19 @@ const StoreSchema = new mongoose.Schema<Store>({
   name: {
     type: String,
     required: [true, 'Name is not given'],
-    validate: {
-      validator: function (v: string) {
-        return v.trim().length > 0;
-      },
-      message: 'Name cannot be empty',
-    },
+    minlength: [1, 'Name must be at least 1 character'],
   },
   location: { type: String, default: '' },
   manager: { type: String, default: '' },
   phone: { type: String, default: '' },
-  status: { type: String, default: 'open' },
+  status: {
+    type: String,
+    default: 'open',
+    enum: {
+      values: ['open', 'closed'],
+      message: 'Status must be either "open" or "closed"',
+    },
+  },
 });
 
 const Store =

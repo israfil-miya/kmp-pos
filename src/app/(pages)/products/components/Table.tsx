@@ -14,6 +14,7 @@ import {
   getAllProductsFiltered as getAllProductsFilteredAction,
 } from '../actions';
 import { ProductDataTypes } from '../schema';
+import BarcodeButton from './Barcode';
 import CreateButton from './Create';
 import DeleteButton from './Delete';
 import EditButton from './Edit';
@@ -398,7 +399,7 @@ const Table: React.FC<TableDataProps> = props => {
                                 productData={item}
                               />
                               <DeleteButton productData={item} />
-                              {/* <button>Print Product Barcode</button> */}
+                              <BarcodeButton code={item.batch} />
                             </div>
                           </div>
                         </td>

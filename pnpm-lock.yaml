@@ -10,6 +10,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^3.9.0
         version: 3.9.0(react-hook-form@7.53.0(react@19.0.0-rc-7771d3a7-20240827))
+      bwip-js:
+        specifier: ^4.5.1
+        version: 4.5.1
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -19,6 +22,9 @@ importers:
       flowbite-react:
         specifier: ^0.10.1
         version: 0.10.1(react-dom@19.0.0-rc-7771d3a7-20240827(react@19.0.0-rc-7771d3a7-20240827))(react@19.0.0-rc-7771d3a7-20240827)(tailwindcss@3.4.11)
+      jspdf:
+        specifier: ^2.5.2
+        version: 2.5.2
       moment-timezone:
         specifier: ^0.5.45
         version: 0.5.45
@@ -49,6 +55,9 @@ importers:
       sonner:
         specifier: ^1.5.0
         version: 1.5.0(react-dom@19.0.0-rc-7771d3a7-20240827(react@19.0.0-rc-7771d3a7-20240827))(react@19.0.0-rc-7771d3a7-20240827)
+      svg2pdf.js:
+        specifier: ^2.2.4
+        version: 2.2.4(jspdf@2.5.2)
       tailwind-merge:
         specifier: ^2.5.2
         version: 2.5.2
@@ -65,6 +74,9 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
+      '@types/bwip-js':
+        specifier: ^3.2.3
+        version: 3.2.3
       '@types/node':
         specifier: ^20.16.2
         version: 20.16.5
@@ -744,6 +756,12 @@ packages:
         integrity: sha512-YNlnKRWF2sVojTpIyzwou9XoTNbzbzONwRhOoniEioF1AtaitTvVZblaQRrAzChWQ1bLYyYSWzM18y4WwgzJ+A==,
       }
 
+  '@types/bwip-js@3.2.3':
+    resolution:
+      {
+        integrity: sha512-kgL1GOW7n5FhlC5aXnckaEim0rz1cFM4t9/xUwuNXCIDnWLx8ruQ4JQkG6znq4GQFovNLhQy5JdgbDwJw4D/zg==,
+      }
+
   '@types/cookie@0.6.0':
     resolution:
       {
@@ -772,6 +790,12 @@ packages:
     resolution:
       {
         integrity: sha512-5zvhXYtRNRluoE/jAp4GVsSduVUzNWKkOZrCDBWYtE7biZywwdC2AcEzg+cSMLFRfVgeAFqpfNabiPjxFddV1Q==,
+      }
+
+  '@types/raf@3.4.3':
+    resolution:
+      {
+        integrity: sha512-c4YAvMedbPZ5tEyxzQdMoOhhJ4RD3rngZIdwC2/qDN3d7JpEhB6fiBRKVY1lg5B7Wk+uPBjn5f39j1/2MY1oOw==,
       }
 
   '@types/react-dom@18.3.0':
@@ -1013,6 +1037,14 @@ packages:
         integrity: sha512-OH/2E5Fg20h2aPrbe+QL8JZQFko0YZaF+j4mnQ7BGhfavO7OpSLa8a0y9sBwomHdSbkhTS8TQNayBfnW5DwbvQ==,
       }
 
+  atob@2.1.2:
+    resolution:
+      {
+        integrity: sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==,
+      }
+    engines: { node: '>= 4.5.0' }
+    hasBin: true
+
   available-typed-arrays@1.0.7:
     resolution:
       {
@@ -1047,6 +1079,13 @@ packages:
         integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==,
       }
 
+  base64-arraybuffer@1.0.2:
+    resolution:
+      {
+        integrity: sha512-I3yl4r9QB5ZRY3XuJVEPfc2XhZO6YweFPI+UovAzn+8/hb3oJ6lnysaFcjVpkCPfVWFUDvoZ8kmVDP7WyRtYtQ==,
+      }
+    engines: { node: '>= 0.6.0' }
+
   binary-extensions@2.3.0:
     resolution:
       {
@@ -1080,12 +1119,27 @@ packages:
       }
     engines: { node: '>=16.20.1' }
 
+  btoa@1.2.1:
+    resolution:
+      {
+        integrity: sha512-SB4/MIGlsiVkMcHmT+pSmIPoNDoHg+7cMzmt3Uxt628MTz2487DKSqK/fuhFBrkuqrYv5UCEnACpF4dTFNKc/g==,
+      }
+    engines: { node: '>= 0.4.0' }
+    hasBin: true
+
   busboy@1.6.0:
     resolution:
       {
         integrity: sha512-8SFQbg/0hQ9xy3UNTB0YEnsNBbWfhf7RtnzpL7TkBiTBRfrQ9Fxcnz7VJsleJpyp6rVLvXiuORqjlHi5q+PYuA==,
       }
     engines: { node: '>=10.16.0' }
+
+  bwip-js@4.5.1:
+    resolution:
+      {
+        integrity: sha512-83yQCKiIftz5YonnsTh6wIkFoHHWl+B/XaGWD1UdRw7aB6XP9JtyYP9n8sRy3m5rzL+Ch/RUPnu28UW0RrPZUA==,
+      }
+    hasBin: true
 
   call-bind@1.0.7:
     resolution:
@@ -1113,6 +1167,13 @@ packages:
       {
         integrity: sha512-GacvNTTuATm26qC74pt+ad1fW15mlQ/zuTzzY1ZoIzECTP8HURDfF43kNxPgf7H1jmelCBQTTbBNxdSXOA7Bqg==,
       }
+
+  canvg@3.0.10:
+    resolution:
+      {
+        integrity: sha512-qwR2FRNO9NlzTeKIPIKpnTY6fqwuYSequ8Ru8c0YkYU7U0oW+hLUvWadLvAu1Rl72OMNiFhoLu4f8eUjQ7l/+Q==,
+      }
+    engines: { node: '>=10.0.0' }
 
   chalk@2.4.2:
     resolution:
@@ -1218,6 +1279,12 @@ packages:
       }
     engines: { node: '>= 0.6' }
 
+  core-js@3.38.1:
+    resolution:
+      {
+        integrity: sha512-OP35aUorbU3Zvlx7pjsFdu1rGNnD4pgw/CWoYzRY3t2EzoVT7shKHY1dlAy3f41cGIO7ZDPQimhGFTlEYkG/Hw==,
+      }
+
   cosmiconfig@7.1.0:
     resolution:
       {
@@ -1231,6 +1298,12 @@ packages:
         integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==,
       }
     engines: { node: '>= 8' }
+
+  css-line-break@2.1.0:
+    resolution:
+      {
+        integrity: sha512-FHcKFCZcAha3LwfVBhCQbW2nCNbkZXn7KVUJcsT5/P8YmfsVja0FMPJr0B903j/E69HUphKiV9iQArX8SDYA4w==,
+      }
 
   cssesc@3.0.0:
     resolution:
@@ -1374,6 +1447,12 @@ packages:
     resolution:
       {
         integrity: sha512-nRCa7CK3VTrM2NmGkIy4cbK7IZlgBE/PYMn55rrXefr5xXDP0LdtfPnblFDoVdcAfslJ7or6iqAUnx0CCGIWQA==,
+      }
+
+  dompurify@2.5.6:
+    resolution:
+      {
+        integrity: sha512-zUTaUBO8pY4+iJMPE1B9XlO2tXVYIcEA4SNGtvDELzTSCQO7RzH+j7S180BmhmJId78lqGU2z19vgVx2Sxs/PQ==,
       }
 
   eastasianwidth@0.2.0:
@@ -1668,6 +1747,12 @@ packages:
         integrity: sha512-sRVD3lWVIXWg6By68ZN7vho9a1pQcN/WBFaAAsDDFzlJjvoGx0P8z7V1t72grFJfJhu3YPZBuu25f7Kaw2jN1w==,
       }
 
+  fflate@0.8.2:
+    resolution:
+      {
+        integrity: sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==,
+      }
+
   file-entry-cache@6.0.1:
     resolution:
       {
@@ -1722,6 +1807,12 @@ packages:
     resolution:
       {
         integrity: sha512-pm3JRo8OIJHGfFYWgaGpPv8E+UdWy0Z3gEAGufw+G/1dusaU/P1zoBLiQpf2/+bYAi+GBQtPVG86KYlV0W+AFQ==,
+      }
+
+  font-family-papandreou@0.2.0-patch2:
+    resolution:
+      {
+        integrity: sha512-l/YiRdBSH/eWv6OF3sLGkwErL+n0MqCICi9mppTZBOCL5vixWGDqCYvRcuxB2h7RGCTzaTKOHT2caHvCXQPRlw==,
       }
 
   for-each@0.3.3:
@@ -1931,6 +2022,13 @@ packages:
       {
         integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==,
       }
+
+  html2canvas@1.4.1:
+    resolution:
+      {
+        integrity: sha512-fPU6BHNpsyIhr8yyMpTLLxAbkaK8ArIBcmZIRiBLiDhjeqvXolaEmDGmELFuX9I4xDcaKKcJl+TKZLqruBbmWA==,
+      }
+    engines: { node: '>=8.0.0' }
 
   ignore@5.3.2:
     resolution:
@@ -2286,6 +2384,12 @@ packages:
         integrity: sha512-g1MWMLBiz8FKi1e4w0UyVL3w+iJceWAFBAaBnnGKOpNa5f8TLktkbre1+s6oICydWAm+HRUGTmI+//xv2hvXYA==,
       }
     hasBin: true
+
+  jspdf@2.5.2:
+    resolution:
+      {
+        integrity: sha512-myeX9c+p7znDWPk0eTrujCzNjT+CXdXyk7YmJq5nD5V7uLLKmSXnlQ/Jn/kuo3X09Op70Apm0rQSnFWyGK8uEQ==,
+      }
 
   jsx-ast-utils@3.3.5:
     resolution:
@@ -2745,6 +2849,12 @@ packages:
       }
     engines: { node: '>=8' }
 
+  performance-now@2.1.0:
+    resolution:
+      {
+        integrity: sha512-7EAHlyLHI56VEIdK57uwHdHKIaAGbnXPiw0yWbarQZOKaKpvUIgW0jWRVLiatnM+XXlSwsanIBH/hzGMJulMow==,
+      }
+
   picocolors@1.1.0:
     resolution:
       {
@@ -2902,6 +3012,12 @@ packages:
         integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==,
       }
 
+  raf@3.4.1:
+    resolution:
+      {
+        integrity: sha512-Sq4CW4QhwOHE8ucn6J34MqtZCeWFP2aQSmrlroYgqAV1PjStIhJXxYuTgUIfkEk7zTLjmIjLmU5q+fbD1NnOJA==,
+      }
+
   react-dom@19.0.0-rc-7771d3a7-20240827:
     resolution:
       {
@@ -2988,6 +3104,12 @@ packages:
       }
     engines: { node: '>= 0.4' }
 
+  regenerator-runtime@0.13.11:
+    resolution:
+      {
+        integrity: sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg==,
+      }
+
   regenerator-runtime@0.14.1:
     resolution:
       {
@@ -3034,6 +3156,13 @@ packages:
         integrity: sha512-U9nH88a3fc/ekCF1l0/UP1IosiuIjyTh7hBvXVMHYgVcfGvt897Xguj2UOLDeI5BG2m7/uwyaLVT6fbtCwTyzw==,
       }
     engines: { iojs: '>=1.0.0', node: '>=0.10.0' }
+
+  rgbcolor@1.0.1:
+    resolution:
+      {
+        integrity: sha512-9aZLIrhRaD97sgVhtJOW6ckOEh6/GnvQtdVNfdZ6s67+3/XwLS9lBcQYzEEhYVeUowN7pRzMLsyGhK2i/xvWbw==,
+      }
+    engines: { node: '>= 0.8.15' }
 
   rimraf@3.0.2:
     resolution:
@@ -3181,6 +3310,20 @@ packages:
         integrity: sha512-kvzhi7vqKTfkh0PZU+2D2PIllw2ymqJKujUcyPMd9Y75Nv4nPbGJZXNhxsgdQab2BmlDct1YnfQCguEvHr7VsQ==,
       }
 
+  specificity@0.4.1:
+    resolution:
+      {
+        integrity: sha512-1klA3Gi5PD1Wv9Q0wUoOQN1IWAuPu0D1U03ThXTr0cJ20+/iq2tHSDnK7Kk/0LXJ1ztUB2/1Os0wKmfyNgUQfg==,
+      }
+    hasBin: true
+
+  stackblur-canvas@2.7.0:
+    resolution:
+      {
+        integrity: sha512-yf7OENo23AGJhBriGx0QivY5JP6Y1HbrrDI6WLt6C5auYZXlQrheoY8hD4ibekFKz1HOfE48Ww8kMWMnJD/zcQ==,
+      }
+    engines: { node: '>=0.1.14' }
+
   stop-iteration-iterator@1.0.0:
     resolution:
       {
@@ -3327,6 +3470,27 @@ packages:
       }
     engines: { node: '>= 0.4' }
 
+  svg-pathdata@6.0.3:
+    resolution:
+      {
+        integrity: sha512-qsjeeq5YjBZ5eMdFuUa4ZosMLxgr5RZ+F+Y1OrDhuOCEInRMA3x74XdBtggJcj9kOeInz0WE+LgCPDkZFlBYJw==,
+      }
+    engines: { node: '>=12.0.0' }
+
+  svg2pdf.js@2.2.4:
+    resolution:
+      {
+        integrity: sha512-ujf+KqVpwAk/MPpTQqv4psV5eVLX/SoIJVHqe2ZhcqZfLd4DF48TzJBC95dVyoZSLqGbXp+GnfwotvCsJwrXXQ==,
+      }
+    peerDependencies:
+      jspdf: ^2.0.0
+
+  svgpath@2.6.0:
+    resolution:
+      {
+        integrity: sha512-OIWR6bKzXvdXYyO4DK/UWa1VA1JeKq8E+0ug2DG98Y/vOmMpfZNj+TIG988HjfYSqtcy/hFOtZq/n/j5GSESNg==,
+      }
+
   tabbable@6.2.0:
     resolution:
       {
@@ -3373,6 +3537,12 @@ packages:
         integrity: sha512-GNzQvQTOIP6RyTfE2Qxb8ZVlNmw0n88vp1szwWRimP02mnTsx3Wtn5qRdqY9w2XduFNUgvOwhNnQsjwCp+kqaQ==,
       }
     engines: { node: '>=6' }
+
+  text-segmentation@1.0.3:
+    resolution:
+      {
+        integrity: sha512-iOiPUo/BGnZ6+54OsWxZidGCsdU8YbE4PSpdPinp7DeMtUJNJBoJ/ouUSTJjHkh1KntHaltHl/gDs2FC4i5+Nw==,
+      }
 
   text-table@0.2.0:
     resolution:
@@ -3522,6 +3692,12 @@ packages:
     resolution:
       {
         integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==,
+      }
+
+  utrie@1.0.2:
+    resolution:
+      {
+        integrity: sha512-1MLa5ouZiOmQzUbjbu9VmjLzn1QLXBhwpUa7kdLUQK+KQ5KA9I1vk5U4YHe/X2Ch7PYnJfWuWT+VbuxbGwljhw==,
       }
 
   webidl-conversions@7.0.0:
@@ -4007,6 +4183,10 @@ snapshots:
     dependencies:
       tslib: 2.7.0
 
+  '@types/bwip-js@3.2.3':
+    dependencies:
+      '@types/node': 20.16.5
+
   '@types/cookie@0.6.0': {}
 
   '@types/json5@0.0.29': {}
@@ -4018,6 +4198,9 @@ snapshots:
   '@types/parse-json@4.0.2': {}
 
   '@types/prop-types@15.7.12': {}
+
+  '@types/raf@3.4.3':
+    optional: true
 
   '@types/react-dom@18.3.0':
     dependencies:
@@ -4191,6 +4374,8 @@ snapshots:
 
   ast-types-flow@0.0.8: {}
 
+  atob@2.1.2: {}
+
   available-typed-arrays@1.0.7:
     dependencies:
       possible-typed-array-names: 1.0.0
@@ -4206,6 +4391,9 @@ snapshots:
       resolve: 1.22.8
 
   balanced-match@1.0.2: {}
+
+  base64-arraybuffer@1.0.2:
+    optional: true
 
   binary-extensions@2.3.0: {}
 
@@ -4224,9 +4412,13 @@ snapshots:
 
   bson@6.8.0: {}
 
+  btoa@1.2.1: {}
+
   busboy@1.6.0:
     dependencies:
       streamsearch: 1.1.0
+
+  bwip-js@4.5.1: {}
 
   call-bind@1.0.7:
     dependencies:
@@ -4241,6 +4433,18 @@ snapshots:
   camelcase-css@2.0.1: {}
 
   caniuse-lite@1.0.30001660: {}
+
+  canvg@3.0.10:
+    dependencies:
+      '@babel/runtime': 7.25.6
+      '@types/raf': 3.4.3
+      core-js: 3.38.1
+      raf: 3.4.1
+      regenerator-runtime: 0.13.11
+      rgbcolor: 1.0.1
+      stackblur-canvas: 2.7.0
+      svg-pathdata: 6.0.3
+    optional: true
 
   chalk@2.4.2:
     dependencies:
@@ -4303,6 +4507,9 @@ snapshots:
 
   cookie@0.6.0: {}
 
+  core-js@3.38.1:
+    optional: true
+
   cosmiconfig@7.1.0:
     dependencies:
       '@types/parse-json': 4.0.2
@@ -4316,6 +4523,11 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
+
+  css-line-break@2.1.0:
+    dependencies:
+      utrie: 1.0.2
+    optional: true
 
   cssesc@3.0.0: {}
 
@@ -4409,6 +4621,9 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.25.6
       csstype: 3.1.3
+
+  dompurify@2.5.6:
+    optional: true
 
   eastasianwidth@0.2.0: {}
 
@@ -4750,6 +4965,8 @@ snapshots:
     dependencies:
       reusify: 1.0.4
 
+  fflate@0.8.2: {}
+
   file-entry-cache@6.0.1:
     dependencies:
       flat-cache: 3.2.0
@@ -4790,6 +5007,8 @@ snapshots:
     dependencies:
       '@popperjs/core': 2.11.8
       mini-svg-data-uri: 1.4.4
+
+  font-family-papandreou@0.2.0-patch2: {}
 
   for-each@0.3.3:
     dependencies:
@@ -4921,6 +5140,12 @@ snapshots:
   hoist-non-react-statics@3.3.2:
     dependencies:
       react-is: 16.13.1
+
+  html2canvas@1.4.1:
+    dependencies:
+      css-line-break: 2.1.0
+      text-segmentation: 1.0.3
+    optional: true
 
   ignore@5.3.2: {}
 
@@ -5103,6 +5328,18 @@ snapshots:
   json5@1.0.2:
     dependencies:
       minimist: 1.2.8
+
+  jspdf@2.5.2:
+    dependencies:
+      '@babel/runtime': 7.25.6
+      atob: 2.1.2
+      btoa: 1.2.1
+      fflate: 0.8.2
+    optionalDependencies:
+      canvg: 3.0.10
+      core-js: 3.38.1
+      dompurify: 2.5.6
+      html2canvas: 1.4.1
 
   jsx-ast-utils@3.3.5:
     dependencies:
@@ -5361,6 +5598,9 @@ snapshots:
 
   path-type@4.0.0: {}
 
+  performance-now@2.1.0:
+    optional: true
+
   picocolors@1.1.0: {}
 
   picomatch@2.3.1: {}
@@ -5437,6 +5677,11 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
+  raf@3.4.1:
+    dependencies:
+      performance-now: 2.1.0
+    optional: true
+
   react-dom@19.0.0-rc-7771d3a7-20240827(react@19.0.0-rc-7771d3a7-20240827):
     dependencies:
       react: 19.0.0-rc-7771d3a7-20240827
@@ -5502,6 +5747,9 @@ snapshots:
       globalthis: 1.0.4
       which-builtin-type: 1.1.4
 
+  regenerator-runtime@0.13.11:
+    optional: true
+
   regenerator-runtime@0.14.1: {}
 
   regexp.prototype.flags@1.5.2:
@@ -5528,6 +5776,9 @@ snapshots:
       supports-preserve-symlinks-flag: 1.0.0
 
   reusify@1.0.4: {}
+
+  rgbcolor@1.0.1:
+    optional: true
 
   rimraf@3.0.2:
     dependencies:
@@ -5636,6 +5887,11 @@ snapshots:
     dependencies:
       memory-pager: 1.5.0
 
+  specificity@0.4.1: {}
+
+  stackblur-canvas@2.7.0:
+    optional: true
+
   stop-iteration-iterator@1.0.0:
     dependencies:
       internal-slot: 1.0.7
@@ -5737,6 +5993,19 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
+  svg-pathdata@6.0.3:
+    optional: true
+
+  svg2pdf.js@2.2.4(jspdf@2.5.2):
+    dependencies:
+      cssesc: 3.0.0
+      font-family-papandreou: 0.2.0-patch2
+      jspdf: 2.5.2
+      specificity: 0.4.1
+      svgpath: 2.6.0
+
+  svgpath@2.6.0: {}
+
   tabbable@6.2.0: {}
 
   tailwind-merge@2.3.0:
@@ -5779,6 +6048,11 @@ snapshots:
       - ts-node
 
   tapable@2.2.1: {}
+
+  text-segmentation@1.0.3:
+    dependencies:
+      utrie: 1.0.2
+    optional: true
 
   text-table@0.2.0: {}
 
@@ -5873,6 +6147,11 @@ snapshots:
       react: 19.0.0-rc-7771d3a7-20240827
 
   util-deprecate@1.0.2: {}
+
+  utrie@1.0.2:
+    dependencies:
+      base64-arraybuffer: 1.0.2
+    optional: true
 
   webidl-conversions@7.0.0: {}
 

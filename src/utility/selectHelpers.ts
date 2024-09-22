@@ -5,11 +5,11 @@ const setCalculatedZIndex = (baseZIndex: number = 50) => {
   return {
     menuPortal: (provided: any) => ({
       ...provided,
-      zIndex: baseZIndex + 1,
+      zIndex: baseZIndex + 0, // baseZIndex + 1
     }),
     menu: (provided: any) => ({
       ...provided,
-      zIndex: baseZIndex + 1,
+      zIndex: baseZIndex + 0, // baseZIndex + 1
     }),
   };
 };

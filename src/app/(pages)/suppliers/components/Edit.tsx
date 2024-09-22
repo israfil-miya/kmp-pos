@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { editSupplier } from '../actions';
 import { SupplierDataTypes, validationSchema } from '../schema';
 
-const baseZIndex = 52;
+const baseZIndex = 50; // 52
 
 interface PropsType {
   supplierData: SupplierDataTypes;

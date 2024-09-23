@@ -172,7 +172,7 @@ const FilterButton: React.FC<PropsType> = ({
               onClick={() => {
                 formRef.current?.requestSubmit();
               }}
-              className="rounded-sm bg-blue-600 text-white   hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
+              className="rounded-sm bg-blue-600 text-white hover:opacity-90 hover:ring-2 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 px-4 py-2 uppercase"
               type="button"
             >
               {loading ? 'Searching...' : 'Search'}

@@ -399,7 +399,7 @@ const Table: React.FC<TableDataProps> = props => {
                                 productData={item}
                               />
                               <DeleteButton productData={item} />
-                              <BarcodeButton code={item.batch} />
+                              <BarcodeButton productData={item} />
                             </div>
                           </div>
                         </td>

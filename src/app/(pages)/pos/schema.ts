@@ -34,3 +34,16 @@ export const validationSchema = z.object({
 });
 
 export type InvoiceDataTypes = z.infer<typeof validationSchema>;
+
+export interface RegexQuery {
+  $regex: string;
+  $options: string;
+}
+
+export interface Query {
+  batch?: RegexQuery;
+  name?: RegexQuery;
+  category?: RegexQuery;
+}
+
+export type RegexFields = Extract<keyof Query, 'batch' | 'name' | 'category'>;

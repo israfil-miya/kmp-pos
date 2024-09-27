@@ -1,8 +1,10 @@
 'use client';
 
 import { Dropdown } from 'flowbite';
-import React, { useEffect, useRef, useState } from 'react';
-import { useDebounce } from 'use-debounce';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useDebouncedCallback } from 'use-debounce';
+import { POSContext } from '../POSContext';
+import SearchedProducts from './products';
 
 export default function SearchInput() {
   const searchInput = useRef<HTMLInputElement | null>(null);
@@ -11,8 +13,7 @@ export default function SearchInput() {
   const [search, setSearch] = useState('');
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
-  // debounce the search value
-  const [debouncedSearch] = useDebounce(search, 400);
+  let context = useContext(POSContext);
 
   useEffect(() => {
     if (dropdownRef.current && searchInput.current) {
@@ -67,6 +68,19 @@ export default function SearchInput() {
     }, 0);
   };
 
+  // Update the context when debounced search value changes
+  const debouncedSetSearch = useDebouncedCallback((value: string) => {
+    if (value) {
+      context?.setSearch(value);
+    } else {
+      context?.setSearch('');
+    }
+  }, 600);
+
+  useEffect(() => {
+    debouncedSetSearch(search || '');
+  }, [search, debouncedSetSearch]);
+
   return (
     <div className="w-full relative">
       <label
@@ -112,7 +126,7 @@ export default function SearchInput() {
             Ctrl
           </kbd>
           <kbd className="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded">
-            K
+            k
           </kbd>
         </div>
       </div>
@@ -122,11 +136,7 @@ export default function SearchInput() {
         className={`z-10 ${isDropdownVisible ? 'block' : 'hidden'} bg-white divide-y divide-gray-100 rounded shadow absolute left-0 mt-2`}
       >
         <div className="p-4 text-sm">
-          <p className="text-center">
-            {debouncedSearch.length !== 0
-              ? 'No products found!'
-              : 'Start typing to search...'}
-          </p>
+          <SearchedProducts />
         </div>
       </div>
     </div>

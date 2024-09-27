@@ -47,6 +47,7 @@ function Form() {
           setLoading,
           productData.name,
           productData.selling_price,
+          productData.vat_rate,
         );
       }
     } catch (error) {

@@ -17,7 +17,13 @@ export const validationSchema = z
     supplier: z.array(z.string()).min(1, 'Supplier is required'),
     category: z.array(z.string()).min(1, 'Category is required'),
     store: z.array(z.string()).min(1, 'Store is required'),
-
+    vat_rate: z
+      .optional(
+        z.coerce
+          .number({ invalid_type_error: 'VAT rate must be a number' })
+          .min(0, 'VAT rate cannot be negative'),
+      )
+      .default(0),
     description: z.optional(z.string()).default(''),
     mft_date: z.optional(z.string()).default(''),
     exp_date: z.optional(z.string()).default(''),

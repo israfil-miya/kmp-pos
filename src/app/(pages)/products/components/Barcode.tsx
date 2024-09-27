@@ -16,6 +16,7 @@ export const handleBarcodeDownload = (
   setLoading: Dispatch<SetStateAction<boolean>>,
   product_name: string | undefined = undefined,
   price: number | undefined = undefined,
+  vat_rate: number = 0,
   file_name: string = `${code}_${Date.now()}_barcode.pdf`,
   shop_name: string = 'Khalek Molla Plaza',
 ) => {
@@ -89,9 +90,14 @@ export const handleBarcodeDownload = (
         if (price !== undefined) {
           doc.setFont('courier', 'bold'); // 'courier' is a monospace font, and 'bold' makes it bold
           doc.setFontSize(18);
-          doc.text(`SELL PRICE: ${price} BDT (VAT Included)`, 105, 100, {
-            align: 'center',
-          });
+          doc.text(
+            `SELL PRICE: ${price + (price * vat_rate) / 100} BDT (VAT Included)`,
+            105,
+            100,
+            {
+              align: 'center',
+            },
+          );
         }
         if (shop_name) {
           doc.setFontSize(24);
@@ -129,6 +135,7 @@ const Barcode: React.FC<BarcodeProps> = ({ productData }) => {
           setLoading,
           productData.name,
           productData.selling_price,
+          productData.vat_rate,
         )
       }
       className="items-center gap-2 rounded-sm bg-yellow-600 hover:opacity-90 hover:ring-2 hover:ring-yellow-600 transition duration-200 delay-300 hover:text-opacity-100 text-white p-2"

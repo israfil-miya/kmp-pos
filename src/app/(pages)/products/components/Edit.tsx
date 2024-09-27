@@ -329,7 +329,7 @@ const EditButton: React.FC<PropsType> = props => {
 
               <div>
                 <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
-                  <span className="uppercase">Cost Price*</span>
+                  <span className="uppercase">Cost Price* (BDT)</span>
                   <span className="text-red-700 text-wrap block text-xs">
                     {errors.cost_price && errors.cost_price?.message}
                   </span>
@@ -338,12 +338,13 @@ const EditButton: React.FC<PropsType> = props => {
                   {...register('cost_price', { valueAsNumber: true })}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   type="number"
+                  step=".01"
                 />
               </div>
 
               <div>
                 <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
-                  <span className="uppercase">Selling Price*</span>
+                  <span className="uppercase">Selling Price* (BDT)</span>
                   <span className="text-red-700 text-wrap block text-xs">
                     {errors.selling_price && errors.selling_price?.message}
                   </span>
@@ -352,6 +353,22 @@ const EditButton: React.FC<PropsType> = props => {
                   {...register('selling_price', { valueAsNumber: true })}
                   className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   type="number"
+                  step=".01"
+                />
+              </div>
+
+              <div>
+                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
+                  <span className="uppercase">VAT Rate</span>
+                  <span className="text-red-700 text-wrap block text-xs">
+                    {errors.vat_rate && errors.vat_rate?.message}
+                  </span>
+                </label>
+                <input
+                  {...register('vat_rate', { valueAsNumber: true })}
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  type="number"
+                  step=".01"
                 />
               </div>
 

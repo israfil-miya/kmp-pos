@@ -178,7 +178,7 @@ const Nav: React.FC<NavProps> = props => {
           href="/pos"
           className={cn(
             'p-4 flex items-center hover:bg-gray-900 hover:border-l-4 hover:text-white',
-            userRole !== 'cashier' && 'hidden',
+            // userRole !== 'cashier' && 'hidden',
             pathName === '/pos' &&
               'bg-gray-900 border-l-4 border-green-400 text-white',
           )}

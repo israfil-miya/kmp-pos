@@ -10,6 +10,7 @@ export interface Product extends mongoose.Document {
   supplier: string[];
   category: string[];
   store: string[];
+  vat_rate: number;
   mft_date: string;
   exp_date: string;
 }
@@ -83,6 +84,11 @@ const ProductSchema = new mongoose.Schema<Product>(
         },
         message: 'Store cannot be empty',
       },
+    },
+    vat_rate: {
+      type: Number,
+      default: 0,
+      min: [0, 'VAT rate cannot be negative'],
     },
     mft_date: {
       type: String,

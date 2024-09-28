@@ -1,4 +1,9 @@
 import {
+  Query as pos_Query,
+  RegexFields as pos_RegexFields,
+  RegexQuery as pos_RegexQuery,
+} from '@/app/(pages)/pos/schema';
+import {
   Query as product_Query,
   RegexFields as product_RegexFields,
   RegexQuery as product_RegexQuery,
@@ -9,9 +14,9 @@ import {
   RegexQuery as supplier_RegexQuery,
 } from '@/app/(pages)/suppliers/schema';
 
-type RegexQuery = supplier_RegexQuery | product_RegexQuery;
-type Query = supplier_Query | product_Query;
-type RegexFields = supplier_RegexFields | product_RegexFields;
+type RegexQuery = supplier_RegexQuery | product_RegexQuery | pos_RegexQuery;
+type Query = supplier_Query | product_Query | pos_Query;
+type RegexFields = supplier_RegexFields | product_RegexFields | pos_RegexFields;
 
 // Helper function to create a regex query
 export const createRegexQuery = (

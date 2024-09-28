@@ -29,6 +29,7 @@ export const authConfig = {
         session.user.role = token.role;
         session.user.store = token.store;
       }
+
       return session;
     },
     authorized({ auth }: { auth: any }) {

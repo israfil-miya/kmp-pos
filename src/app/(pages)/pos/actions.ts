@@ -27,10 +27,11 @@ export type FormState = {
 export const getAllProductsFiltered = async (data: {
   filters: {
     searchText: string;
+    store: string;
   };
 }): Promise<FormState> => {
   try {
-    const { searchText } = data.filters;
+    const { searchText, store } = data.filters;
 
     const query: Query = {};
 
@@ -52,6 +53,8 @@ export const getAllProductsFiltered = async (data: {
       createdAt: -1,
     };
 
+    console.log(searchQuery['$or']);
+
     const products = await Product.aggregate([
       {
         $addFields: {
@@ -60,7 +63,13 @@ export const getAllProductsFiltered = async (data: {
           },
         },
       },
-      { $match: { ...searchQuery, in_stock: 1 } },
+      {
+        $match: {
+          ...searchQuery,
+          in_stock: 1,
+          store: { $regex: `^${store}$`, $options: 'i' },
+        },
+      },
       { $sort: sortQuery },
     ]);
 

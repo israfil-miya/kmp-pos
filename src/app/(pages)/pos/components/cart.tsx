@@ -1,8 +1,39 @@
 import React, { useContext } from 'react';
+import { toast } from 'sonner';
 import { POSContext, ProductType } from '../POSContext';
 
 function Cart() {
   let context = useContext(POSContext);
+
+  const getTotal = () => {
+    let total = 0;
+    context?.products.forEach(product => {
+      total +=
+        product.price * (product.unit || 0) +
+        ((product.price * product.vat) / 100) * (product.unit || 0);
+    });
+    return total;
+  };
+
+  const updateQuantity = (product: ProductType, unit: number) => {
+    // Check if the unit requested is less than 0 and show an error message
+    if (unit < 0) {
+      toast.error("Unit can't be negative");
+      return;
+    }
+
+    // Check if the unit requested is more than the available quantity and show an error message
+    if (unit > product.quantity) {
+      toast.error('Available quantity exceeded!');
+      return;
+    }
+
+    // Update the quantity
+    context?.updateProduct({
+      ...product,
+      unit: unit,
+    });
+  };
 
   return (
     <>
@@ -33,7 +64,9 @@ function Cart() {
                   <td className="capitalize">{product.name}</td>
                   <td className="capitalize">
                     <input
-                      className="appearance-none w-8 bg-gray-50 p-1 text-gray-700 border border-gray-200 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                      onChange={e => updateQuantity(product, +e.target.value)}
+                      type="number"
+                      className="appearance-none w-10 bg-gray-50 p-1 text-gray-700 border border-gray-200 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                       value={product.unit}
                     />
                     {' / ' + product.quantity}
@@ -44,8 +77,9 @@ function Cart() {
                     {Number(
                       Math.round(
                         parseFloat(
-                          product.price * 1 +
-                            ((product.price * product.vat) / 100) * 1 +
+                          product.price * (product.unit || 0) +
+                            ((product.price * product.vat) / 100) *
+                              (product.unit || 0) +
                             'e' +
                             2,
                         ),
@@ -87,6 +121,21 @@ function Cart() {
           </tbody>
         </table>
       </div>
+      <style jsx>
+        {`
+          /* Chrome, Safari, Edge, Opera */
+          input::-webkit-outer-spin-button,
+          input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+          }
+
+          /* Firefox */
+          input[type='number'] {
+            -moz-appearance: textfield;
+          }
+        `}
+      </style>
     </>
   );
 }

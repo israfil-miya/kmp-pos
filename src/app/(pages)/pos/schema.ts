@@ -44,6 +44,10 @@ export interface Query {
   batch?: RegexQuery;
   name?: RegexQuery;
   category?: RegexQuery;
+  store?: RegexQuery;
 }
 
-export type RegexFields = Extract<keyof Query, 'batch' | 'name' | 'category'>;
+export type RegexFields = Extract<
+  keyof Query,
+  'batch' | 'name' | 'category' | 'store'
+>;

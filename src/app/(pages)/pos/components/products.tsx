@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import { useSession } from 'next-auth/react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { ProductDataTypes } from '../../products/schema';
@@ -9,14 +10,18 @@ function SearchedProducts() {
   let context = useContext(POSContext);
   const [products, setProducts] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(false);
+  const { data: session } = useSession();
 
   const getAllProductsFiltered = useCallback(async (): Promise<void> => {
     try {
       // setLoading(true);
 
+      console.log('store', session?.user);
+
       let response = await getAllProductsFilteredAction({
         filters: {
           searchText: context?.search || '',
+          store: session?.user.store || '',
         },
       });
       if (response.error) {
@@ -71,7 +76,7 @@ function SearchedProducts() {
     } finally {
       setLoading(false);
     }
-  }, [context?.search, context?.products]);
+  }, [context?.search, session?.user]);
 
   const updateCart = (product: ProductType) => {
     console.log('Insert func called');
@@ -81,8 +86,17 @@ function SearchedProducts() {
     let productInCart = context?.products.find(p => p.batch === product.batch);
 
     if (productInCart) {
-      // If the product exists, update its quantity
-      context?.setProducts(products =>)
+      let updatedProduct = {
+        ...product,
+        unit: productInCart.unit + product.unit,
+      };
+
+      if (updatedProduct.unit > updatedProduct.quantity) {
+        toast.error('Available quantity exceeded!');
+        return;
+      }
+
+      context?.updateProduct(updatedProduct); // Set the updated array
     } else {
       // If the product doesn't exist, insert it into the cart
       context?.insertProduct(product);
@@ -103,7 +117,7 @@ function SearchedProducts() {
   return (
     <div>
       {products.length ? (
-        <div className="table-responsive text-nowrap text-sm">
+        <div className="table-responsive text-nowrap text-sm select-none">
           <table className="table table-hover">
             <thead>
               <tr>

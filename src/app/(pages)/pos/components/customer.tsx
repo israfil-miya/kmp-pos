@@ -1,14 +1,30 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
+import { CustomerType, POSContext } from '../POSContext';
 
 const Customer: React.FC = () => {
+  const context = useContext(POSContext);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ): void => {
+    const { name, type, value } = e.target;
+
+    context?.setCustomer(prevData => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
       <div className="relative">
         <input
           type="text"
+          onChange={handleChange}
+          name="name"
           id="floating_filled_name"
-          className="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
           placeholder=""
+          className="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
         />
         <label
           htmlFor="floating_filled_name"
@@ -20,9 +36,11 @@ const Customer: React.FC = () => {
       <div className="relative">
         <input
           type="text"
+          onChange={handleChange}
+          name="phone"
           id="floating_filled_phone"
-          className="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
           placeholder=""
+          className="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
         />
         <label
           htmlFor="floating_filled_phone"
@@ -37,6 +55,8 @@ const Customer: React.FC = () => {
           rows={1}
           id="floating_filled_address"
           className="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+          onChange={handleChange}
+          name="address"
           placeholder=""
         />
         <label

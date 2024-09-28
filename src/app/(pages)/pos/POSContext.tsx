@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import React, { createContext } from 'react';
+import React, { createContext, Dispatch } from 'react';
 
 export type ProductType = {
   id: Types.ObjectId;
@@ -21,9 +21,9 @@ export type POSContextType = {
   search: string;
   products: ProductType[];
   customer?: CustomerType;
-  setCustomer: (customer: CustomerType) => void;
-  setProducts: (products: ProductType[]) => void;
-  setSearch: (search: string) => void;
+  setCustomer: Dispatch<React.SetStateAction<CustomerType>>;
+  updateProduct: (updatedProduct: ProductType) => void;
+  setSearch: Dispatch<React.SetStateAction<string>>;
   insertProduct: (product: ProductType) => void;
   removeProduct: (product: ProductType['batch']) => void;
 };
@@ -33,7 +33,11 @@ const POSContext = createContext<POSContextType | null>(null);
 function POStContextProvider({ children }: { children: React.ReactNode }) {
   const [search, setSearch] = React.useState('');
   const [products, setProducts] = React.useState<ProductType[]>([]);
-  const [customer, setCustomer] = React.useState<CustomerType>();
+  const [customer, setCustomer] = React.useState<CustomerType>({
+    name: '',
+    phone: '',
+    address: '',
+  });
 
   const insertProduct = (product: ProductType) => {
     setProducts([...products, product]);
@@ -43,16 +47,14 @@ function POStContextProvider({ children }: { children: React.ReactNode }) {
     setProducts(products.filter(p => p.batch !== batch));
   };
 
-  const updateSearch = (search: string) => {
-    setSearch(search);
-  };
-
-  const updateProducts = (products: ProductType[]) => {
-    setProducts(products);
-  };
-
-  const updateCustomer = (customer: CustomerType) => {
-    setCustomer(customer);
+  const updateProduct = (updatedProduct: ProductType) => {
+    setProducts(prevProducts =>
+      prevProducts.map(product =>
+        product.batch === updatedProduct.batch
+          ? { ...product, ...updatedProduct }
+          : product,
+      ),
+    );
   };
 
   return (
@@ -61,9 +63,9 @@ function POStContextProvider({ children }: { children: React.ReactNode }) {
         search,
         products,
         customer,
-        setCustomer: updateCustomer,
-        setProducts: updateProducts,
-        setSearch: updateSearch,
+        setCustomer: setCustomer,
+        updateProduct,
+        setSearch: setSearch,
         insertProduct,
         removeProduct,
       }}

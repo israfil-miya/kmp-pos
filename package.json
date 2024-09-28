@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
+    "@types/jspdf": "^2.0.0",
     "bwip-js": "^4.5.1",
     "clsx": "^2.1.1",
     "flowbite": "2.3.0",

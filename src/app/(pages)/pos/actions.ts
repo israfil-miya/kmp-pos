@@ -53,7 +53,6 @@ export const getAllProductsFiltered = async (data: {
     };
 
     const products = await Product.aggregate([
-      { $match: searchQuery },
       {
         $addFields: {
           in_stock: {
@@ -61,6 +60,7 @@ export const getAllProductsFiltered = async (data: {
           },
         },
       },
+      { $match: { ...searchQuery, in_stock: 1 } },
       { $sort: sortQuery },
     ]);
 

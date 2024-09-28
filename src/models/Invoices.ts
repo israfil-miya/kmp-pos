@@ -1,13 +1,14 @@
 import mongoose from 'mongoose';
 
 export interface Invoice extends mongoose.Document {
+  cashier: string;
   customer: {
     name: string;
     phone: string;
     address: string;
   };
   products: {
-    product: string;
+    product: mongoose.Types.ObjectId;
     quantity: number;
     total_price: number;
   }[];
@@ -20,6 +21,11 @@ export interface Invoice extends mongoose.Document {
 
 const InvoiceSchema = new mongoose.Schema<Invoice>(
   {
+    cashier: {
+      type: String,
+      required: [true, 'Cashier name is not given'],
+      minlength: [1, 'Cashier name cannot be empty'], // Ensure cashier name is not empty
+    },
     customer: {
       name: {
         type: String,

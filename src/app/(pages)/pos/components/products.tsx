@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { ProductDataTypes } from '../../products/schema';
@@ -28,13 +29,13 @@ function SearchedProducts() {
         try {
           parsedMessage = JSON.parse(response.message) as ProductDataTypes[];
 
-          // Filter out products with batch codes that exist in the context.products
-          parsedMessage = parsedMessage.filter(
-            p =>
-              !context?.products.some(
-                ctxProduct => ctxProduct.batch === p.batch,
-              ),
-          );
+          // // Filter out products with batch codes that exist in the context.products
+          // parsedMessage = parsedMessage.filter(
+          //   p =>
+          //     !context?.products.some(
+          //       ctxProduct => ctxProduct.batch === p.batch,
+          //     ),
+          // );
         } catch (error) {
           console.error(
             'Failed to parse response message as ProductType:',
@@ -49,10 +50,12 @@ function SearchedProducts() {
           let product = parsedMessage[i];
 
           products.push({
+            id: new Types.ObjectId(product._id),
             batch: product.batch,
             name: product.name,
             price: product.selling_price,
             vat: product.vat_rate,
+            unit: 1,
             quantity: product.quantity,
           });
         }
@@ -72,8 +75,18 @@ function SearchedProducts() {
 
   const updateCart = (product: ProductType) => {
     console.log('Insert func called');
-    context?.insertProduct(product);
-    setProducts(products.filter(p => p.batch !== product.batch));
+    console.log(product);
+
+    // Check if the product with the same batch already exists in the cart
+    let productInCart = context?.products.find(p => p.batch === product.batch);
+
+    if (productInCart) {
+      // If the product exists, update its quantity
+      context?.setProducts(products =>)
+    } else {
+      // If the product doesn't exist, insert it into the cart
+      context?.insertProduct(product);
+    }
   };
 
   useEffect(() => {
@@ -82,36 +95,44 @@ function SearchedProducts() {
     }
   }, [context?.search, getAllProductsFiltered]);
 
-  if (loading) return <p className="text-center">Loading...</p>;
+  if (loading) return <p className="text-center pb-4">Loading...</p>;
 
   if (!loading && !context?.search)
-    return <p className="text-center">Start typing to search...</p>;
+    return <p className="text-center pb-4">Start typing to search...</p>;
 
   return (
     <div>
       {products.length ? (
-        <div>
-          {products.map((product, index) => (
-            <div key={index} className="flex justify-between items-center py-2">
-              <div>
-                <p className="font-semibold text-gray-800">{product.name}</p>
-                <p className="text-sm text-gray-500">{product.price}</p>
-              </div>
-              <div>
-                <button
-                  className="bg-gray-200 px-2 py-1 rounded-lg"
-                  onClick={() => {
-                    updateCart(product);
-                  }}
+        <div className="table-responsive text-nowrap text-sm">
+          <table className="table table-hover">
+            <thead>
+              <tr>
+                <th className="font-bold">S/N</th>
+                <th className="font-bold">Batch</th>
+                <th className="font-bold">Name</th>
+                <th className="font-bold">Qty</th>
+                <th className="font-bold">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((product: ProductType, index: number) => (
+                <tr
+                  key={String(product.id)}
+                  className="cursor-pointer"
+                  onClick={() => updateCart(product)}
                 >
-                  Add
-                </button>
-              </div>
-            </div>
-          ))}
+                  <td>{index + 1}</td>
+                  <td>{product.batch}</td>
+                  <td className="capitalize test-wrap">{product.name}</td>
+                  <td>{product.quantity}</td>
+                  <td>{product.price}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       ) : (
-        <p className="text-center">No products found</p>
+        <p className="text-center pb-4">No products found</p>
       )}
     </div>
   );

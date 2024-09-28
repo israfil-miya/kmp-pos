@@ -48,26 +48,37 @@ export default function SearchInput() {
       }
     };
 
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        searchInput.current &&
+        !searchInput.current.contains(event.target as Node)
+      ) {
+        dropdownInstance.current?.hide();
+      }
+    };
+
     window.addEventListener('keydown', keyDownHandler);
+    document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
       window.removeEventListener('keydown', keyDownHandler);
+      document.removeEventListener('mousedown', handleClickOutside);
       dropdownInstance.current?.hide();
     };
   }, []);
 
-  const handleFocusOrClick = () => {
-    if (!isDropdownVisible) dropdownInstance.current?.show();
+  const handleFocus = () => {
+    dropdownInstance.current?.show();
   };
 
-  const handleBlur = (e: React.FocusEvent) => {
-    setTimeout(() => {
-      if (!searchInput.current?.contains(document.activeElement)) {
-        dropdownInstance.current?.hide();
-      }
-    }, 0);
+  const handleInputClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isDropdownVisible) {
+      dropdownInstance.current?.show();
+    }
   };
-
   // Update the context when debounced search value changes
   const debouncedSetSearch = useDebouncedCallback((value: string) => {
     if (value) {
@@ -110,16 +121,17 @@ export default function SearchInput() {
         <input
           ref={searchInput}
           id="searchDropdownButton"
+          data-dropdown-toggle="searchDropdown"
           type="text"
-          className="block w-full p-4 ps-10 sm:pe-24 text-sm text-gray-900 border border-gray-300 rounded bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+          className="block w-full p-4 ps-10 pe-24 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
           placeholder="Search products by batch, name and category"
           required
-          onChange={e => setSearch(e.target.value)}
-          name="search"
+          onChange={e => {
+            setSearch(e.target.value);
+          }}
           autoComplete="off"
-          onFocus={handleFocusOrClick}
-          onBlur={handleBlur}
-          onClick={handleFocusOrClick}
+          onFocus={handleFocus}
+          onClick={handleInputClick}
         />
         <div className="hidden sm:absolute inset-y-0 end-0 sm:flex items-center pe-3 space-x-1">
           <kbd className="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded">
@@ -133,11 +145,9 @@ export default function SearchInput() {
       <div
         id="searchDropdown"
         ref={dropdownRef}
-        className={`z-10 ${isDropdownVisible ? 'block' : 'hidden'} bg-white divide-y divide-gray-100 rounded shadow absolute left-0 mt-2`}
+        className={`z-50 ${isDropdownVisible ? 'block' : 'hidden'} pt-4 px-4 text-sm bg-white divide-y divide-gray-100 rounded shadow absolute left-0 mt-2`}
       >
-        <div className="p-4 text-sm">
-          <SearchedProducts />
-        </div>
+        <SearchedProducts />
       </div>
     </div>
   );

@@ -91,7 +91,13 @@ export const handleBarcodeDownload = (
           doc.setFont('courier', 'bold'); // 'courier' is a monospace font, and 'bold' makes it bold
           doc.setFontSize(18);
           doc.text(
-            `SELL PRICE: ${price + (price * vat_rate) / 100} BDT (VAT Included)`,
+            `SELL PRICE: ${Number(
+              Math.round(
+                parseFloat(price + (price * vat_rate) / 100 + 'e' + 2),
+              ) +
+                'e-' +
+                2,
+            ).toFixed(2)} BDT (VAT Included)`,
             105,
             100,
             {

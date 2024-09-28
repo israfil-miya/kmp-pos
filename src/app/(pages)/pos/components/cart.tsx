@@ -5,16 +5,6 @@ import { POSContext, ProductType } from '../POSContext';
 function Cart() {
   let context = useContext(POSContext);
 
-  const getTotal = () => {
-    let total = 0;
-    context?.products.forEach(product => {
-      total +=
-        product.price * (product.unit || 0) +
-        ((product.price * product.vat) / 100) * (product.unit || 0);
-    });
-    return total;
-  };
-
   const updateQuantity = (product: ProductType, unit: number) => {
     // Check if the unit requested is less than 0 and show an error message
     if (unit < 0) {
@@ -65,9 +55,10 @@ function Cart() {
                   <td className="capitalize">
                     <input
                       onChange={e => updateQuantity(product, +e.target.value)}
-                      type="number"
-                      className="appearance-none w-10 bg-gray-50 p-1 text-gray-700 border border-gray-200 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                      value={product.unit}
+                      type="text"
+                      placeholder="0"
+                      className="appearance-none w-10 p-1 text-gray-700 border border-gray-200 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                      value={product.unit || ''}
                     />
                     {' / ' + product.quantity}
                   </td>

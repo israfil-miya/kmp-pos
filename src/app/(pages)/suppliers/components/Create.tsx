@@ -62,9 +62,10 @@ const CreateButton: React.FC = () => {
       }
     } else if (state?.message !== '') {
       toast.success(state.message);
-      if (state.fields) {
-        reset(state.fields as SupplierDataTypes);
-      }
+      // if (state.fields) {
+      //   reset(state.fields as SupplierDataTypes);
+      // }
+      reset();
       setIsOpen(false);
     } else {
       console.log('Nothing was returned from the server');

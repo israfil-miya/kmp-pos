@@ -78,9 +78,10 @@ const CreateButton: React.FC<PropsType> = props => {
       }
     } else if (state?.message !== '') {
       toast.success(state.message);
-      if (state.fields) {
-        reset(state.fields as UserDataTypes);
-      }
+      // if (state.fields) {
+      //   reset(state.fields as UserDataTypes);
+      // }
+      reset();
       setIsOpen(false);
     } else {
       console.log('Nothing was returned from the server');

@@ -64,9 +64,10 @@ const CreateButton = () => {
       }
     } else if (state?.message !== '') {
       toast.success(state.message);
-      if (state.fields) {
-        reset(state.fields as StoreDataTypes);
-      }
+      // if (state.fields) {
+      //   reset(state.fields as StoreDataTypes);
+      // }
+      reset();
       setIsOpen(false);
     } else {
       console.log('Nothing was returned from the server');

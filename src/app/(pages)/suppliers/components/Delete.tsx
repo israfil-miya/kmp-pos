@@ -65,7 +65,6 @@ const DeleteButton: React.FC<PropsType> = props => {
               onClick={() => setIsOpen(false)}
               type="button"
               className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-sm text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
-              data-modal-toggle="default-modal"
             >
               <svg
                 className="w-5 h-5"

@@ -2,7 +2,7 @@ import getTodayDate from '@/utility/getTodaysDate';
 import mongoose from 'mongoose';
 
 export interface Expense extends mongoose.Document {
-  title: string;
+  reason: string;
   amount: number;
   date: string;
   category: string;
@@ -11,10 +11,10 @@ export interface Expense extends mongoose.Document {
 
 const ExpenseSchema = new mongoose.Schema<Expense>(
   {
-    title: {
+    reason: {
       type: String,
-      minlength: [1, 'Title must be at least 1 character'],
-      required: [true, 'Title is required'],
+      minlength: [1, 'Reason must be at least 1 character'],
+      required: [true, 'Reason is required'],
     },
     amount: {
       type: Number,

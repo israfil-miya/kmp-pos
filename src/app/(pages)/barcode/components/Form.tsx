@@ -73,9 +73,9 @@ function Form() {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               className="h-5 w-5 text-gray-400"
             >
               <path d="M3 5v14" />
@@ -87,7 +87,7 @@ function Form() {
           </div>
           <input
             {...register('code', { required: 'Batch Code is required' })}
-            className="w-full pl-10 py-2.5 px-4 appearance-none block bg-gray-200 text-gray-700 border border-gray-200 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+            className="w-full pl-10 py-2.5 px-4 appearance-none block bg-gray-50 text-gray-700 border border-gray-200 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             placeholder="Enter Batch Code"
             type="text"
           />

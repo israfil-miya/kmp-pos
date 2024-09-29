@@ -185,7 +185,7 @@ const EditButton: React.FC<PropsType> = props => {
 
                 <input
                   {...register('batch')}
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  className="appearance-none block w-full bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   type="text"
                   readOnly
                 />
@@ -200,7 +200,7 @@ const EditButton: React.FC<PropsType> = props => {
                 </label>
                 <input
                   {...register('name')}
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  className="appearance-none block w-full bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   type="text"
                 />
               </div>
@@ -322,7 +322,7 @@ const EditButton: React.FC<PropsType> = props => {
                 </label>
                 <input
                   {...register('quantity', { valueAsNumber: true })}
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  className="appearance-none block w-full bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   type="number"
                 />
               </div>
@@ -336,7 +336,7 @@ const EditButton: React.FC<PropsType> = props => {
                 </label>
                 <input
                   {...register('cost_price', { valueAsNumber: true })}
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  className="appearance-none block w-full bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   type="number"
                   step=".01"
                 />
@@ -351,7 +351,7 @@ const EditButton: React.FC<PropsType> = props => {
                 </label>
                 <input
                   {...register('selling_price', { valueAsNumber: true })}
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  className="appearance-none block w-full bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   type="number"
                   step=".01"
                 />
@@ -366,7 +366,7 @@ const EditButton: React.FC<PropsType> = props => {
                 </label>
                 <input
                   {...register('vat_rate', { valueAsNumber: true })}
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  className="appearance-none block w-full bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   type="number"
                   step=".01"
                 />
@@ -381,7 +381,7 @@ const EditButton: React.FC<PropsType> = props => {
                 </label>
                 <input
                   {...register('mft_date')}
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  className="appearance-none block w-full bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   type="date"
                 />
               </div>
@@ -395,7 +395,7 @@ const EditButton: React.FC<PropsType> = props => {
                 </label>
                 <input
                   {...register('exp_date')}
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  className="appearance-none block w-full bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   type="date"
                 />
               </div>
@@ -410,7 +410,7 @@ const EditButton: React.FC<PropsType> = props => {
                 <textarea
                   {...register('description')}
                   rows={5}
-                  className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                  className="appearance-none block w-full bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                   placeholder="What's the product about?"
                 />
               </div>

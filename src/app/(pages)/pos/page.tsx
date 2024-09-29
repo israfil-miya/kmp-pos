@@ -11,18 +11,22 @@ function POSPage() {
   return (
     <>
       <POStContextProvider>
-        <div className="gap-4 flex flex-col">
-          <div>
-            <h2 className="text-2xl font-semibold mb-1">Product Search</h2>
-            <SearchInput />
+        <div className="gap-1 lg:flex-row flex flex-col">
+          <div className="border-2 rounded-sm p-4 w-full overflow-auto">
+            <div>
+              <h2 className="text-2xl font-semibold mb-1">Product Search</h2>
+              <SearchInput />
+            </div>
+            <div>
+              <h2 className="text-2xl font-semibold mt-4 mb-1">
+                Shopping Cart
+              </h2>
+              <Cart />
+            </div>
           </div>
-          <div>
-            <h2 className="text-2xl font-semibold mt-4 mb-1">Shopping Cart</h2>
-            <Cart />
-          </div>
-          <div className="w-full">
-            <div className="flex flex-col md:flex-row w-full gap-8">
-              <div className="w-full md:w-[40vw]">
+          <div className="lg:w-[40vw] w-full border-2 rounded-sm p-4 overflow-auto">
+            <div className="flex flex-col md:flex-col gap-8 w-full">
+              <div className="w-full">
                 <h2 className="text-2xl font-semibold mt-4 mb-1">
                   Customer Details
                 </h2>
@@ -37,7 +41,6 @@ function POSPage() {
             </div>
           </div>
         </div>
-        <button>PAY THE BILL</button>
       </POStContextProvider>
     </>
   );

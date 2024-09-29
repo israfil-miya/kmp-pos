@@ -9,10 +9,11 @@ export interface Invoice extends mongoose.Document {
   };
   products: {
     product: mongoose.Types.ObjectId;
-    quantity: number;
+    unit: number;
     total_price: number;
   }[];
   discount_amount: number;
+  vat_amount: number;
   sub_total: number;
   grand_total: number;
   paid_amount: number;
@@ -47,10 +48,10 @@ const InvoiceSchema = new mongoose.Schema<Invoice>(
           ref: 'Product',
           required: [true, 'Product id is not given'], // Product reference is required
         },
-        quantity: {
+        unit: {
           type: Number,
-          required: [true, 'Quantity is not given'],
-          min: [1, 'Quantity cannot be less than 1'], // Ensure positive quantity
+          required: [true, 'Unit is not given'],
+          min: [1, 'Unit cannot be less than 1'], // Ensure positive unit
         },
         total_price: {
           type: Number,
@@ -77,6 +78,12 @@ const InvoiceSchema = new mongoose.Schema<Invoice>(
       type: Number,
       required: [true, 'Total amount is not given'],
       min: [0, 'Total amount cannot be negative'], // Ensure positive
+    },
+
+    vat_amount: {
+      type: Number,
+      default: 0, // Default VAT to 0 if not provided
+      min: [0, 'VAT amount cannot be negative'],
     },
 
     paid_amount: {

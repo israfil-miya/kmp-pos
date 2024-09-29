@@ -123,7 +123,7 @@ export default function SearchInput() {
           id="searchDropdownButton"
           data-dropdown-toggle="searchDropdown"
           type="text"
-          className="block w-full p-4 ps-10 pe-24 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+          className="block w-full p-4 ps-10 pe-24 text-sm text-gray-900 border border-gray-300 rounded bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
           placeholder="Search products by batch, name and category"
           required
           onChange={e => {

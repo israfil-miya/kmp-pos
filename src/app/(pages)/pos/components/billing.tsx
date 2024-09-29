@@ -1,12 +1,14 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import Select from 'react-select';
-import { POSContext } from '../POSContext';
+import { toast } from 'sonner';
+import { POSContext, ProductType } from '../POSContext';
 
 // Define the structure of a Product
 interface Product {
   price: number;
   unit?: number;
   vat: number;
+  id: string; // Assuming each product has an id
 }
 
 // Define the structure of the Invoice state
@@ -54,7 +56,7 @@ function Billing() {
   const getTotal = useCallback(() => {
     let sub_total = 0;
     let vat = 0;
-    context?.products.forEach((product: Product) => {
+    context?.products.forEach((product: ProductType) => {
       const quantity = product.unit || 0;
       sub_total += product.price * quantity;
       vat += ((product.price * product.vat) / 100) * quantity;
@@ -86,7 +88,7 @@ function Billing() {
       ...prevInvoice,
       calculated_discount: Math.min(calculated_discount, sub_total), // Ensure the discount does not exceed sub_total
     }));
-  }, [invoice]);
+  }, [invoice.discount_value, invoice.sub_total, invoice.discount_type]);
 
   // Handle discount input changes
   const handleDiscount = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,7 +112,7 @@ function Billing() {
     calculateDiscount();
   }, [invoice.discount_value, invoice.discount_type, calculateDiscount]);
 
-  // Calculate round_off and total_amount whenever sub_total, discount, or vat changes
+  // Calculate round_off and total_amount whenever sub_total, calculated_discount, or vat changes
   useEffect(() => {
     const { sub_total, calculated_discount, vat } = invoice;
     const totalBeforeRoundOff = sub_total - calculated_discount + vat;
@@ -124,35 +126,80 @@ function Billing() {
       round_off: isNaN(roundOff) ? 0 : roundOff,
       total_amount: parseFloat((totalBeforeRoundOff + roundOff).toFixed(2)),
     }));
-  }, [invoice.sub_total, invoice.calculated_discount, invoice.vat, invoice]);
+  }, [invoice.sub_total, invoice.calculated_discount, invoice.vat]); // Removed 'invoice' from dependencies
+
+  const createInvoice = () => {
+    const { products, customer } = context || {};
+
+    // Validate the customer details
+    if (
+      !customer?.name &&
+      !customer?.phone &&
+      !customer?.address &&
+      invoice.paid_amount < invoice.total_amount
+    ) {
+      toast.error('Please provide customer details');
+      return;
+    }
+
+    // Validate the payment details
+    if (!invoice.payment_method || invoice.paid_amount < 0) {
+      if (invoice.paid_amount > 0) {
+        toast.error('Please provide payment details');
+        return;
+      }
+    }
+
+    // Create the invoice object
+    const newInvoice = {
+      customer: {
+        name: customer?.name || '',
+        phone: customer?.phone || '',
+        address: customer?.address || '',
+      },
+      products: products?.map(product => ({
+        product: product.id,
+        unit: product.unit || 0,
+        total_price: product.price * (product.unit || 0),
+      })),
+      discount_amount: invoice.calculated_discount,
+      vat_amount: invoice.vat,
+      sub_total: invoice.sub_total,
+      grand_total: invoice.total_amount,
+      paid_amount: invoice.paid_amount,
+      payment_method: invoice.payment_method,
+    };
+
+    console.log(newInvoice);
+    // You might want to send this to your backend or perform further actions
+  };
 
   return (
     <>
       <div className="w-full">
         {/* Bill Details */}
-        <div className="flex justify-between mb-4 w-full">
-          <div className="flex flex-col flex-grow min-w-0 space-y-2">
-            <div className="flex items-center">Sub Total:</div>
-            <div className="flex items-center">Discount:</div>
-            <div className="flex items-center">VAT:</div>
-            <div className="flex items-center">Round Off:</div>
+        <div className="space-y-2 w-full">
+          <div className="flex justify-between items-center">
+            <p className="font-medium">Sub Total:</p>
+            <p>{invoice.sub_total.toFixed(2)} ৳</p>
           </div>
-          <div className="flex flex-col items-end min-w-max space-y-2">
-            <div className="flex items-center">
-              {invoice.sub_total.toFixed(2)} &#2547;
-            </div>
-            <div className="flex items-center gap-1">
-              -
+
+          <div className="flex justify-between items-center">
+            <p className="font-medium">Discount:</p>
+            <div className="flex items-center gap-2">
               <input
-                onChange={handleDiscount}
                 type="number"
-                className="appearance-none w-20 p-2 text-gray-700 border border-gray-200 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                 value={invoice.discount_value}
+                onChange={handleDiscount}
+                className="w-20 p-2 border rounded"
                 placeholder={
                   invoice.discount_type === 'percentage' ? '0%' : '0৳'
                 }
               />
               <Select
+                value={discountTypes.find(
+                  option => option.value === invoice.discount_type,
+                )}
                 onChange={e =>
                   setInvoice(prevInvoice => ({
                     ...prevInvoice,
@@ -161,20 +208,19 @@ function Billing() {
                     discount_value: 0,
                   }))
                 }
-                classNamePrefix="react-select"
-                value={discountTypes.find(
-                  option => option.value === invoice.discount_type,
-                )}
-                name="discount_type"
                 options={discountTypes}
               />
             </div>
-            <div className="flex items-center">
-              {invoice.vat.toFixed(2)} &#2547;
-            </div>
-            <div className="flex items-center">
-              {invoice.round_off.toFixed(2)} &#2547;
-            </div>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <p className="font-medium">VAT:</p>
+            <p>{invoice.vat.toFixed(2)} ৳</p>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <p className="font-medium">Round Off:</p>
+            <p>+ {invoice.round_off.toFixed(2)} ৳</p>
           </div>
         </div>
 
@@ -182,22 +228,21 @@ function Billing() {
 
         {/* Total Amount Section */}
         <div className="flex justify-between items-center mb-4">
-          <div className="font-semibold text-lg">Total Amount:</div>
-          <div className="font-bold text-lg">
+          <p className="font-semibold text-lg">Total Amount:</p>
+          <p className="font-bold text-lg">
             {Number(invoice.total_amount.toFixed(2)) || 0} &#2547;
-          </div>
+          </p>
         </div>
 
         <hr className="my-4" />
 
         {/* Payment Section */}
-        <div className="flex justify-between w-full">
-          <div className="flex flex-col flex-grow min-w-0 space-y-4">
-            <div className="font-semibold">Payment Method:</div>
-            <div className="font-semibold">Paid Amount:</div>
-          </div>
-          <div className="flex flex-col items-end min-w-max space-y-4">
+
+        <div className="space-y-2 w-full">
+          <div className="flex justify-between items-center">
+            <p className="font-medium">Payment Method:</p>
             <Select
+              menuPortalTarget={document.body}
               onChange={e =>
                 setInvoice(prevInvoice => ({
                   ...prevInvoice,
@@ -212,6 +257,10 @@ function Billing() {
               name="payment_method"
               options={paymentOptions}
             />
+          </div>
+
+          <div className="flex justify-between items-center">
+            <p className="font-medium">Paid Amount:</p>
             <input
               onChange={e =>
                 setInvoice(prevInvoice => ({
@@ -220,12 +269,19 @@ function Billing() {
                 }))
               }
               type="number"
-              placeholder="Enter an amount in Taka"
-              className="appearance-none block w-full text-gray-700 border border-gray-200 rounded p-2.5 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              placeholder="Enter paid amount"
+              className="appearance-none text-lg font-semibold block max-w-md text-gray-700 border border-gray-200 rounded p-2.5 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             />
           </div>
         </div>
       </div>
+      <button
+        onClick={createInvoice}
+        disabled={!context?.products.length}
+        className="w-full disabled:bg-green-400 disabled:text-gray-100 mt-6 text-center rounded-sm bg-green-600 hover:[&:not([disabled])]:opacity-90 hover:[&:not([disabled])]:ring-2 hover:[&:not([disabled])]:ring-green-600 transition duration-200 delay-300 hover:[&:not([disabled])]:text-opacity-100 text-white py-2 px-3"
+      >
+        PAY THE BILL
+      </button>
 
       {/* Custom Styles to Remove Number Input Arrows */}
       <style jsx>

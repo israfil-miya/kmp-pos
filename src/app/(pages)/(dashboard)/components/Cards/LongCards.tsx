@@ -10,7 +10,7 @@ const LongCards = () => {
     <div className="grid grid-cols-3 gap-4">
       <LongCardTemplate
         title={`Expenses (${currentMonth})`}
-        description="630&#2547;"
+        description="630 ৳"
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -28,7 +28,7 @@ const LongCards = () => {
       />
       <LongCardTemplate
         title={`Sales (${currentMonth})`}
-        description="1500&#2547;"
+        description="1500 ৳"
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -45,7 +45,7 @@ const LongCards = () => {
       />
       <LongCardTemplate
         title={`Revenue (${currentMonth})`}
-        description="230.85&#2547;"
+        description="230.85 ৳"
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -116,7 +116,7 @@ const LongCards = () => {
       />
       <LongCardTemplate
         title={`Expenses (${currentYear})`}
-        description="630&#2547;"
+        description="630 ৳"
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -133,7 +133,7 @@ const LongCards = () => {
       />
       <LongCardTemplate
         title={`Sales (${currentYear})`}
-        description="1500&#2547;"
+        description="1500 ৳"
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -157,7 +157,7 @@ const LongCards = () => {
       />
       <LongCardTemplate
         title={`Revenue (${currentYear})`}
-        description="230.85&#2547;"
+        description="230.85 ৳"
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"

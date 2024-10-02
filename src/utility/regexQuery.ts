@@ -1,4 +1,9 @@
 import {
+  Query as invoice_Query,
+  RegexFields as invoice_RegexFields,
+  RegexQuery as invoice_RegexQuery,
+} from '@/app/(pages)/invoices/schema';
+import {
   Query as pos_Query,
   RegexFields as pos_RegexFields,
   RegexQuery as pos_RegexQuery,
@@ -14,9 +19,17 @@ import {
   RegexQuery as supplier_RegexQuery,
 } from '@/app/(pages)/suppliers/schema';
 
-type RegexQuery = supplier_RegexQuery | product_RegexQuery | pos_RegexQuery;
-type Query = supplier_Query | product_Query | pos_Query;
-type RegexFields = supplier_RegexFields | product_RegexFields | pos_RegexFields;
+type RegexQuery =
+  | supplier_RegexQuery
+  | product_RegexQuery
+  | pos_RegexQuery
+  | invoice_RegexQuery;
+type Query = supplier_Query | product_Query | pos_Query | invoice_Query;
+type RegexFields =
+  | supplier_RegexFields
+  | product_RegexFields
+  | pos_RegexFields
+  | invoice_RegexFields;
 
 // Helper function to create a regex query
 export const createRegexQuery = (

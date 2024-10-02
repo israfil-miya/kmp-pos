@@ -95,7 +95,7 @@ const InvoiceSchema = new mongoose.Schema<Invoice>(
       type: String,
       required: [true, 'Payment method is not given'],
       enum: {
-        values: ['cash', 'card', 'bkash', 'nagad', 'rocket'],
+        values: ['cash', 'card', 'bkash', 'nagad', 'rocket', 'check', 'bank'],
         message: 'Invalid payment method',
       },
     },

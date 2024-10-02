@@ -62,8 +62,8 @@ function Cart() {
                     />
                     {' / ' + product.quantity}
                   </td>
-                  <td className="capitalize">{product.price}&#2547;</td>
-                  <td className="capitalize">{product.vat}%</td>
+                  <td className="capitalize">{product.price} ৳</td>
+                  <td className="capitalize">{product.vat} %</td>
                   <td className="capitalize">
                     {Number(
                       Math.round(
@@ -77,8 +77,8 @@ function Cart() {
                       ) +
                         'e-' +
                         2,
-                    ).toFixed(2)}
-                    &#2547;
+                    ).toFixed(2)}{' '}
+                    ৳
                   </td>
                   <td
                     className="text-center"

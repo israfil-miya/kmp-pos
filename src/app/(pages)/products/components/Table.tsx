@@ -340,7 +340,7 @@ const Table: React.FC<TableDataProps> = props => {
                           ? convertToDDMMYYYY(item.exp_date)
                           : 'N/A'}
                       </td>
-                      <td>{item.selling_price}</td>
+                      <td>{item.selling_price} ৳</td>
                       <td>{item.quantity}</td>
                       <td
                         className="uppercase items-center"

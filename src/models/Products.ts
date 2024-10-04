@@ -1,3 +1,4 @@
+import getTodayDate from '@/utility/getTodaysDate';
 import mongoose from 'mongoose';
 
 export interface Product extends mongoose.Document {
@@ -13,6 +14,7 @@ export interface Product extends mongoose.Document {
   vat_rate: number;
   mft_date: string;
   exp_date: string;
+  restock_date: string;
 }
 
 const ProductSchema = new mongoose.Schema<Product>(
@@ -97,6 +99,12 @@ const ProductSchema = new mongoose.Schema<Product>(
     exp_date: {
       type: String,
       default: '',
+    },
+
+    // last restock date
+    restock_date: {
+      type: String,
+      default: getTodayDate(),
     },
   },
   { timestamps: true },

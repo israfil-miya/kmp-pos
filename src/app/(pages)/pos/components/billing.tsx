@@ -219,6 +219,7 @@ function Billing() {
           <div className="flex justify-between items-center">
             <p className="font-medium">Discount:</p>
             <div className="flex items-center gap-2">
+              -
               <input
                 type="number"
                 value={invoice.discount_value}

@@ -1,9 +1,6 @@
 'use client';
 
-import cn from '@/utility/cn';
-import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
-import fetchData from '@/utility/fetchData';
-import moment from 'moment-timezone';
+import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
@@ -14,10 +11,8 @@ import {
   getAllProductsFiltered as getAllProductsFilteredAction,
 } from '../actions';
 import { ProductDataTypes } from '../schema';
-import BarcodeButton from './Barcode';
 import CreateButton from './Create';
 import DeleteButton from './Delete';
-import EditButton from './Edit';
 import FilterButton from './Filter';
 
 export interface ProductsState {
@@ -29,15 +24,12 @@ export interface ProductsState {
 }
 
 interface TableDataProps {
-  storeNames: FormState;
-  categoryNames: FormState;
-  supplierNames: FormState;
   data: FormState;
 }
 
 const Table: React.FC<TableDataProps> = props => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [products, setProducts] = useState<ProductsState>({
+  const [loading, setLoading] = useState(false);
+  const [invoices, setProducts] = useState<ProductsState>({
     pagination: {
       count: 0,
       pageCount: 0,
@@ -45,10 +37,6 @@ const Table: React.FC<TableDataProps> = props => {
     items: [],
   });
   const { data: session } = useSession();
-
-  const [stores, setStores] = useState<string[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [suppliers, setSuppliers] = useState<string[]>([]);
 
   const router = useRouter();
 
@@ -66,7 +54,7 @@ const Table: React.FC<TableDataProps> = props => {
 
   const getAllProducts = async (): Promise<void> => {
     try {
-      // setIsLoading(true);
+      // setLoading(true);
 
       let response = await getAllProductsAction({
         page: page,
@@ -83,15 +71,15 @@ const Table: React.FC<TableDataProps> = props => {
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred while retrieving products data');
+      toast.error('An error occurred while retrieving invoices data');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   const getAllProductsFiltered = async (): Promise<void> => {
     try {
-      // setIsLoading(true);
+      // setLoading(true);
 
       let response = await getAllProductsFilteredAction({
         page: isFiltered ? page : 1,
@@ -110,47 +98,18 @@ const Table: React.FC<TableDataProps> = props => {
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred while retrieving products data');
+      toast.error('An error occurred while retrieving invoices data');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (props.storeNames.error) {
-      if (props.storeNames?.message !== '') {
-        toast.error(props.storeNames.message);
-      }
-    } else if (props.storeNames?.message !== '') {
-      setStores(JSON.parse(props.storeNames.message));
-    } else {
-      console.log('Nothing was returned from the server');
-    }
-  }, [props.storeNames]);
-
-  useEffect(() => {
-    if (props.categoryNames.error) {
-      if (props.categoryNames?.message !== '') {
-        toast.error(props.categoryNames.message);
-      }
-    } else if (props.categoryNames?.message !== '') {
-      setCategories(JSON.parse(props.categoryNames.message));
-    } else {
-      console.log('Nothing was returned from the server');
-    }
-  }, [props.categoryNames]);
-
-  useEffect(() => {
-    if (props.supplierNames.error) {
-      if (props.supplierNames?.message !== '') {
-        toast.error(props.supplierNames.message);
-      }
-    } else if (props.supplierNames?.message !== '') {
-      setSuppliers(JSON.parse(props.supplierNames.message));
-    } else {
-      console.log('Nothing was returned from the server');
-    }
-  }, [props.supplierNames]);
+  function handlePrevious() {
+    setPage(p => {
+      if (p === 1) return p;
+      return p - 1;
+    });
+  }
 
   useEffect(() => {
     if (props.data.error) {
@@ -164,13 +123,6 @@ const Table: React.FC<TableDataProps> = props => {
     }
   }, [props.data]);
 
-  function handlePrevious() {
-    setPage(p => {
-      if (p === 1) return p;
-      return p - 1;
-    });
-  }
-
   function handleNext() {
     setPage(p => {
       if (p === pageCount) return p;
@@ -180,7 +132,7 @@ const Table: React.FC<TableDataProps> = props => {
 
   useEffect(() => {
     if (prevPage.current !== 1 || page > 1) {
-      if (products?.pagination?.pageCount == 1) return;
+      if (invoices?.pagination?.pageCount == 1) return;
       if (!isFiltered) getAllProducts();
       else getAllProductsFiltered();
     }
@@ -188,16 +140,16 @@ const Table: React.FC<TableDataProps> = props => {
   }, [page]);
 
   useEffect(() => {
-    if (products?.pagination?.pageCount !== undefined) {
+    if (invoices?.pagination?.pageCount !== undefined) {
       setPage(1);
       if (prevPageCount.current !== 0) {
         if (!isFiltered) getAllProductsFiltered();
       }
-      if (products) setPageCount(products?.pagination?.pageCount);
-      prevPageCount.current = products?.pagination?.pageCount;
+      if (invoices) setPageCount(invoices?.pagination?.pageCount);
+      prevPageCount.current = invoices?.pagination?.pageCount;
       prevPage.current = 1;
     }
-  }, [products?.pagination?.pageCount]);
+  }, [invoices?.pagination?.pageCount]);
 
   useEffect(() => {
     // Reset to first page when itemsPerPage changes
@@ -217,9 +169,9 @@ const Table: React.FC<TableDataProps> = props => {
           <div className="inline-flex rounded-sm" role="group">
             <button
               onClick={handlePrevious}
-              disabled={page === 1 || pageCount === 0 || isLoading}
+              disabled={page === 1 || pageCount === 0 || loading}
               type="button"
-              className="inline-flex items-center px-4 py-2 text-sm bg-gray-50 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              className="inline-flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -240,15 +192,15 @@ const Table: React.FC<TableDataProps> = props => {
               className="hidden sm:visible sm:inline-flex items-center px-4 py-2 text-sm font-medium border"
             >
               <label>
-                Page <b>{products?.items?.length !== 0 ? page : 0}</b> of{' '}
+                Page <b>{invoices?.items?.length !== 0 ? page : 0}</b> of{' '}
                 <b>{pageCount}</b>
               </label>
             </button>
             <button
               onClick={handleNext}
-              disabled={page === pageCount || pageCount === 0 || isLoading}
+              disabled={page === pageCount || pageCount === 0 || loading}
               type="button"
-              className="inline-flex items-center px-4 py-2 text-sm bg-gray-50 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              className="inline-flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             >
               Next
               <svg
@@ -270,7 +222,7 @@ const Table: React.FC<TableDataProps> = props => {
             value={itemsPerPage}
             onChange={e => setItemsPerPage(parseInt(e.target.value))}
             required
-            className="appearance-none bg-gray-50 text-gray-700 border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+            className="appearance-none bg-gray-200 text-gray-700 border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           >
             <option value={30}>30</option>
             <option value={50}>50</option>
@@ -284,78 +236,36 @@ const Table: React.FC<TableDataProps> = props => {
             setProducts={setProducts}
           />
         </div>
-        <CreateButton
-          suppliersList={suppliers}
-          categoriesList={categories}
-          storesList={stores}
-        />
+        <CreateButton />
       </div>
 
-      {isLoading && <p className="text-center">Loading...</p>}
+      {loading && <p className="text-center">Loading...</p>}
 
-      {!isLoading && (
+      {!loading && (
         <div className="table-responsive text-nowrap text-sm">
           <table className="table table-bordered table-striped">
             <thead>
               <tr>
                 <th className="font-bold">S/N</th>
-                <th className="font-bold">Barcode</th>
+                <th className="font-bold">Batch</th>
                 <th className="font-bold">Products</th>
-                <th className="font-bold">Category</th>
-                <th className="font-bold">Expire</th>
-                <th className="font-bold">Price</th>
-                <th className="font-bold">Stock</th>
-                <th className="font-bold">Store</th>
                 <th className="font-bold">Supplier</th>
-                <th className="font-bold">Restocked</th>
-                <th className="font-bold">Status</th>
+                <th className="font-bold">Cost Price</th>
+                <th className="font-bold">Sell Price</th>
+                <th className="font-bold">Stock Date</th>
                 {session?.user?.role === 'administrator' && (
                   <th className="font-bold">Action</th>
                 )}
               </tr>
             </thead>
             <tbody>
-              {products?.items?.length !== 0 ? (
-                products?.items?.map(
+              {invoices?.items?.length !== 0 ? (
+                invoices?.items?.map(
                   (item: ProductDataTypes, index: number) => (
-                    <tr key={item._id}>
+                    <tr key={String(item._id)}>
                       <td>{index + 1}</td>
                       <td>{item.batch}</td>
                       <td className="capitalize">{item.name}</td>
-                      <td
-                        className="uppercase items-center"
-                        style={{ verticalAlign: 'middle' }}
-                      >
-                        {item.category?.map((category, index) => (
-                          <span
-                            key={index}
-                            className="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400"
-                          >
-                            {category}
-                          </span>
-                        ))}
-                      </td>
-
-                      <td>
-                        {item.exp_date
-                          ? convertToDDMMYYYY(item.exp_date)
-                          : 'N/A'}
-                      </td>
-                      <td>{item.selling_price} ৳</td>
-                      <td>{item.quantity}</td>
-                      <td
-                        className="uppercase items-center"
-                        style={{ verticalAlign: 'middle' }}
-                      >
-                        {item.store?.map((store, index) => (
-                          <span
-                            key={index}
-                            className="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400"
-                          >
-                            {store}
-                          </span>
-                        ))}
-                      </td>
                       <td
                         className="uppercase items-center text-wrap"
                         style={{ verticalAlign: 'middle' }}
@@ -369,27 +279,12 @@ const Table: React.FC<TableDataProps> = props => {
                           </span>
                         ))}
                       </td>
-
+                      <td>{item.cost_price.toLocaleString() || '0'} ৳</td>
+                      <td>{item.selling_price.toLocaleString() || '0'} ৳</td>
                       <td>
                         {item.restock_date
                           ? convertToDDMMYYYY(item.restock_date)
                           : 'N/A'}
-                      </td>
-                      <td
-                        className="uppercase items-center"
-                        style={{ verticalAlign: 'middle' }}
-                      >
-                        <span
-                          key={index}
-                          className={cn(
-                            'text-xs font-medium px-2.5 py-0.5 rounded border',
-                            item.in_stock
-                              ? 'bg-green-100 text-green-800 border-green-400'
-                              : 'bg-red-100 text-red-800 border-red-400',
-                          )}
-                        >
-                          {item.in_stock ? 'In Stock' : 'Out of Stock'}
-                        </span>
                       </td>
 
                       {session?.user?.role === 'administrator' && (
@@ -399,14 +294,7 @@ const Table: React.FC<TableDataProps> = props => {
                         >
                           <div className="inline-block">
                             <div className="flex gap-2">
-                              <EditButton
-                                storesList={stores}
-                                categoriesList={categories}
-                                suppliersList={suppliers}
-                                productData={item}
-                              />
-                              <DeleteButton productData={item} />
-                              <BarcodeButton productData={item} />
+                              <DeleteButton invoiceData={item} />
                             </div>
                           </div>
                         </td>
@@ -417,7 +305,7 @@ const Table: React.FC<TableDataProps> = props => {
               ) : (
                 <tr key={0}>
                   <td
-                    colSpan={session?.user?.role === 'administrator' ? 12 : 11}
+                    colSpan={session?.user?.role === 'administrator' ? 8 : 7}
                     className="align-center text-center"
                   >
                     No Product To Show.

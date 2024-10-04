@@ -19,6 +19,7 @@ const Customer: React.FC = () => {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
       <div className="relative">
         <input
+          value={context?.customer?.name || ''}
           type="text"
           onChange={handleChange}
           name="name"
@@ -35,6 +36,7 @@ const Customer: React.FC = () => {
       </div>
       <div className="relative">
         <input
+          value={context?.customer?.phone || ''}
           type="text"
           onChange={handleChange}
           name="phone"
@@ -51,6 +53,7 @@ const Customer: React.FC = () => {
       </div>
       <div className="relative lg:col-span-2">
         <textarea
+          value={context?.customer?.address || ''}
           rows={5}
           id="floating_filled_address"
           className="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 dark:border-gray-600 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer resize-none"

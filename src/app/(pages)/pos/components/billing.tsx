@@ -1,15 +1,10 @@
+import { useSession } from 'next-auth/react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import Select from 'react-select';
 import { toast } from 'sonner';
+import { createNewInvoice } from '../actions';
 import { POSContext, ProductType } from '../POSContext';
-
-// Define the structure of a Product
-interface Product {
-  price: number;
-  unit?: number;
-  vat: number;
-  id: string; // Assuming each product has an id
-}
+import { InvoiceDataTypes } from '../schema';
 
 // Define the structure of the Invoice state
 interface Invoice {
@@ -25,6 +20,8 @@ interface Invoice {
 }
 
 function Billing() {
+  const { data: session } = useSession();
+  const [loading, setLoading] = useState(false);
   const context = useContext(POSContext);
 
   const [invoice, setInvoice] = useState<Invoice>({
@@ -128,50 +125,83 @@ function Billing() {
     }));
   }, [invoice.sub_total, invoice.calculated_discount, invoice.vat]); // Removed 'invoice' from dependencies
 
-  const createInvoice = () => {
-    const { products, customer } = context || {};
+  const createInvoice = async () => {
+    try {
+      setLoading(true);
 
-    // Validate the customer details
-    if (
-      !customer?.name &&
-      !customer?.phone &&
-      !customer?.address &&
-      invoice.paid_amount < invoice.total_amount
-    ) {
-      toast.error('Please provide customer details');
-      return;
-    }
+      const { products, customer } = context || {};
 
-    // Validate the payment details
-    if (!invoice.payment_method || invoice.paid_amount < 0) {
-      if (invoice.paid_amount > 0) {
-        toast.error('Please provide payment details');
+      // Validate the customer details
+      if (
+        !customer?.name &&
+        !customer?.phone &&
+        !customer?.address &&
+        invoice.paid_amount < invoice.total_amount
+      ) {
+        toast.error('Please provide customer details');
         return;
       }
+
+      // Validate the payment details
+      if (!invoice.payment_method || invoice.paid_amount < 0) {
+        if (invoice.paid_amount > 0) {
+          toast.error('Please provide payment details');
+          return;
+        }
+      }
+
+      // Create the invoice object
+      const newInvoice: InvoiceDataTypes = {
+        cashier: session?.user?.full_name || session?.user?.name || '',
+        customer: {
+          name: customer?.name || '',
+          phone: customer?.phone || '',
+          address: customer?.address || '',
+        },
+        products: products!.map(product => ({
+          product: JSON.parse(JSON.stringify(product.id)),
+          unit: product.unit || 0,
+          total_price: product.price * (product.unit || 0),
+        })),
+        discount_amount: invoice.calculated_discount,
+        vat_amount: invoice.vat,
+        sub_total: invoice.sub_total,
+        grand_total: invoice.total_amount,
+        paid_amount: invoice.paid_amount,
+        payment_method: invoice.payment_method,
+      };
+
+      console.log(newInvoice);
+
+      let response = await createNewInvoice(newInvoice);
+      if (response.error) {
+        if (response?.message !== '') {
+          toast.error(response.message);
+        }
+      } else if (response?.message !== '') {
+        // after creating the invoice, reset the context and invoice state
+        context?.resetAll();
+        setInvoice({
+          sub_total: 0,
+          discount_value: 0,
+          calculated_discount: 0,
+          vat: 0,
+          round_off: 0,
+          total_amount: 0,
+          payment_method: 'cash',
+          paid_amount: 0,
+          discount_type: 'fixed',
+        });
+        toast.success(response.message);
+      } else {
+        console.log('Nothing was returned from the server');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while submitting the data');
+    } finally {
+      setLoading(false);
     }
-
-    // Create the invoice object
-    const newInvoice = {
-      customer: {
-        name: customer?.name || '',
-        phone: customer?.phone || '',
-        address: customer?.address || '',
-      },
-      products: products?.map(product => ({
-        product: product.id,
-        unit: product.unit || 0,
-        total_price: product.price * (product.unit || 0),
-      })),
-      discount_amount: invoice.calculated_discount,
-      vat_amount: invoice.vat,
-      sub_total: invoice.sub_total,
-      grand_total: invoice.total_amount,
-      paid_amount: invoice.paid_amount,
-      payment_method: invoice.payment_method,
-    };
-
-    console.log(newInvoice);
-    // You might want to send this to your backend or perform further actions
   };
 
   return (
@@ -242,7 +272,9 @@ function Billing() {
           <div className="flex justify-between items-center">
             <p className="font-medium">Payment Method:</p>
             <Select
-              menuPortalTarget={document.body}
+              menuPortalTarget={
+                typeof window !== 'undefined' ? document.body : null
+              }
               onChange={e =>
                 setInvoice(prevInvoice => ({
                   ...prevInvoice,
@@ -262,6 +294,7 @@ function Billing() {
           <div className="flex justify-between items-center">
             <p className="font-medium">Paid Amount:</p>
             <input
+              value={invoice.paid_amount}
               onChange={e =>
                 setInvoice(prevInvoice => ({
                   ...prevInvoice,
@@ -277,7 +310,7 @@ function Billing() {
       </div>
       <button
         onClick={createInvoice}
-        disabled={!context?.products.length}
+        disabled={!context?.products.length || loading}
         className="w-full disabled:bg-green-400 disabled:text-gray-100 mt-6 text-center rounded-sm bg-green-600 hover:[&:not([disabled])]:opacity-90 hover:[&:not([disabled])]:ring-2 hover:[&:not([disabled])]:ring-green-600 transition duration-200 delay-300 hover:[&:not([disabled])]:text-opacity-100 text-white py-2 px-3"
       >
         PAY THE BILL

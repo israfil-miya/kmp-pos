@@ -26,6 +26,7 @@ export type POSContextType = {
   setSearch: Dispatch<React.SetStateAction<string>>;
   insertProduct: (product: ProductType) => void;
   removeProduct: (product: ProductType['batch']) => void;
+  resetAll: () => void;
 };
 
 const POSContext = createContext<POSContextType | null>(null);
@@ -57,6 +58,16 @@ function POStContextProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  // create a reset function to reset the state of the products and customer
+  const resetAll = () => {
+    setProducts([]);
+    setCustomer({
+      name: '',
+      phone: '',
+      address: '',
+    });
+  };
+
   return (
     <POSContext.Provider
       value={{
@@ -68,6 +79,7 @@ function POStContextProvider({ children }: { children: React.ReactNode }) {
         setSearch: setSearch,
         insertProduct,
         removeProduct,
+        resetAll,
       }}
     >
       {children}

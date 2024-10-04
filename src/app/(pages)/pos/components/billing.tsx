@@ -31,7 +31,7 @@ function Billing() {
     vat: 0,
     round_off: 0,
     total_amount: 0,
-    payment_method: '',
+    payment_method: 'cash',
     paid_amount: 0,
     discount_type: 'fixed',
   });
@@ -39,6 +39,8 @@ function Billing() {
   const paymentOptions = [
     { value: 'cash', label: 'Cash' },
     { value: 'card', label: 'Card' },
+    { value: 'check', label: 'Check' },
+    { value: 'bank', label: 'Bank' },
     { value: 'bkash', label: 'Bkash' },
     { value: 'nagad', label: 'Nagad' },
     { value: 'rocket', label: 'Rocket' },
@@ -227,6 +229,7 @@ function Billing() {
                 }
               />
               <Select
+                defaultValue={discountTypes[0]}
                 value={discountTypes.find(
                   option => option.value === invoice.discount_type,
                 )}

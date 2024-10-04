@@ -14,7 +14,7 @@ function SearchedProducts() {
 
   const getAllProductsFiltered = useCallback(async (): Promise<void> => {
     try {
-      // setLoading(true);
+      setLoading(true);
 
       console.log('store', session?.user);
 
@@ -79,9 +79,6 @@ function SearchedProducts() {
   }, [context?.search, session?.user]);
 
   const updateCart = (product: ProductType) => {
-    console.log('Insert func called');
-    console.log(product);
-
     // Check if the product with the same batch already exists in the cart
     let productInCart = context?.products.find(p => p.batch === product.batch);
 
@@ -139,7 +136,7 @@ function SearchedProducts() {
                   <td>{product.batch}</td>
                   <td className="capitalize test-wrap">{product.name}</td>
                   <td>{product.quantity}</td>
-                  <td>{product.price}</td>
+                  <td>{product.price} ৳</td>
                 </tr>
               ))}
             </tbody>

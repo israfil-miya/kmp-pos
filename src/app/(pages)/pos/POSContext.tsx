@@ -8,6 +8,7 @@ export type ProductType = {
   price: number;
   vat: number;
   unit: number; // Quantity of the product in the cart
+  exp_date: string;
   quantity: number; // Available quantity
 };
 

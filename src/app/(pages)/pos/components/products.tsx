@@ -62,6 +62,7 @@ function SearchedProducts() {
             vat: product.vat_rate,
             unit: 1,
             quantity: product.quantity,
+            exp_date: product.exp_date,
           });
         }
 
@@ -123,6 +124,7 @@ function SearchedProducts() {
                 <th className="font-bold">Name</th>
                 <th className="font-bold">Qty</th>
                 <th className="font-bold">Price</th>
+                <th className="font-bold">Expire</th>
               </tr>
             </thead>
             <tbody>
@@ -137,6 +139,7 @@ function SearchedProducts() {
                   <td className="capitalize test-wrap">{product.name}</td>
                   <td>{product.quantity}</td>
                   <td>{product.price} ৳</td>
+                  <td>{product.exp_date}</td>
                 </tr>
               ))}
             </tbody>

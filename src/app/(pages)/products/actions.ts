@@ -159,7 +159,10 @@ export const getAllProductsFiltered = async (data: {
           }
         : { $or: [{}] };
 
-    const count: number = await Product.countDocuments(searchQuery);
+    const count: number = await Product.countDocuments({
+      ...searchQuery,
+      exp_date: { $lt: getTodayDate() },
+    });
 
     const skip = (page - 1) * itemsPerPage;
 
@@ -169,7 +172,7 @@ export const getAllProductsFiltered = async (data: {
     };
 
     const products = await Product.aggregate([
-      { $match: searchQuery },
+      { $match: { ...searchQuery, exp_date: { $lt: getTodayDate() } } },
       {
         $addFields: {
           in_stock: {
@@ -226,7 +229,9 @@ export const getAllProducts = async (data: {
 
     const skip = (page - 1) * itemsPerPage;
 
-    const count: number = await Product.countDocuments({});
+    const count: number = await Product.countDocuments({
+      exp_date: { $lt: getTodayDate() },
+    });
 
     const products = await Product.aggregate([
       {
@@ -235,6 +240,9 @@ export const getAllProducts = async (data: {
             $cond: { if: { $gt: ['$quantity', 0] }, then: 1, else: 0 },
           },
         },
+      },
+      {
+        $match: { exp_date: { $lt: getTodayDate() } },
       },
       { $sort: sortQuery },
       { $skip: skip },

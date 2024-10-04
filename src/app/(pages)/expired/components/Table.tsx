@@ -1,5 +1,6 @@
 'use client';
 
+import cn from '@/utility/cn';
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -165,7 +166,7 @@ const Table: React.FC<TableDataProps> = props => {
     <>
       <h2 className="text-3xl font-semibold">Products List</h2>
       <div className="flex flex-col sm:flex-row justify-between mb-4 mt-6 gap-2 items-center">
-        <div className="items-center flex gap-2">
+        <div className="items-center justify-start flex gap-2">
           <div className="inline-flex rounded-sm" role="group">
             <button
               onClick={handlePrevious}
@@ -236,7 +237,7 @@ const Table: React.FC<TableDataProps> = props => {
             setProducts={setProducts}
           />
         </div>
-        <CreateButton />
+        {/* <CreateButton /> */}
       </div>
 
       {loading && <p className="text-center">Loading...</p>}
@@ -247,12 +248,16 @@ const Table: React.FC<TableDataProps> = props => {
             <thead>
               <tr>
                 <th className="font-bold">S/N</th>
-                <th className="font-bold">Batch</th>
+                <th className="font-bold">Barcode</th>
                 <th className="font-bold">Products</th>
+                <th className="font-bold">Category</th>
+                <th className="font-bold">Expire</th>
+                <th className="font-bold">Price</th>
+                <th className="font-bold">Stock</th>
+                <th className="font-bold">Store</th>
                 <th className="font-bold">Supplier</th>
-                <th className="font-bold">Cost Price</th>
-                <th className="font-bold">Sell Price</th>
-                <th className="font-bold">Stock Date</th>
+                <th className="font-bold">Restocked</th>
+                <th className="font-bold">Status</th>
                 {session?.user?.role === 'administrator' && (
                   <th className="font-bold">Action</th>
                 )}
@@ -267,6 +272,40 @@ const Table: React.FC<TableDataProps> = props => {
                       <td>{item.batch}</td>
                       <td className="capitalize">{item.name}</td>
                       <td
+                        className="uppercase items-center"
+                        style={{ verticalAlign: 'middle' }}
+                      >
+                        {item.category?.map((category, index) => (
+                          <span
+                            key={index}
+                            className="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400"
+                          >
+                            {category}
+                          </span>
+                        ))}
+                      </td>
+
+                      <td>
+                        {item.exp_date
+                          ? convertToDDMMYYYY(item.exp_date)
+                          : 'N/A'}
+                      </td>
+                      <td>{item.selling_price} ৳</td>
+                      <td>{item.quantity}</td>
+                      <td
+                        className="uppercase items-center"
+                        style={{ verticalAlign: 'middle' }}
+                      >
+                        {item.store?.map((store, index) => (
+                          <span
+                            key={index}
+                            className="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400"
+                          >
+                            {store}
+                          </span>
+                        ))}
+                      </td>
+                      <td
                         className="uppercase items-center text-wrap"
                         style={{ verticalAlign: 'middle' }}
                       >
@@ -279,12 +318,27 @@ const Table: React.FC<TableDataProps> = props => {
                           </span>
                         ))}
                       </td>
-                      <td>{item.cost_price.toLocaleString() || '0'} ৳</td>
-                      <td>{item.selling_price.toLocaleString() || '0'} ৳</td>
+
                       <td>
                         {item.restock_date
                           ? convertToDDMMYYYY(item.restock_date)
                           : 'N/A'}
+                      </td>
+                      <td
+                        className="uppercase items-center"
+                        style={{ verticalAlign: 'middle' }}
+                      >
+                        <span
+                          key={index}
+                          className={cn(
+                            'text-xs font-medium px-2.5 py-0.5 rounded border',
+                            item.in_stock
+                              ? 'bg-green-100 text-green-800 border-green-400'
+                              : 'bg-red-100 text-red-800 border-red-400',
+                          )}
+                        >
+                          {item.in_stock ? 'In Stock' : 'Out of Stock'}
+                        </span>
                       </td>
 
                       {session?.user?.role === 'administrator' && (
@@ -294,7 +348,7 @@ const Table: React.FC<TableDataProps> = props => {
                         >
                           <div className="inline-block">
                             <div className="flex gap-2">
-                              <DeleteButton invoiceData={item} />
+                              <DeleteButton productData={item} />
                             </div>
                           </div>
                         </td>
@@ -305,7 +359,7 @@ const Table: React.FC<TableDataProps> = props => {
               ) : (
                 <tr key={0}>
                   <td
-                    colSpan={session?.user?.role === 'administrator' ? 8 : 7}
+                    colSpan={session?.user?.role === 'administrator' ? 12 : 11}
                     className="align-center text-center"
                   >
                     No Product To Show.

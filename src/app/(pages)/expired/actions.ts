@@ -91,7 +91,7 @@ export const getAllProductsFiltered = async (data: {
 
     const count: number = await Product.countDocuments({
       ...searchQuery,
-      quantity: { $eq: 0 },
+      exp_date: { $gte: getTodayDate() },
     });
 
     const skip = (page - 1) * itemsPerPage;
@@ -101,7 +101,7 @@ export const getAllProductsFiltered = async (data: {
     };
 
     const products = await Product.aggregate([
-      { $match: { ...searchQuery, quantity: { $eq: 0 } } },
+      { $match: { ...searchQuery, exp_date: { $gte: getTodayDate() } } },
       { $sort: sortQuery },
       { $skip: skip },
       { $limit: itemsPerPage },
@@ -151,11 +151,11 @@ export const getAllProducts = async (data: {
     const skip = (page - 1) * itemsPerPage;
 
     const count: number = await Product.countDocuments({
-      quantity: { $eq: 0 },
+      exp_date: { $gte: getTodayDate() },
     });
 
     const products = await Product.aggregate([
-      { $match: { quantity: { $eq: 0 } } },
+      { $match: { exp_date: { $gte: getTodayDate() } } },
       { $sort: sortQuery },
       { $skip: skip },
       { $limit: itemsPerPage },
@@ -197,7 +197,7 @@ export const editProduct = async (
 ): Promise<FormState> => {
   let parsed;
   try {
-    const formData = parseFormData(data);
+    const formData = parseFormData(data, ['store', 'category', 'supplier']);
     parsed = schema.safeParse(formData);
 
     if (!parsed.success) {

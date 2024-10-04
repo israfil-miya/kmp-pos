@@ -17,6 +17,7 @@ import { InvoiceDataTypes } from './schema';
 
 dbConnect();
 
+import getTodayDate from '@/utility/getTodaysDate';
 import { Query, validationSchema as schema } from './schema';
 
 export type FormState = {
@@ -51,11 +52,8 @@ export const getAllProductsFiltered = async (data: {
         : { $or: [{}] };
 
     let sortQuery: Record<string, 1 | -1> = {
-      in_stock: -1,
       createdAt: -1,
     };
-
-    console.log(searchQuery['$or']);
 
     const products = await Product.aggregate([
       {
@@ -69,6 +67,7 @@ export const getAllProductsFiltered = async (data: {
         $match: {
           ...searchQuery,
           in_stock: 1,
+          exp_date: { $or: [{ $gte: getTodayDate() }, { $eq: '' }] },
           store: { $regex: `^${store}$`, $options: 'i' },
         },
       },
@@ -98,6 +97,8 @@ export const createNewInvoice = async (
   data: InvoiceDataTypes,
 ): Promise<FormState> => {
   let parsed;
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     // go through data.products and for each product convert the product id to a mongoose.Types.ObjectId
     data.products = data.products.map(product => {
@@ -120,6 +121,17 @@ export const createNewInvoice = async (
     const invoice = await Invoice.create(data);
 
     if (invoice) {
+      // update the stock of each product in the invoice
+      for (let i = 0; i < data.products.length; i++) {
+        const product = data.products[i];
+        const productData = await Product.findById(product.product);
+        productData!.quantity -= product.unit;
+        await productData!.save();
+      }
+
+      await session.commitTransaction();
+      session.endSession();
+
       return {
         error: false,
         message: 'New invoice created successfully',
@@ -132,6 +144,10 @@ export const createNewInvoice = async (
     }
   } catch (error: any) {
     // MongoDB validation errors
+
+    await session.abortTransaction();
+    session.endSession();
+
     if (error instanceof mongoose.Error.ValidationError) {
       const validationIssues = extractDbErrorMessages(error);
       return {

@@ -10,7 +10,7 @@ export interface Product extends mongoose.Document {
   quantity: number;
   supplier: string[];
   category: string[];
-  store: string[];
+  store: string;
   vat_rate: number;
   mft_date: string;
   exp_date: string;
@@ -78,14 +78,10 @@ const ProductSchema = new mongoose.Schema<Product>(
       },
     },
     store: {
-      type: [String],
-      required: [true, 'store is not given'],
-      validate: {
-        validator: function (v: string[]) {
-          return v.length > 0;
-        },
-        message: 'Store cannot be empty',
-      },
+      type: String,
+      required: [true, 'Store is not given'],
+      unique: true,
+      minlength: [1, 'Store must be at least 1 character'],
     },
     vat_rate: {
       type: Number,

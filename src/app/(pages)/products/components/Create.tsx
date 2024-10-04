@@ -64,7 +64,7 @@ const CreateButton: React.FC<PropsType> = props => {
       quantity: 0,
       supplier: [],
       category: [],
-      store: [],
+      store: '',
       vat_rate: 0,
       mft_date: '',
       exp_date: '',
@@ -245,20 +245,19 @@ const CreateButton: React.FC<PropsType> = props => {
                       {...field}
                       {...setClassNameAndIsDisabled(isOpen)}
                       options={storeOptions}
-                      isMulti
-                      closeMenuOnSelect={false}
-                      placeholder="Select stores"
+                      closeMenuOnSelect={true}
+                      placeholder="Select store"
                       classNamePrefix="react-select"
                       menuPortalTarget={setMenuPortalTarget}
                       styles={setCalculatedZIndex(baseZIndex)}
                       // Map selected values back to the option objects
-                      value={storeOptions.filter(option =>
-                        field.value.includes(option.value),
-                      )}
-                      onChange={selectedOptions =>
-                        field.onChange(
-                          selectedOptions.map(option => option.value),
-                        )
+                      value={
+                        storeOptions.find(
+                          option => option.value === field.value,
+                        ) || null
+                      }
+                      onChange={option =>
+                        field.onChange(option ? option.value : '')
                       }
                     />
                   )}

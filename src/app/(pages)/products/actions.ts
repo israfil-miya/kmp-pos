@@ -69,7 +69,7 @@ export const createNewProduct = async (
 ): Promise<FormState> => {
   let parsed;
   try {
-    const formData = parseFormData(data, ['store', 'category', 'supplier']);
+    const formData = parseFormData(data, ['category', 'supplier']);
     parsed = schema.safeParse(formData);
 
     if (!parsed.success) {
@@ -82,24 +82,30 @@ export const createNewProduct = async (
       };
     }
 
-    const productData = await Product.findOneAndUpdate(
-      {
-        name: parsed.data.name,
-      },
-      parsed.data,
-      {
-        upsert: true,
-        new: true,
-        runValidators: true, // Ensures validation rules are applied
-      },
-    );
+    const similarProduct = await Product.findOne({
+      name: parsed.data.name,
+      store: parsed.data.store,
+      exp_date: parsed.data.exp_date,
+    });
+
+    const productData = await Product.create(parsed.data);
 
     if (productData) {
       revalidatePath('/products');
-      return {
-        error: false,
-        message: 'New product added successfully',
-      };
+      if (similarProduct) {
+        return {
+          error: false,
+          message:
+            'A similar product already exists with the same name, expiry date and shop, you might want to merge them',
+          fields: parsed.data,
+        };
+      } else {
+        return {
+          error: false,
+          message: 'Product added successfully',
+          fields: productData.toObject(),
+        };
+      }
     } else {
       return {
         error: true,
@@ -161,7 +167,15 @@ export const getAllProductsFiltered = async (data: {
 
     const count: number = await Product.countDocuments({
       ...searchQuery,
-      exp_date: { $lt: getTodayDate() },
+
+      $or: [
+        {
+          exp_date: { $gte: getTodayDate() },
+        },
+        {
+          exp_date: '',
+        },
+      ],
     });
 
     const skip = (page - 1) * itemsPerPage;
@@ -172,7 +186,19 @@ export const getAllProductsFiltered = async (data: {
     };
 
     const products = await Product.aggregate([
-      { $match: { ...searchQuery, exp_date: { $lt: getTodayDate() } } },
+      {
+        $match: {
+          ...searchQuery,
+          $or: [
+            {
+              exp_date: { $gte: getTodayDate() },
+            },
+            {
+              exp_date: '',
+            },
+          ],
+        },
+      },
       {
         $addFields: {
           in_stock: {
@@ -230,7 +256,14 @@ export const getAllProducts = async (data: {
     const skip = (page - 1) * itemsPerPage;
 
     const count: number = await Product.countDocuments({
-      exp_date: { $lt: getTodayDate() },
+      $or: [
+        {
+          exp_date: { $gte: getTodayDate() },
+        },
+        {
+          exp_date: '',
+        },
+      ],
     });
 
     const products = await Product.aggregate([
@@ -242,7 +275,16 @@ export const getAllProducts = async (data: {
         },
       },
       {
-        $match: { exp_date: { $lt: getTodayDate() } },
+        $match: {
+          $or: [
+            {
+              exp_date: { $gte: getTodayDate() },
+            },
+            {
+              exp_date: '',
+            },
+          ],
+        },
       },
       { $sort: sortQuery },
       { $skip: skip },
@@ -285,7 +327,7 @@ export const editProduct = async (
 ): Promise<FormState> => {
   let parsed;
   try {
-    const formData = parseFormData(data, ['store', 'category', 'supplier']);
+    const formData = parseFormData(data, ['category', 'supplier']);
     parsed = schema.safeParse(formData);
 
     if (!parsed.success) {
@@ -311,6 +353,12 @@ export const editProduct = async (
     const productData = await Product.findById(productId);
 
     if (productData) {
+      const similarProduct = await Product.findOne({
+        name: parsed.data.name,
+        store: parsed.data.store,
+        exp_date: parsed.data.exp_date,
+      });
+
       if (Number(productData.quantity) !== parsed.data.quantity) {
         productData.set({ ...parsed.data, restock_date: getTodayDate() });
       } else {
@@ -319,11 +367,24 @@ export const editProduct = async (
       await productData.save();
 
       revalidatePath('/products');
-      return {
-        error: false,
-        message: 'Product edited successfully',
-        fields: productData.toObject(),
-      };
+
+      if (
+        similarProduct &&
+        (similarProduct._id as mongoose.Types.ObjectId).toString() !== productId
+      ) {
+        return {
+          error: false,
+          message:
+            'A similar product already exists with the same name, expiry date and shop, you might want to merge them',
+          fields: parsed.data,
+        };
+      } else {
+        return {
+          error: false,
+          message: 'Product edited successfully',
+          fields: productData.toObject(),
+        };
+      }
     } else {
       return {
         error: true,

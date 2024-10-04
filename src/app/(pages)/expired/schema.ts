@@ -16,7 +16,7 @@ export const validationSchema = z
       .nonnegative('Quantity cannot be in negative'),
     supplier: z.array(z.string()).min(1, 'Supplier is required'),
     category: z.array(z.string()).min(1, 'Category is required'),
-    store: z.array(z.string()).min(1, 'Store is required'),
+    store: z.string().min(1, 'Store is required'),
     vat_rate: z
       .optional(
         z.coerce

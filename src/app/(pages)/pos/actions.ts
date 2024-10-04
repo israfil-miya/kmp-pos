@@ -42,16 +42,17 @@ export const getAllProductsFiltered = async (data: {
     addRegexField(query, 'batch', searchText.trim(), true);
     addRegexField(query, 'category', searchText.trim());
 
-    const searchQuery =
-      Object.keys(query).length > 0
-        ? {
-            $or: Object.entries(query).map(([key, value]) => ({
-              [key]: value,
-            })),
-          }
-        : { $or: [{}] };
+    const searchConditions = Object.entries(query).map(([key, value]) => ({
+      [key]: value,
+    }));
+
+    console.log('searchConditions:', searchConditions);
+    console.log('store:', store);
+    console.log('Today Date:', getTodayDate());
 
     let sortQuery: Record<string, 1 | -1> = {
+      // sort by exp_date from expired soon to later
+      exp_date: 1,
       createdAt: -1,
     };
 
@@ -65,10 +66,22 @@ export const getAllProductsFiltered = async (data: {
       },
       {
         $match: {
-          ...searchQuery,
-          in_stock: 1,
-          exp_date: { $or: [{ $gte: getTodayDate() }, { $eq: '' }] },
-          store: { $regex: `^${store}$`, $options: 'i' },
+          $and: [
+            searchConditions.length > 0 ? { $or: searchConditions } : {},
+            {
+              in_stock: 1,
+
+              $or: [
+                {
+                  exp_date: { $gte: getTodayDate() },
+                },
+                {
+                  exp_date: '',
+                },
+              ],
+              store: { $regex: `^${store}$`, $options: 'i' },
+            },
+          ],
         },
       },
       { $sort: sortQuery },
@@ -86,6 +99,8 @@ export const getAllProductsFiltered = async (data: {
       };
     }
   } catch (error: any) {
+    console.error(error);
+
     return {
       error: true,
       message: 'An error occurred while retrieving products data',

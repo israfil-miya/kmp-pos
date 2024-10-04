@@ -296,14 +296,12 @@ const Table: React.FC<TableDataProps> = props => {
                         className="uppercase items-center"
                         style={{ verticalAlign: 'middle' }}
                       >
-                        {item.store?.map((store, index) => (
-                          <span
-                            key={index}
-                            className="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400"
-                          >
-                            {store}
-                          </span>
-                        ))}
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400"
+                        >
+                          {item.store}
+                        </span>
                       </td>
                       <td
                         className="uppercase items-center text-wrap"

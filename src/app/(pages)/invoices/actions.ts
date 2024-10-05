@@ -67,8 +67,10 @@ export const getAllInvoicesFiltered = async (data: {
 
     const query: Query = {};
 
-    addRegexField(query, 'cashier', searchText, false);
+    addRegexField(query, 'cashier', searchText);
     addRegexField(query, 'payment_method', searchText, true);
+    addRegexField(query, 'invoice_no', searchText, true);
+    addRegexField(query, 'customer.name', searchText);
 
     const searchQuery =
       Object.keys(query).length > 0
@@ -116,6 +118,7 @@ export const getAllInvoicesFiltered = async (data: {
       };
     }
   } catch (error: any) {
+    console.log('Error:', error);
     return {
       error: true,
       message: 'An error occurred while retrieving invoices data',

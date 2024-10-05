@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { z } from 'zod';
 
 export const validationSchema = z.object({
+  invoice_no: z.string(),
   cashier: z.string(),
   customer: z.object({
     name: z.string(),
@@ -35,6 +36,11 @@ export interface RegexQuery {
 export interface Query {
   cashier?: RegexQuery;
   payment_method?: RegexQuery;
+  invoice_no?: RegexQuery;
+  'customer.name'?: RegexQuery;
 }
 
-export type RegexFields = Extract<keyof Query, 'cashier' | 'payment_method'>;
+export type RegexFields = Extract<
+  keyof Query,
+  'cashier' | 'payment_method' | 'invoice_no' | 'customer.name'
+>;

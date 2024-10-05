@@ -5,8 +5,8 @@ import React, { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { getAllInvoices, getAllInvoicesFiltered } from '../actions';
-import { InvoicesState } from './Table';
+import { getAllSuppliers, getAllSuppliersFiltered } from '../actions';
+import { SuppliersState } from './Table';
 
 const validationSchema = z.object({
   searchText: z.string().min(1, { message: 'Search text is required' }),
@@ -19,7 +19,7 @@ interface PropsType {
   itemsPerPage: number;
   setFilters: React.Dispatch<React.SetStateAction<FilterTypes>>;
   setIsFiltered: React.Dispatch<React.SetStateAction<boolean>>;
-  setInvoices: React.Dispatch<React.SetStateAction<InvoicesState>>;
+  setSuppliers: React.Dispatch<React.SetStateAction<SuppliersState>>;
 }
 
 const FilterButton: React.FC<PropsType> = ({
@@ -27,7 +27,7 @@ const FilterButton: React.FC<PropsType> = ({
   itemsPerPage,
   setFilters,
   setIsFiltered,
-  setInvoices,
+  setSuppliers,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -60,22 +60,22 @@ const FilterButton: React.FC<PropsType> = ({
       setLoading(true);
       const searchText = watch('searchText');
       const response = searchText
-        ? await getAllInvoicesFiltered({
+        ? await getAllSuppliersFiltered({
             page: 1,
             itemsPerPage,
             filters: { searchText },
           })
-        : await getAllInvoices({ page, itemsPerPage });
+        : await getAllSuppliers({ page, itemsPerPage });
 
       if (response?.error) {
-        toast.error(response?.message || 'Error fetching invoices');
+        toast.error(response?.message || 'Error fetching suppliers');
       } else {
-        setInvoices(JSON.parse(response.message));
+        setSuppliers(JSON.parse(response.message));
         setIsFiltered(!!searchText);
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred while retrieving invoices data');
+      toast.error('An error occurred while retrieving suppliers data');
     } finally {
       setLoading(false);
       setFilters({ searchText: watch('searchText') });
@@ -113,7 +113,7 @@ const FilterButton: React.FC<PropsType> = ({
         >
           <header className="flex items-center align-middle justify-between px-4 py-2 border-b rounded-t">
             <h3 className="text-gray-900 text-lg lg:text-xl font-semibold dark:text-white uppercase">
-              Filter Invoices
+              Filter Suppliers
             </h3>
             <button
               onClick={() => setIsOpen(false)}

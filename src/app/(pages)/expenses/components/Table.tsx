@@ -1,25 +1,29 @@
 'use client';
 
+import ExtendableTd from '@/components/ExtendableTd';
+import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
+import fetchData from '@/utility/fetchData';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import {
   FormState,
-  getAllInvoices as getAllInvoicesAction,
-  getAllInvoicesFiltered as getAllInvoicesFilteredAction,
+  getAllSuppliers as getAlSuppliersAction,
+  getAllSuppliersFiltered as getAllSuppliersFilteredAction,
 } from '../actions';
-import { InvoiceDataTypes } from '../schema';
+import { SupplierDataTypes } from '../schema';
 import CreateButton from './Create';
 import DeleteButton from './Delete';
+import EditButton from './Edit';
 import FilterButton from './Filter';
 
-export interface InvoicesState {
+export interface SuppliersState {
   pagination?: {
     count: number;
     pageCount: number;
   };
-  items?: InvoiceDataTypes[];
+  items?: SupplierDataTypes[];
 }
 
 interface TableDataProps {
@@ -27,8 +31,8 @@ interface TableDataProps {
 }
 
 const Table: React.FC<TableDataProps> = props => {
-  const [loading, setLoading] = useState(false);
-  const [invoices, setInvoices] = useState<InvoicesState>({
+  const [isLoading, setIsLoading] = useState(false);
+  const [suppliers, setSuppliers] = useState<SuppliersState>({
     pagination: {
       count: 0,
       pageCount: 0,
@@ -51,11 +55,11 @@ const Table: React.FC<TableDataProps> = props => {
     searchText: '',
   });
 
-  const getAllInvoices = async (): Promise<void> => {
+  const getAllSuppliers = async (): Promise<void> => {
     try {
-      // setLoading(true);
+      // setIsLoading(true);
 
-      let response = await getAllInvoicesAction({
+      let response = await getAlSuppliersAction({
         page: page,
         itemsPerPage: itemsPerPage,
       });
@@ -64,23 +68,23 @@ const Table: React.FC<TableDataProps> = props => {
           toast.error(response.message);
         }
       } else if (response?.message !== '') {
-        setInvoices(JSON.parse(response.message));
+        setSuppliers(JSON.parse(response.message));
       } else {
         console.log('Nothing was returned from the server');
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred while retrieving invoices data');
+      toast.error('An error occurred while retrieving suppliers data');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const getAllInvoicesFiltered = async (): Promise<void> => {
+  const getAllSuppliersFiltered = async (): Promise<void> => {
     try {
-      // setLoading(true);
+      // setIsLoading(true);
 
-      let response = await getAllInvoicesFilteredAction({
+      let response = await getAllSuppliersFilteredAction({
         page: isFiltered ? page : 1,
         itemsPerPage: itemsPerPage,
         filters: filters,
@@ -90,16 +94,16 @@ const Table: React.FC<TableDataProps> = props => {
           toast.error(response.message);
         }
       } else if (response?.message !== '') {
-        setInvoices(JSON.parse(response.message));
+        setSuppliers(JSON.parse(response.message));
         setIsFiltered(true);
       } else {
         console.log('Nothing was returned from the server');
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred while retrieving invoices data');
+      toast.error('An error occurred while retrieving suppliers data');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -116,7 +120,7 @@ const Table: React.FC<TableDataProps> = props => {
         toast.error(props.data.message);
       }
     } else if (props.data?.message !== '') {
-      setInvoices(JSON.parse(props.data.message));
+      setSuppliers(JSON.parse(props.data.message));
     } else {
       console.log('Nothing was returned from the server');
     }
@@ -131,24 +135,24 @@ const Table: React.FC<TableDataProps> = props => {
 
   useEffect(() => {
     if (prevPage.current !== 1 || page > 1) {
-      if (invoices?.pagination?.pageCount == 1) return;
-      if (!isFiltered) getAllInvoices();
-      else getAllInvoicesFiltered();
+      if (suppliers?.pagination?.pageCount == 1) return;
+      if (!isFiltered) getAllSuppliers();
+      else getAllSuppliersFiltered();
     }
     prevPage.current = page;
   }, [page]);
 
   useEffect(() => {
-    if (invoices?.pagination?.pageCount !== undefined) {
+    if (suppliers?.pagination?.pageCount !== undefined) {
       setPage(1);
       if (prevPageCount.current !== 0) {
-        if (!isFiltered) getAllInvoicesFiltered();
+        if (!isFiltered) getAllSuppliersFiltered();
       }
-      if (invoices) setPageCount(invoices?.pagination?.pageCount);
-      prevPageCount.current = invoices?.pagination?.pageCount;
+      if (suppliers) setPageCount(suppliers?.pagination?.pageCount);
+      prevPageCount.current = suppliers?.pagination?.pageCount;
       prevPage.current = 1;
     }
-  }, [invoices?.pagination?.pageCount]);
+  }, [suppliers?.pagination?.pageCount]);
 
   useEffect(() => {
     // Reset to first page when itemsPerPage changes
@@ -156,21 +160,21 @@ const Table: React.FC<TableDataProps> = props => {
     prevPage.current = 1;
     setPage(1);
 
-    if (!isFiltered) getAllInvoices();
-    else getAllInvoicesFiltered();
+    if (!isFiltered) getAllSuppliers();
+    else getAllSuppliersFiltered();
   }, [itemsPerPage]);
 
   return (
     <>
-      <h2 className="text-3xl font-semibold">Invoices List</h2>
+      <h2 className="text-3xl font-semibold">Suppliers List</h2>
       <div className="flex flex-col sm:flex-row justify-between mb-4 mt-6 gap-2 items-center">
         <div className="items-center flex gap-2">
           <div className="inline-flex rounded-sm" role="group">
             <button
               onClick={handlePrevious}
-              disabled={page === 1 || pageCount === 0 || loading}
+              disabled={page === 1 || pageCount === 0 || isLoading}
               type="button"
-              className="inline-flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              className="inline-flex items-center px-4 py-2 text-sm bg-gray-50 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -191,15 +195,15 @@ const Table: React.FC<TableDataProps> = props => {
               className="hidden sm:visible sm:inline-flex items-center px-4 py-2 text-sm font-medium border"
             >
               <label>
-                Page <b>{invoices?.items?.length !== 0 ? page : 0}</b> of{' '}
+                Page <b>{suppliers?.items?.length !== 0 ? page : 0}</b> of{' '}
                 <b>{pageCount}</b>
               </label>
             </button>
             <button
               onClick={handleNext}
-              disabled={page === pageCount || pageCount === 0 || loading}
+              disabled={page === pageCount || pageCount === 0 || isLoading}
               type="button"
-              className="inline-flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              className="inline-flex items-center px-4 py-2 text-sm bg-gray-50 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             >
               Next
               <svg
@@ -221,7 +225,7 @@ const Table: React.FC<TableDataProps> = props => {
             value={itemsPerPage}
             onChange={e => setItemsPerPage(parseInt(e.target.value))}
             required
-            className="appearance-none bg-gray-200 text-gray-700 border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+            className="appearance-none bg-gray-50 text-gray-700 border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           >
             <option value={30}>30</option>
             <option value={50}>50</option>
@@ -232,50 +236,49 @@ const Table: React.FC<TableDataProps> = props => {
             itemsPerPage={itemsPerPage}
             setFilters={setFilters}
             setIsFiltered={setIsFiltered}
-            setInvoices={setInvoices}
+            setSuppliers={setSuppliers}
           />
         </div>
         <CreateButton />
       </div>
 
-      {loading && <p className="text-center">Loading...</p>}
+      {isLoading && <p className="text-center">Loading...</p>}
 
-      {!loading && (
+      {!isLoading && (
         <div className="table-responsive text-nowrap text-sm">
           <table className="table table-bordered table-striped">
             <thead>
               <tr>
                 <th className="font-bold">S/N</th>
-                <th className="font-bold">ID</th>
-                <th className="font-bold">Customer</th>
-                <th className="font-bold">Cashier</th>
-                <th className="font-bold">NOP</th>
-                <th className="font-bold">Bill</th>
-                <th className="font-bold">Paid</th>
-                <th className="font-bold">Method</th>
+                <th className="font-bold">Name</th>
+                <th className="font-bold">Company</th>
+                <th className="font-bold">Reg. Date</th>
+                <th className="font-bold">Email</th>
+                <th className="font-bold">Phone</th>
+                <th className="font-bold">Address</th>
                 {session?.user?.role === 'administrator' && (
                   <th className="font-bold">Action</th>
                 )}
               </tr>
             </thead>
             <tbody>
-              {invoices?.items?.length !== 0 ? (
-                invoices?.items?.map(
-                  (item: InvoiceDataTypes, index: number) => (
-                    <tr key={String(item._id)}>
+              {suppliers?.items?.length !== 0 ? (
+                suppliers?.items?.map(
+                  (item: SupplierDataTypes, index: number) => (
+                    <tr key={item._id}>
                       <td>{index + 1}</td>
-                      <td>{item.invoice_no}</td>
-                      <td className="capitalize">{item.customer.name}</td>
-                      <td className="capitalize">{item.cashier}</td>
-                      <td>
-                        {item.products
-                          .map(product => product.unit)
-                          .reduce((a, b) => a + b, 0)}
-                      </td>
+                      <td className="capitalize">{item.name}</td>
+                      <td className="test-wrap capitalize">{item.company}</td>
 
-                      <td>{item.grand_total.toLocaleString() || '0'} ৳</td>
-                      <td>{item.paid_amount.toLocaleString() || '0'} ৳</td>
-                      <td className="capitalize">{item.payment_method}</td>
+                      <td>
+                        {item.reg_date
+                          ? convertToDDMMYYYY(item.reg_date)
+                          : 'N/A'}
+                      </td>
+                      <td>{item.email}</td>
+                      <td>{item.phone}</td>
+
+                      <ExtendableTd data={item.address || ''} />
 
                       {session?.user?.role === 'administrator' && (
                         <td
@@ -284,7 +287,8 @@ const Table: React.FC<TableDataProps> = props => {
                         >
                           <div className="inline-block">
                             <div className="flex gap-2">
-                              <DeleteButton invoiceData={item} />
+                              <EditButton supplierData={item} />
+                              <DeleteButton supplierData={item} />
                             </div>
                           </div>
                         </td>
@@ -295,10 +299,10 @@ const Table: React.FC<TableDataProps> = props => {
               ) : (
                 <tr key={0}>
                   <td
-                    colSpan={session?.user?.role === 'administrator' ? 7 : 6}
+                    colSpan={session?.user?.role === 'administrator' ? 8 : 7}
                     className="align-center text-center"
                   >
-                    No Invoice To Show.
+                    No Supplier To Show.
                   </td>
                 </tr>
               )}

@@ -127,6 +127,17 @@ function Billing() {
     }));
   }, [invoice.sub_total, invoice.calculated_discount, invoice.vat]); // Removed 'invoice' from dependencies
 
+  // a function to generate a 8 digit alphanumeric invoice number (all capital characters and numbers) with INV- prefix
+  const generateInvoiceNumber = (): string => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const charactersLength = characters.length;
+    let result = 'INV-';
+    for (let i = 0; i < 8; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  };
+
   const createInvoice = async () => {
     try {
       setLoading(true);
@@ -154,6 +165,7 @@ function Billing() {
 
       // Create the invoice object
       const newInvoice: InvoiceDataTypes = {
+        invoice_no: generateInvoiceNumber(),
         cashier: session?.user?.full_name || session?.user?.name || '',
         customer: {
           name: customer?.name || '',

@@ -3,6 +3,7 @@ import { Types } from 'mongoose';
 import { z } from 'zod';
 
 export const validationSchema = z.object({
+  invoice_no: z.string().min(1, 'Invoice number cannot be empty'),
   cashier: z.string(),
   customer: z.object({
     name: z.string().default(''),

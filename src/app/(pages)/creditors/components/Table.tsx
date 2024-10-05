@@ -1,20 +1,21 @@
 'use client';
 
+import cn from '@/utility/cn';
+import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { InvoiceDataTypes } from '../../invoices/schema';
 import {
   FormState,
-  getAllInvoices as getAllInvoicesAction,
-  getAllInvoicesFiltered as getAllInvoicesFilteredAction,
+  getAllCreditors as getAllCreditorsAction,
+  getAllCreditorsFiltered as getAllCreditorsFilteredAction,
 } from '../actions';
-import { InvoiceDataTypes } from '../schema';
-import CreateButton from './Create';
-import DeleteButton from './Delete';
+import EditButton from './Edit';
 import FilterButton from './Filter';
 
-export interface InvoicesState {
+export interface CreditorsState {
   pagination?: {
     count: number;
     pageCount: number;
@@ -28,7 +29,7 @@ interface TableDataProps {
 
 const Table: React.FC<TableDataProps> = props => {
   const [loading, setLoading] = useState(false);
-  const [invoices, setInvoices] = useState<InvoicesState>({
+  const [creditors, setCreditors] = useState<CreditorsState>({
     pagination: {
       count: 0,
       pageCount: 0,
@@ -51,11 +52,11 @@ const Table: React.FC<TableDataProps> = props => {
     searchText: '',
   });
 
-  const getAllInvoices = async (): Promise<void> => {
+  const getAllCreditors = async (): Promise<void> => {
     try {
       // setLoading(true);
 
-      let response = await getAllInvoicesAction({
+      let response = await getAllCreditorsAction({
         page: page,
         itemsPerPage: itemsPerPage,
       });
@@ -64,23 +65,23 @@ const Table: React.FC<TableDataProps> = props => {
           toast.error(response.message);
         }
       } else if (response?.message !== '') {
-        setInvoices(JSON.parse(response.message));
+        setCreditors(JSON.parse(response.message));
       } else {
         console.log('Nothing was returned from the server');
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred while retrieving invoices data');
+      toast.error('An error occurred while retrieving creditors data');
     } finally {
       setLoading(false);
     }
   };
 
-  const getAllInvoicesFiltered = async (): Promise<void> => {
+  const getAllCreditorsFiltered = async (): Promise<void> => {
     try {
       // setLoading(true);
 
-      let response = await getAllInvoicesFilteredAction({
+      let response = await getAllCreditorsFilteredAction({
         page: isFiltered ? page : 1,
         itemsPerPage: itemsPerPage,
         filters: filters,
@@ -90,14 +91,14 @@ const Table: React.FC<TableDataProps> = props => {
           toast.error(response.message);
         }
       } else if (response?.message !== '') {
-        setInvoices(JSON.parse(response.message));
+        setCreditors(JSON.parse(response.message));
         setIsFiltered(true);
       } else {
         console.log('Nothing was returned from the server');
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred while retrieving invoices data');
+      toast.error('An error occurred while retrieving creditors data');
     } finally {
       setLoading(false);
     }
@@ -116,7 +117,7 @@ const Table: React.FC<TableDataProps> = props => {
         toast.error(props.data.message);
       }
     } else if (props.data?.message !== '') {
-      setInvoices(JSON.parse(props.data.message));
+      setCreditors(JSON.parse(props.data.message));
     } else {
       console.log('Nothing was returned from the server');
     }
@@ -131,24 +132,24 @@ const Table: React.FC<TableDataProps> = props => {
 
   useEffect(() => {
     if (prevPage.current !== 1 || page > 1) {
-      if (invoices?.pagination?.pageCount == 1) return;
-      if (!isFiltered) getAllInvoices();
-      else getAllInvoicesFiltered();
+      if (creditors?.pagination?.pageCount == 1) return;
+      if (!isFiltered) getAllCreditors();
+      else getAllCreditorsFiltered();
     }
     prevPage.current = page;
   }, [page]);
 
   useEffect(() => {
-    if (invoices?.pagination?.pageCount !== undefined) {
+    if (creditors?.pagination?.pageCount !== undefined) {
       setPage(1);
       if (prevPageCount.current !== 0) {
-        if (!isFiltered) getAllInvoicesFiltered();
+        if (!isFiltered) getAllCreditorsFiltered();
       }
-      if (invoices) setPageCount(invoices?.pagination?.pageCount);
-      prevPageCount.current = invoices?.pagination?.pageCount;
+      if (creditors) setPageCount(creditors?.pagination?.pageCount);
+      prevPageCount.current = creditors?.pagination?.pageCount;
       prevPage.current = 1;
     }
-  }, [invoices?.pagination?.pageCount]);
+  }, [creditors?.pagination?.pageCount]);
 
   useEffect(() => {
     // Reset to first page when itemsPerPage changes
@@ -156,15 +157,15 @@ const Table: React.FC<TableDataProps> = props => {
     prevPage.current = 1;
     setPage(1);
 
-    if (!isFiltered) getAllInvoices();
-    else getAllInvoicesFiltered();
+    if (!isFiltered) getAllCreditors();
+    else getAllCreditorsFiltered();
   }, [itemsPerPage]);
 
   return (
     <>
-      <h2 className="text-3xl font-semibold">Invoices List</h2>
+      <h2 className="text-3xl font-semibold">Creditors List</h2>
       <div className="flex flex-col sm:flex-row justify-between mb-4 mt-6 gap-2 items-center">
-        <div className="items-center flex gap-2">
+        <div className="items-center justify-start flex gap-2">
           <div className="inline-flex rounded-sm" role="group">
             <button
               onClick={handlePrevious}
@@ -191,7 +192,7 @@ const Table: React.FC<TableDataProps> = props => {
               className="hidden sm:visible sm:inline-flex items-center px-4 py-2 text-sm font-medium border"
             >
               <label>
-                Page <b>{invoices?.items?.length !== 0 ? page : 0}</b> of{' '}
+                Page <b>{creditors?.items?.length !== 0 ? page : 0}</b> of{' '}
                 <b>{pageCount}</b>
               </label>
             </button>
@@ -232,10 +233,10 @@ const Table: React.FC<TableDataProps> = props => {
             itemsPerPage={itemsPerPage}
             setFilters={setFilters}
             setIsFiltered={setIsFiltered}
-            setInvoices={setInvoices}
+            setCreditors={setCreditors}
           />
         </div>
-        <CreateButton />
+        {/* <CreateButton /> */}
       </div>
 
       {loading && <p className="text-center">Loading...</p>}
@@ -248,6 +249,8 @@ const Table: React.FC<TableDataProps> = props => {
                 <th className="font-bold">S/N</th>
                 <th className="font-bold">ID</th>
                 <th className="font-bold">Customer</th>
+                <th className="font-bold">Phone</th>
+                <th className="font-bold">Address</th>
                 <th className="font-bold">Cashier</th>
                 <th className="font-bold">NOP</th>
                 <th className="font-bold">Bill</th>
@@ -259,13 +262,21 @@ const Table: React.FC<TableDataProps> = props => {
               </tr>
             </thead>
             <tbody>
-              {invoices?.items?.length !== 0 ? (
-                invoices?.items?.map(
+              {creditors?.items?.length !== 0 ? (
+                creditors?.items?.map(
                   (item: InvoiceDataTypes, index: number) => (
                     <tr key={String(item._id)}>
                       <td>{index + 1}</td>
                       <td>{item.invoice_no}</td>
-                      <td className="capitalize">{item.customer.name}</td>
+                      <td className="capitalize">
+                        {item.customer?.name || 'N/A'}
+                      </td>
+                      <td className="capitalize">
+                        {item.customer?.phone || 'N/A'}
+                      </td>
+                      <td className="capitalize">
+                        {item.customer?.address || 'N/A'}
+                      </td>
                       <td className="capitalize">{item.cashier}</td>
                       <td>
                         {item.products
@@ -284,7 +295,7 @@ const Table: React.FC<TableDataProps> = props => {
                         >
                           <div className="inline-block">
                             <div className="flex gap-2">
-                              <DeleteButton invoiceData={item} />
+                              <EditButton creditorData={item} />
                             </div>
                           </div>
                         </td>
@@ -295,7 +306,7 @@ const Table: React.FC<TableDataProps> = props => {
               ) : (
                 <tr key={0}>
                   <td
-                    colSpan={session?.user?.role === 'administrator' ? 7 : 6}
+                    colSpan={session?.user?.role === 'administrator' ? 11 : 10}
                     className="align-center text-center"
                   >
                     No Invoice To Show.

@@ -125,7 +125,7 @@ export const createNewInvoice = async (
       };
     }
 
-    const invoice = await Invoice.create(data);
+    const invoice = await Invoice.create(parsed.data);
 
     if (invoice) {
       // update the stock of each product in the invoice

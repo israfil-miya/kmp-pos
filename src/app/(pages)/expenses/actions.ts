@@ -1,6 +1,6 @@
 'use server';
 
-import Supplier from '@/models/Suppliers';
+import Expense from '@/models/Expenses';
 import {
   extractDbErrorMessages,
   mapFormDataToFields,
@@ -21,45 +21,45 @@ export type FormState = {
   issues?: string[];
 };
 
-export const deleteSupplier = async (
+export const deleteExpense = async (
   prevState: FormState,
   data: FormData,
 ): Promise<FormState> => {
   try {
-    const supplierId = data.get('_id');
+    const expenseId = data.get('_id');
 
-    if (!supplierId) {
+    if (!expenseId) {
       return {
         error: true,
-        message: 'Supplier ID is required',
+        message: 'Expense ID is required',
       };
     }
 
-    const supplierData = await Supplier.findOneAndDelete({
-      _id: supplierId,
+    const expenseData = await Expense.findOneAndDelete({
+      _id: expenseId,
     });
 
-    if (supplierData) {
-      revalidatePath('/suppliers');
+    if (expenseData) {
+      revalidatePath('/expenses');
       return {
         error: false,
-        message: 'Supplier deleted successfully',
+        message: 'Expense deleted successfully',
       };
     } else {
       return {
         error: true,
-        message: 'Unable to delete the supplier',
+        message: 'Unable to delete the expense',
       };
     }
   } catch (error: any) {
     return {
       error: true,
-      message: 'An error occurred while deleting the supplier',
+      message: 'An error occurred while deleting the expense',
     };
   }
 };
 
-export const createNewSupplier = async (
+export const createNewExpense = async (
   prevState: FormState,
   data: FormData,
 ): Promise<FormState> => {
@@ -70,6 +70,7 @@ export const createNewSupplier = async (
 
     if (!parsed.success) {
       const fields = mapFormDataToFields(formData);
+      console.log('fields', parsed.error.issues);
       return {
         error: true,
         message: 'Invalid form data',
@@ -78,28 +79,18 @@ export const createNewSupplier = async (
       };
     }
 
-    const supplierData = await Supplier.findOneAndUpdate(
-      {
-        name: parsed.data.name,
-      },
-      parsed.data,
-      {
-        upsert: true,
-        new: true,
-        runValidators: true, // Ensures validation rules are applied
-      },
-    );
+    const expenseData = await Expense.create(parsed.data);
 
-    if (supplierData) {
-      revalidatePath('/suppliers');
+    if (expenseData) {
+      revalidatePath('/expenses');
       return {
         error: false,
-        message: 'New supplier added successfully',
+        message: 'New expense added successfully',
       };
     } else {
       return {
         error: true,
-        message: 'Failed to add the new supplier',
+        message: 'Failed to add the new expense',
         fields: parsed.data,
       };
     }
@@ -126,7 +117,7 @@ export const createNewSupplier = async (
   }
 };
 
-export const getAllSuppliersFiltered = async (data: {
+export const getAllExpensesFiltered = async (data: {
   page: number;
   itemsPerPage: number;
   filters: {
@@ -140,11 +131,9 @@ export const getAllSuppliersFiltered = async (data: {
 
     const query: Query = {};
 
-    addRegexField(query, 'name', searchText.trim());
-    addRegexField(query, 'company', searchText.trim());
-    addRegexField(query, 'email', searchText.trim());
-    addRegexField(query, 'phone', searchText.trim());
-    addRegexField(query, 'address', searchText.trim());
+    addRegexField(query, 'reason', searchText.trim());
+    addRegexField(query, 'category', searchText.trim(), true);
+    addRegexField(query, 'full_name', searchText.trim());
 
     const searchQuery =
       Object.keys(query).length > 0
@@ -155,7 +144,7 @@ export const getAllSuppliersFiltered = async (data: {
           }
         : { $or: [{}] };
 
-    const count: number = await Supplier.countDocuments(searchQuery);
+    const count: number = await Expense.countDocuments(searchQuery);
 
     const skip = (page - 1) * itemsPerPage;
 
@@ -163,7 +152,7 @@ export const getAllSuppliersFiltered = async (data: {
       createdAt: -1,
     };
 
-    const suppliers = await Supplier.aggregate([
+    const expenses = await Expense.aggregate([
       { $match: searchQuery },
       { $sort: sortQuery },
       { $skip: skip },
@@ -172,34 +161,34 @@ export const getAllSuppliersFiltered = async (data: {
 
     const pageCount: number = Math.ceil(count / itemsPerPage);
 
-    if (suppliers) {
-      let suppliersData = {
+    if (expenses) {
+      let expensesData = {
         pagination: {
           count,
           pageCount,
         },
-        items: suppliers,
+        items: expenses,
       };
 
       return {
         error: false,
-        message: JSON.stringify(suppliersData),
+        message: JSON.stringify(expensesData),
       };
     } else {
       return {
         error: true,
-        message: "Couldn't retrieve suppliers data",
+        message: "Couldn't retrieve expenses data",
       };
     }
   } catch (error: any) {
     return {
       error: true,
-      message: 'An error occurred while retrieving suppliers data',
+      message: 'An error occurred while retrieving expenses data',
     };
   }
 };
 
-export const getAllSuppliers = async (data: {
+export const getAllExpenses = async (data: {
   page: number;
   itemsPerPage: number;
 }): Promise<FormState> => {
@@ -213,9 +202,9 @@ export const getAllSuppliers = async (data: {
 
     const skip = (page - 1) * itemsPerPage;
 
-    const count: number = await Supplier.countDocuments({});
+    const count: number = await Expense.countDocuments({});
 
-    const suppliers = await Supplier.aggregate([
+    const expenses = await Expense.aggregate([
       { $sort: sortQuery },
       { $skip: skip },
       { $limit: itemsPerPage },
@@ -223,34 +212,34 @@ export const getAllSuppliers = async (data: {
 
     const pageCount: number = Math.ceil(count / itemsPerPage);
 
-    if (suppliers) {
-      let suppliersData = {
+    if (expenses) {
+      let expensesData = {
         pagination: {
           count,
           pageCount,
         },
-        items: suppliers,
+        items: expenses,
       };
 
       return {
         error: false,
-        message: JSON.stringify(suppliersData),
+        message: JSON.stringify(expensesData),
       };
     } else {
       return {
         error: true,
-        message: "Couldn't retrieve suppliers data",
+        message: "Couldn't retrieve expenses data",
       };
     }
   } catch (error: any) {
     return {
       error: true,
-      message: 'An error occurred while retrieving suppliers data',
+      message: 'An error occurred while retrieving expenses data',
     };
   }
 };
 
-export const editSupplier = async (
+export const editExpense = async (
   prevState: FormState,
   data: FormData,
 ): Promise<FormState> => {
@@ -269,35 +258,35 @@ export const editSupplier = async (
       };
     }
 
-    let supplierId = parsed.data._id;
+    let expenseId = parsed.data._id;
     delete parsed.data._id;
 
-    if (!supplierId) {
+    if (!expenseId) {
       return {
         error: true,
-        message: 'Supplier ID is missing',
+        message: 'Expense ID is missing',
       };
     }
 
-    const supplierData = await Supplier.findByIdAndUpdate(
-      supplierId,
+    const expenseData = await Expense.findByIdAndUpdate(
+      expenseId,
       parsed.data,
       {
         new: true,
       },
     );
 
-    if (supplierData) {
-      revalidatePath('/suppliers');
+    if (expenseData) {
+      revalidatePath('/expenses');
       return {
         error: false,
-        message: 'Supplier edited successfully',
-        fields: supplierData.toObject(),
+        message: 'Expense edited successfully',
+        fields: expenseData.toObject(),
       };
     } else {
       return {
         error: true,
-        message: 'Failed to edit the supplier',
+        message: 'Failed to edit the expense',
         fields: parsed.data,
       };
     }

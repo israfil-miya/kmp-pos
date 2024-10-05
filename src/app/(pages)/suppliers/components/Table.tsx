@@ -9,7 +9,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import {
   FormState,
-  getAllSuppliers as getAlSuppliersAction,
+  getAllSuppliers as getAllSuppliersAction,
   getAllSuppliersFiltered as getAllSuppliersFilteredAction,
 } from '../actions';
 import { SupplierDataTypes } from '../schema';
@@ -59,7 +59,7 @@ const Table: React.FC<TableDataProps> = props => {
     try {
       // setIsLoading(true);
 
-      let response = await getAlSuppliersAction({
+      let response = await getAllSuppliersAction({
         page: page,
         itemsPerPage: itemsPerPage,
       });

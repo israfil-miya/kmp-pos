@@ -4,7 +4,6 @@ import mongoose from 'mongoose';
 export interface Expense extends mongoose.Document {
   reason: string;
   amount: number;
-  date: string;
   category: string;
   full_name: string;
 }

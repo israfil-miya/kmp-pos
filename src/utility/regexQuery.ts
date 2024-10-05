@@ -4,6 +4,11 @@ import {
   RegexQuery as creditor_RegexQuery,
 } from '@/app/(pages)/creditors/schema';
 import {
+  Query as expense_Query,
+  RegexFields as expense_RegexFields,
+  RegexQuery as expense_RegexQuery,
+} from '@/app/(pages)/expenses/schema';
+import {
   Query as invoice_Query,
   RegexFields as invoice_RegexFields,
   RegexQuery as invoice_RegexQuery,
@@ -29,19 +34,22 @@ type RegexQuery =
   | product_RegexQuery
   | pos_RegexQuery
   | invoice_RegexQuery
-  | creditor_RegexQuery;
+  | creditor_RegexQuery
+  | expense_RegexQuery;
 type Query =
   | supplier_Query
   | product_Query
   | pos_Query
   | invoice_Query
-  | creditor_Query;
+  | creditor_Query
+  | expense_Query;
 type RegexFields =
   | supplier_RegexFields
   | product_RegexFields
   | pos_RegexFields
   | invoice_RegexFields
-  | creditor_RegexFields;
+  | creditor_RegexFields
+  | expense_RegexFields;
 
 // Helper function to create a regex query
 export const createRegexQuery = (

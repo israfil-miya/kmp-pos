@@ -5,8 +5,8 @@ import React, { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { getAllSuppliers, getAllSuppliersFiltered } from '../actions';
-import { SuppliersState } from './Table';
+import { getAllExpenses, getAllExpensesFiltered } from '../actions';
+import { ExpensesState } from './Table';
 
 const validationSchema = z.object({
   searchText: z.string().min(1, { message: 'Search text is required' }),
@@ -19,7 +19,7 @@ interface PropsType {
   itemsPerPage: number;
   setFilters: React.Dispatch<React.SetStateAction<FilterTypes>>;
   setIsFiltered: React.Dispatch<React.SetStateAction<boolean>>;
-  setSuppliers: React.Dispatch<React.SetStateAction<SuppliersState>>;
+  setExpenses: React.Dispatch<React.SetStateAction<ExpensesState>>;
 }
 
 const FilterButton: React.FC<PropsType> = ({
@@ -27,7 +27,7 @@ const FilterButton: React.FC<PropsType> = ({
   itemsPerPage,
   setFilters,
   setIsFiltered,
-  setSuppliers,
+  setExpenses,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -60,22 +60,22 @@ const FilterButton: React.FC<PropsType> = ({
       setLoading(true);
       const searchText = watch('searchText');
       const response = searchText
-        ? await getAllSuppliersFiltered({
+        ? await getAllExpensesFiltered({
             page: 1,
             itemsPerPage,
             filters: { searchText },
           })
-        : await getAllSuppliers({ page, itemsPerPage });
+        : await getAllExpenses({ page, itemsPerPage });
 
       if (response?.error) {
-        toast.error(response?.message || 'Error fetching suppliers');
+        toast.error(response?.message || 'Error fetching expenses');
       } else {
-        setSuppliers(JSON.parse(response.message));
+        setExpenses(JSON.parse(response.message));
         setIsFiltered(!!searchText);
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred while retrieving suppliers data');
+      toast.error('An error occurred while retrieving expenses data');
     } finally {
       setLoading(false);
       setFilters({ searchText: watch('searchText') });

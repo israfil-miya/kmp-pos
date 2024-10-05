@@ -16,7 +16,7 @@ interface PropsType {
   data: string;
 }
 
-const ExtandableTd: React.FC<PropsType> = props => {
+const ExtendableTd: React.FC<PropsType> = props => {
   const { data } = props;
 
   const [showFullText, setShowFullText] = useState(false);
@@ -54,4 +54,4 @@ const ExtandableTd: React.FC<PropsType> = props => {
   );
 };
 
-export default ExtandableTd;
+export default ExtendableTd;

@@ -1,20 +1,20 @@
 import { auth } from '@/auth';
 import { SessionProvider } from 'next-auth/react';
 import React from 'react';
-import { getAllSuppliers } from './actions';
+import { getAllExpenses } from './actions';
 import Table from './components/Table';
 
-const SuppliersPage = async () => {
+const ExpensesPage = async () => {
   const session = await auth();
-  const suppliers = await getAllSuppliers({
+  const expenses = await getAllExpenses({
     page: 1,
     itemsPerPage: 30,
   });
   return (
     <SessionProvider session={session}>
-      <Table data={suppliers} />
+      <Table data={expenses} />
     </SessionProvider>
   );
 };
 
-export default SuppliersPage;
+export default ExpensesPage;

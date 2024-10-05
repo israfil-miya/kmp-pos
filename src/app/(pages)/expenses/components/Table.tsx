@@ -9,21 +9,21 @@ import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import {
   FormState,
-  getAllSuppliers as getAlSuppliersAction,
-  getAllSuppliersFiltered as getAllSuppliersFilteredAction,
+  getAllExpenses as getAllExpensesAction,
+  getAllExpensesFiltered as getAllExpensesFilteredAction,
 } from '../actions';
-import { SupplierDataTypes } from '../schema';
+import { ExpenseDataTypes } from '../schema';
 import CreateButton from './Create';
 import DeleteButton from './Delete';
 import EditButton from './Edit';
 import FilterButton from './Filter';
 
-export interface SuppliersState {
+export interface ExpensesState {
   pagination?: {
     count: number;
     pageCount: number;
   };
-  items?: SupplierDataTypes[];
+  items?: ExpenseDataTypes[];
 }
 
 interface TableDataProps {
@@ -32,7 +32,7 @@ interface TableDataProps {
 
 const Table: React.FC<TableDataProps> = props => {
   const [isLoading, setIsLoading] = useState(false);
-  const [suppliers, setSuppliers] = useState<SuppliersState>({
+  const [expenses, setExpenses] = useState<ExpensesState>({
     pagination: {
       count: 0,
       pageCount: 0,
@@ -55,11 +55,11 @@ const Table: React.FC<TableDataProps> = props => {
     searchText: '',
   });
 
-  const getAllSuppliers = async (): Promise<void> => {
+  const getAllExpenses = async (): Promise<void> => {
     try {
       // setIsLoading(true);
 
-      let response = await getAlSuppliersAction({
+      let response = await getAllExpensesAction({
         page: page,
         itemsPerPage: itemsPerPage,
       });
@@ -68,23 +68,23 @@ const Table: React.FC<TableDataProps> = props => {
           toast.error(response.message);
         }
       } else if (response?.message !== '') {
-        setSuppliers(JSON.parse(response.message));
+        setExpenses(JSON.parse(response.message));
       } else {
         console.log('Nothing was returned from the server');
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred while retrieving suppliers data');
+      toast.error('An error occurred while retrieving expenses data');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getAllSuppliersFiltered = async (): Promise<void> => {
+  const getAllExpensesFiltered = async (): Promise<void> => {
     try {
       // setIsLoading(true);
 
-      let response = await getAllSuppliersFilteredAction({
+      let response = await getAllExpensesFilteredAction({
         page: isFiltered ? page : 1,
         itemsPerPage: itemsPerPage,
         filters: filters,
@@ -94,14 +94,14 @@ const Table: React.FC<TableDataProps> = props => {
           toast.error(response.message);
         }
       } else if (response?.message !== '') {
-        setSuppliers(JSON.parse(response.message));
+        setExpenses(JSON.parse(response.message));
         setIsFiltered(true);
       } else {
         console.log('Nothing was returned from the server');
       }
     } catch (error) {
       console.error(error);
-      toast.error('An error occurred while retrieving suppliers data');
+      toast.error('An error occurred while retrieving expenses data');
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +120,7 @@ const Table: React.FC<TableDataProps> = props => {
         toast.error(props.data.message);
       }
     } else if (props.data?.message !== '') {
-      setSuppliers(JSON.parse(props.data.message));
+      setExpenses(JSON.parse(props.data.message));
     } else {
       console.log('Nothing was returned from the server');
     }
@@ -135,24 +135,24 @@ const Table: React.FC<TableDataProps> = props => {
 
   useEffect(() => {
     if (prevPage.current !== 1 || page > 1) {
-      if (suppliers?.pagination?.pageCount == 1) return;
-      if (!isFiltered) getAllSuppliers();
-      else getAllSuppliersFiltered();
+      if (expenses?.pagination?.pageCount == 1) return;
+      if (!isFiltered) getAllExpenses();
+      else getAllExpensesFiltered();
     }
     prevPage.current = page;
   }, [page]);
 
   useEffect(() => {
-    if (suppliers?.pagination?.pageCount !== undefined) {
+    if (expenses?.pagination?.pageCount !== undefined) {
       setPage(1);
       if (prevPageCount.current !== 0) {
-        if (!isFiltered) getAllSuppliersFiltered();
+        if (!isFiltered) getAllExpensesFiltered();
       }
-      if (suppliers) setPageCount(suppliers?.pagination?.pageCount);
-      prevPageCount.current = suppliers?.pagination?.pageCount;
+      if (expenses) setPageCount(expenses?.pagination?.pageCount);
+      prevPageCount.current = expenses?.pagination?.pageCount;
       prevPage.current = 1;
     }
-  }, [suppliers?.pagination?.pageCount]);
+  }, [expenses?.pagination?.pageCount]);
 
   useEffect(() => {
     // Reset to first page when itemsPerPage changes
@@ -160,13 +160,13 @@ const Table: React.FC<TableDataProps> = props => {
     prevPage.current = 1;
     setPage(1);
 
-    if (!isFiltered) getAllSuppliers();
-    else getAllSuppliersFiltered();
+    if (!isFiltered) getAllExpenses();
+    else getAllExpensesFiltered();
   }, [itemsPerPage]);
 
   return (
     <>
-      <h2 className="text-3xl font-semibold">Suppliers List</h2>
+      <h2 className="text-3xl font-semibold">Expenses List</h2>
       <div className="flex flex-col sm:flex-row justify-between mb-4 mt-6 gap-2 items-center">
         <div className="items-center flex gap-2">
           <div className="inline-flex rounded-sm" role="group">
@@ -195,7 +195,7 @@ const Table: React.FC<TableDataProps> = props => {
               className="hidden sm:visible sm:inline-flex items-center px-4 py-2 text-sm font-medium border"
             >
               <label>
-                Page <b>{suppliers?.items?.length !== 0 ? page : 0}</b> of{' '}
+                Page <b>{expenses?.items?.length !== 0 ? page : 0}</b> of{' '}
                 <b>{pageCount}</b>
               </label>
             </button>
@@ -236,7 +236,7 @@ const Table: React.FC<TableDataProps> = props => {
             itemsPerPage={itemsPerPage}
             setFilters={setFilters}
             setIsFiltered={setIsFiltered}
-            setSuppliers={setSuppliers}
+            setExpenses={setExpenses}
           />
         </div>
         <CreateButton />
@@ -251,34 +251,47 @@ const Table: React.FC<TableDataProps> = props => {
               <tr>
                 <th className="font-bold">S/N</th>
                 <th className="font-bold">Name</th>
-                <th className="font-bold">Company</th>
-                <th className="font-bold">Reg. Date</th>
-                <th className="font-bold">Email</th>
-                <th className="font-bold">Phone</th>
-                <th className="font-bold">Address</th>
+                <th className="font-bold">Reason</th>
+                <th className="font-bold">Category</th>
+                <th className="font-bold">Amount</th>
+                <th className="font-bold">Creation Date</th>
+                <th className="font-bold">Last Update</th>
                 {session?.user?.role === 'administrator' && (
                   <th className="font-bold">Action</th>
                 )}
               </tr>
             </thead>
             <tbody>
-              {suppliers?.items?.length !== 0 ? (
-                suppliers?.items?.map(
-                  (item: SupplierDataTypes, index: number) => (
+              {expenses?.items?.length !== 0 ? (
+                expenses?.items?.map(
+                  (item: ExpenseDataTypes, index: number) => (
                     <tr key={item._id}>
                       <td>{index + 1}</td>
-                      <td className="capitalize">{item.name}</td>
-                      <td className="test-wrap capitalize">{item.company}</td>
+                      <td className="capitalize">{item.full_name}</td>
+                      <td className="test-wrap capitalize">{item.reason}</td>
+                      <td
+                        className="uppercase items-center"
+                        style={{ verticalAlign: 'middle' }}
+                      >
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400"
+                        >
+                          {item.category}
+                        </span>
+                      </td>
+                      <td>{item.amount || 0} ৳</td>
 
                       <td>
-                        {item.reg_date
-                          ? convertToDDMMYYYY(item.reg_date)
+                        {item.createdAt
+                          ? convertToDDMMYYYY(item.createdAt)
                           : 'N/A'}
                       </td>
-                      <td>{item.email}</td>
-                      <td>{item.phone}</td>
-
-                      <ExtendableTd data={item.address || ''} />
+                      <td>
+                        {item.updatedAt
+                          ? convertToDDMMYYYY(item.updatedAt)
+                          : 'N/A'}
+                      </td>
 
                       {session?.user?.role === 'administrator' && (
                         <td
@@ -287,8 +300,8 @@ const Table: React.FC<TableDataProps> = props => {
                         >
                           <div className="inline-block">
                             <div className="flex gap-2">
-                              <EditButton supplierData={item} />
-                              <DeleteButton supplierData={item} />
+                              <EditButton expenseData={item} />
+                              <DeleteButton expenseData={item} />
                             </div>
                           </div>
                         </td>
@@ -302,7 +315,7 @@ const Table: React.FC<TableDataProps> = props => {
                     colSpan={session?.user?.role === 'administrator' ? 8 : 7}
                     className="align-center text-center"
                   >
-                    No Supplier To Show.
+                    No Expense To Show.
                   </td>
                 </tr>
               )}

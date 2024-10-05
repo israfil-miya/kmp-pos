@@ -1,5 +1,6 @@
 'use client';
 
+import ExtendableTd from '@/components/ExtendableTd';
 import cn from '@/utility/cn';
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
 import { useSession } from 'next-auth/react';
@@ -274,9 +275,7 @@ const Table: React.FC<TableDataProps> = props => {
                       <td className="capitalize">
                         {item.customer?.phone || 'N/A'}
                       </td>
-                      <td className="capitalize">
-                        {item.customer?.address || 'N/A'}
-                      </td>
+                      <ExtendableTd data={item.customer?.phone || 'N/A'} />
                       <td className="capitalize">{item.cashier}</td>
                       <td>
                         {item.products

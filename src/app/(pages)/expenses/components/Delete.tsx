@@ -3,17 +3,17 @@
 import { useSession } from 'next-auth/react';
 import React, { useActionState, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { deleteSupplier } from '../actions';
-import { SupplierDataTypes } from '../schema';
+import { deleteExpense } from '../actions';
+import { ExpenseDataTypes } from '../schema';
 
 interface PropsType {
-  supplierData: SupplierDataTypes;
+  expenseData: ExpenseDataTypes;
 }
 
 const DeleteButton: React.FC<PropsType> = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const [state, formAction, loading] = useActionState(deleteSupplier, {
+  const [state, formAction, loading] = useActionState(deleteExpense, {
     error: false,
     message: '',
   });
@@ -59,7 +59,7 @@ const DeleteButton: React.FC<PropsType> = props => {
         >
           <header className="flex items-center align-middle justify-between px-4 py-2 border-b rounded-t">
             <h3 className="text-gray-900 text-lg lg:text-xl font-semibold dark:text-white uppercase">
-              Delete Supplier
+              Delete Expense
             </h3>
             <button
               onClick={() => setIsOpen(false)}
@@ -82,7 +82,7 @@ const DeleteButton: React.FC<PropsType> = props => {
           </header>
           <div className="overflow-hidden max-h-[70vh] p-4">
             <p className="text-lg">
-              Are you sure, you want to delete this supplier?
+              Are you sure, you want to delete this expense?
             </p>
           </div>
           <footer className="flex space-x-2 items-center px-4 py-2 border-t justify-end border-gray-200 rounded-b">
@@ -98,7 +98,7 @@ const DeleteButton: React.FC<PropsType> = props => {
               disabled={loading}
               onClick={() => {
                 const formData = new FormData();
-                formData.append('_id', props.supplierData._id!);
+                formData.append('_id', props.expenseData._id!);
                 formAction(formData);
               }}
               type="button"

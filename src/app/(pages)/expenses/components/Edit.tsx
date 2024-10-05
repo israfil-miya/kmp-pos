@@ -1,28 +1,49 @@
 'use client';
 
+import {
+  setCalculatedZIndex,
+  setClassNameAndIsDisabled,
+  setMenuPortalTarget,
+} from '@/utility/selectHelpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import 'flowbite';
 import { initFlowbite } from 'flowbite';
 import React, { useActionState, useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+import Select from 'react-select';
 import { toast } from 'sonner';
-import { editSupplier } from '../actions';
-import { SupplierDataTypes, validationSchema } from '../schema';
+import { editExpense } from '../actions';
+import { ExpenseDataTypes, validationSchema } from '../schema';
 
 const baseZIndex = 50; // 52
 
 interface PropsType {
-  supplierData: SupplierDataTypes;
+  expenseData: ExpenseDataTypes;
 }
 
 const EditButton: React.FC<PropsType> = props => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const popupRef = useRef<HTMLElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const [state, formAction, loading] = useActionState(editSupplier, {
+  const [state, formAction, loading] = useActionState(editExpense, {
     error: false,
     message: '',
   });
+
+  const expenseCategories = [
+    { value: 'utilities', label: 'Utilities' },
+    { value: 'salaries_wages', label: 'Salaries and Wages' },
+    { value: 'rent_lease', label: 'Rent and Lease' },
+    { value: 'inventory_supplies', label: 'Inventory and Supplies' },
+    { value: 'marketing_advertising', label: 'Marketing and Advertising' },
+    { value: 'maintenance_repairs', label: 'Maintenance and Repairs' },
+    { value: 'transportation', label: 'Transportation' },
+    { value: 'taxes_licensing', label: 'Taxes and Licensing' },
+    { value: 'professional_services', label: 'Professional Services' },
+    { value: 'insurance', label: 'Insurance' },
+    { value: 'adjustments', label: 'Adjustments' },
+    { value: 'other', label: 'Other (specify in reason)' },
+  ];
 
   const handleClickOutside = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -43,11 +64,12 @@ const EditButton: React.FC<PropsType> = props => {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
-  } = useForm<SupplierDataTypes>({
+  } = useForm<ExpenseDataTypes>({
     resolver: zodResolver(validationSchema),
     defaultValues: {
-      ...props.supplierData,
+      ...props.expenseData,
       ...(state?.fields ?? {}),
     },
   });
@@ -60,7 +82,7 @@ const EditButton: React.FC<PropsType> = props => {
     } else if (state?.message !== '') {
       toast.success(state.message);
       if (state.fields) {
-        reset(state.fields as SupplierDataTypes);
+        reset(state.fields as ExpenseDataTypes);
       }
       setIsOpen(false);
     } else {
@@ -103,7 +125,7 @@ const EditButton: React.FC<PropsType> = props => {
         >
           <header className="flex items-center align-middle justify-between px-4 py-2 border-b rounded-t">
             <h3 className="text-gray-900 text-lg lg:text-xl font-semibold dark:text-white uppercase">
-              Edit Supplier
+              Edit Expense
             </h3>
             <button
               onClick={() => setIsOpen(false)}
@@ -133,7 +155,7 @@ const EditButton: React.FC<PropsType> = props => {
               e.preventDefault();
               handleSubmit(() => {
                 const formData = new FormData(formRef.current!);
-                formData.append('_id', props.supplierData._id!);
+                formData.append('_id', props.expenseData._id!);
                 console.log('Form data', formData);
                 formAction(formData);
               })(e);
@@ -142,88 +164,59 @@ const EditButton: React.FC<PropsType> = props => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4">
               <div>
                 <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
-                  <span className="uppercase">Contact Person*</span>
+                  <span className="uppercase">Reason*</span>
                   <span className="text-red-700 text-wrap block text-xs">
-                    {errors.name && errors.name.message}
+                    {errors.reason && errors.reason.message}
                   </span>
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  {...register('name')}
+                  {...register('reason')}
                   type="text"
                 />
               </div>
 
               <div>
                 <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
-                  <span className="uppercase">E-mail</span>
+                  <span className="uppercase">Amount</span>
                   <span className="text-red-700 text-wrap block text-xs">
-                    {errors.email && errors.email.message}
+                    {errors.amount && errors.amount.message}
                   </span>
                 </label>
                 <input
                   className="appearance-none block w-full bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  {...register('email')}
-                  type="text"
+                  {...register('amount')}
+                  step=".01"
+                  type="number"
                 />
               </div>
 
-              <div>
-                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
-                  <span className="uppercase">Phone</span>
-                  <span className="text-red-700 text-wrap block text-xs">
-                    {errors.phone && errors.phone.message}
-                  </span>
-                </label>
-                <input
-                  className="appearance-none block w-full bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  {...register('phone')}
-                  type="text"
-                />
-              </div>
-
-              <div>
-                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
-                  <span className="uppercase">Reg. Date</span>
-                  <span className="text-red-700 text-wrap block text-xs">
-                    {errors.reg_date && errors.reg_date.message}
-                  </span>
-                </label>
-                <input
-                  className="appearance-none block w-full bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  {...register('reg_date')}
-                  type="date"
-                />
-              </div>
-
-              <div>
-                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
-                  <span className="uppercase">Company Name</span>
-                  <span className="text-red-700 text-wrap block text-xs">
-                    {errors.company && errors.company.message}
-                  </span>
-                </label>
-                <input
-                  className="appearance-none block w-full bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  {...register('company')}
-                  type="text"
-                />
-              </div>
-
-              <div>
-                <label className="tracking-wide text-gray-700 text-sm font-bold block mb-2 ">
-                  <span className="uppercase">Address</span>
-                  <span className="text-red-700 text-wrap block text-xs">
-                    {errors.address && errors.address.message}
-                  </span>
-                </label>
-                <textarea
-                  rows={5}
-                  className="appearance-none block w-full bg-gray-50 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                  {...register('address')}
-                  placeholder="Company's headquarter/storehouse location"
-                />
-              </div>
+              <Controller
+                name="category"
+                control={control}
+                render={({ field }) => {
+                  return (
+                    <Select
+                      {...field}
+                      {...setClassNameAndIsDisabled(isOpen)}
+                      options={expenseCategories}
+                      isClearable={true}
+                      placeholder="Select category"
+                      classNamePrefix="react-select"
+                      menuPortalTarget={setMenuPortalTarget}
+                      styles={setCalculatedZIndex(baseZIndex)}
+                      value={
+                        expenseCategories.find(
+                          option => option.value === field.value,
+                        ) || null
+                      }
+                      onChange={option =>
+                        field.onChange(option ? option.value : '')
+                      }
+                    />
+                  );
+                }}
+              />
             </div>
           </form>
 

@@ -1,19 +1,17 @@
 import { z } from 'zod';
 
 export const validationSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  company: z.optional(z.string()).default(''),
-  reg_date: z.optional(z.string()).default(''),
-  email: z.optional(z.string()).default(''),
-  phone: z.optional(z.string()).default(''),
-  address: z.optional(z.string()).default(''),
+  reason: z.string().min(1, 'Reason is required'),
+  amount: z.optional(z.coerce.number()).default(0),
+  category: z.optional(z.string()),
+  full_name: z.optional(z.string()),
   _id: z.optional(z.string()),
   createdAt: z.optional(z.union([z.date(), z.string()])),
   updatedAt: z.optional(z.union([z.date(), z.string()])),
   __v: z.optional(z.number()),
 });
 
-export type SupplierDataTypes = z.infer<typeof validationSchema>;
+export type ExpenseDataTypes = z.infer<typeof validationSchema>;
 
 export interface RegexQuery {
   $regex: string;
@@ -21,14 +19,12 @@ export interface RegexQuery {
 }
 
 export interface Query {
-  name?: RegexQuery;
-  company?: RegexQuery;
-  email?: RegexQuery;
-  phone?: RegexQuery;
-  address?: RegexQuery;
+  reason?: RegexQuery;
+  category?: RegexQuery;
+  full_name?: RegexQuery;
 }
 
 export type RegexFields = Extract<
   keyof Query,
-  'name' | 'company' | 'email' | 'phone' | 'address'
+  'reason' | 'category' | 'full_name'
 >;

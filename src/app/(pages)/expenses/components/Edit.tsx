@@ -198,7 +198,11 @@ const EditButton: React.FC<PropsType> = props => {
                   return (
                     <Select
                       {...field}
-                      {...setClassNameAndIsDisabled(isOpen)}
+                      {...setClassNameAndIsDisabled(
+                        isOpen,
+                        undefined,
+                        'col-span-2',
+                      )}
                       options={expenseCategories}
                       isClearable={true}
                       placeholder="Select category"

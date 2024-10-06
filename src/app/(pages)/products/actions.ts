@@ -13,6 +13,7 @@ import getTodayDate from '@/utility/getTodaysDate';
 import { addRegexField } from '@/utility/regexQuery';
 import mongoose from 'mongoose';
 import { revalidatePath } from 'next/cache';
+import { ProductSortEnum } from './schema';
 
 import { Query, validationSchema as schema } from './schema';
 
@@ -24,6 +25,29 @@ export type FormState = {
   fields?: Record<any, any>;
   issues?: string[];
 };
+
+function getSortQuery(sortType: ProductSortEnum): any {
+  switch (sortType) {
+    case ProductSortEnum.StockAsc:
+      return { quantity: 1 };
+    case ProductSortEnum.StockDesc:
+      return { quantity: -1 };
+    case ProductSortEnum.StatusInStockFirst:
+      return { in_stock: -1 };
+    case ProductSortEnum.StatusOutOfStockFirst:
+      return { in_stock: 1 };
+    case ProductSortEnum.ExpirySoonToLater:
+      return { exp_date: 1 };
+    case ProductSortEnum.ExpiryLaterToSoon:
+      return { exp_date: -1 };
+    case ProductSortEnum.AddedAsc:
+      return { createdAt: 1 };
+    case ProductSortEnum.AddedDesc:
+      return { createdAt: -1 };
+    default:
+      return {};
+  }
+}
 
 export const deleteProduct = async (
   prevState: FormState,
@@ -142,6 +166,7 @@ export const getAllProductsFiltered = async (data: {
   filters: {
     searchText: string;
   };
+  sortBy?: ProductSortEnum;
 }): Promise<FormState> => {
   try {
     const page = data.page;
@@ -180,21 +205,22 @@ export const getAllProductsFiltered = async (data: {
 
     const skip = (page - 1) * itemsPerPage;
 
-    let sortQuery: Record<string, 1 | -1> = {
-      in_stock: -1,
-      createdAt: -1,
-    };
+    const sortQuery = getSortQuery(data.sortBy || ProductSortEnum.AddedDesc);
 
     const products = await Product.aggregate([
       {
         $match: {
-          ...searchQuery,
-          $or: [
+          $and: [
+            { ...searchQuery },
             {
-              exp_date: { $gte: getTodayDate() },
-            },
-            {
-              exp_date: '',
+              $or: [
+                {
+                  exp_date: { $gte: getTodayDate() },
+                },
+                {
+                  exp_date: '',
+                },
+              ],
             },
           ],
         },
@@ -210,6 +236,11 @@ export const getAllProductsFiltered = async (data: {
       { $skip: skip },
       { $limit: itemsPerPage },
     ]);
+
+    const simpleQuery = { name: { $regex: 'bananafdf', $options: 'i' } };
+    const productsXX = await Product.find(simpleQuery);
+
+    console.log('products', productsXX, 'filters', JSON.stringify(searchQuery));
 
     const pageCount: number = Math.ceil(count / itemsPerPage);
 
@@ -243,15 +274,13 @@ export const getAllProductsFiltered = async (data: {
 export const getAllProducts = async (data: {
   page: number;
   itemsPerPage: number;
+  sortBy?: ProductSortEnum;
 }): Promise<FormState> => {
   try {
     const page = data.page;
     const itemsPerPage = data.itemsPerPage;
 
-    let sortQuery: Record<string, 1 | -1> = {
-      in_stock: -1,
-      createdAt: -1,
-    };
+    const sortQuery = getSortQuery(data.sortBy || ProductSortEnum.AddedDesc);
 
     const skip = (page - 1) * itemsPerPage;
 
@@ -359,10 +388,13 @@ export const editProduct = async (
         exp_date: parsed.data.exp_date,
       });
 
-      if (Number(productData.quantity) !== parsed.data.quantity) {
+      if (parsed.data.quantity > Number(productData.quantity)) {
         productData.set({ ...parsed.data, restock_date: getTodayDate() });
       } else {
-        productData.set(parsed.data);
+        productData.set({
+          ...parsed.data,
+          restock_date: productData.restock_date,
+        });
       }
       await productData.save();
 

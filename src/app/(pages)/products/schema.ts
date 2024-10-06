@@ -111,3 +111,14 @@ export type RegexFields = Extract<
   keyof Query,
   'batch' | 'name' | 'supplier' | 'category' | 'store'
 >;
+
+export enum ProductSortEnum {
+  StockAsc = 'stock_asc',
+  StockDesc = 'stock_desc',
+  StatusInStockFirst = 'status_in_stock_first',
+  StatusOutOfStockFirst = 'status_out_of_stock_first',
+  ExpirySoonToLater = 'expiry_soon_to_later',
+  ExpiryLaterToSoon = 'expiry_later_to_soon',
+  AddedAsc = 'added_asc',
+  AddedDesc = 'added_desc',
+}

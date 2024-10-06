@@ -149,12 +149,23 @@ export const getAllExpensesFiltered = async (data: {
     const skip = (page - 1) * itemsPerPage;
 
     let sortQuery: Record<string, 1 | -1> = {
-      createdAt: -1,
+      due_amount: -1,
     };
 
     const expenses = await Expense.aggregate([
-      { $match: searchQuery },
+      {
+        $addFields: {
+          due_amount: {
+            $subtract: ['$grand_total', '$paid_amount'], // Calculate due amount
+          },
+        },
+      },
       { $sort: sortQuery },
+      {
+        $project: {
+          due_amount: 0,
+        },
+      },
       { $skip: skip },
       { $limit: itemsPerPage },
     ]);
@@ -197,7 +208,7 @@ export const getAllExpenses = async (data: {
     const itemsPerPage = data.itemsPerPage;
 
     let sortQuery: Record<string, 1 | -1> = {
-      createdAt: -1,
+      due_amount: -1,
     };
 
     const skip = (page - 1) * itemsPerPage;
@@ -205,7 +216,19 @@ export const getAllExpenses = async (data: {
     const count: number = await Expense.countDocuments({});
 
     const expenses = await Expense.aggregate([
+      {
+        $addFields: {
+          due_amount: {
+            $subtract: ['$grand_total', '$paid_amount'], // Calculate due amount
+          },
+        },
+      },
       { $sort: sortQuery },
+      {
+        $project: {
+          due_amount: 0,
+        },
+      },
       { $skip: skip },
       { $limit: itemsPerPage },
     ]);

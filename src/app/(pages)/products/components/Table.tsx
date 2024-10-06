@@ -13,12 +13,13 @@ import {
   getAllProducts as getAllProductsAction,
   getAllProductsFiltered as getAllProductsFilteredAction,
 } from '../actions';
-import { ProductDataTypes } from '../schema';
+import { ProductDataTypes, ProductSortEnum } from '../schema';
 import BarcodeButton from './Barcode';
 import CreateButton from './Create';
 import DeleteButton from './Delete';
 import EditButton from './Edit';
 import FilterButton from './Filter';
+import SortButton from './Sort';
 
 export interface ProductsState {
   pagination?: {
@@ -64,6 +65,10 @@ const Table: React.FC<TableDataProps> = props => {
     searchText: '',
   });
 
+  const [sortBy, setSortBy] = useState<ProductSortEnum>(
+    ProductSortEnum.AddedDesc,
+  );
+
   const getAllProducts = async (): Promise<void> => {
     try {
       // setIsLoading(true);
@@ -71,6 +76,7 @@ const Table: React.FC<TableDataProps> = props => {
       let response = await getAllProductsAction({
         page: page,
         itemsPerPage: itemsPerPage,
+        sortBy: sortBy,
       });
       if (response.error) {
         if (response?.message !== '') {
@@ -97,6 +103,7 @@ const Table: React.FC<TableDataProps> = props => {
         page: isFiltered ? page : 1,
         itemsPerPage: itemsPerPage,
         filters: filters,
+        sortBy: sortBy,
       });
       if (response.error) {
         if (response?.message !== '') {
@@ -280,6 +287,15 @@ const Table: React.FC<TableDataProps> = props => {
             page={page}
             itemsPerPage={itemsPerPage}
             setFilters={setFilters}
+            setIsFiltered={setIsFiltered}
+            setProducts={setProducts}
+          />
+          <SortButton
+            page={page}
+            itemsPerPage={itemsPerPage}
+            setSortBy={setSortBy}
+            sortBy={sortBy}
+            filters={filters}
             setIsFiltered={setIsFiltered}
             setProducts={setProducts}
           />

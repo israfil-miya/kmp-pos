@@ -15,9 +15,11 @@ interface Props {
 const Template: React.FC<Props> = props => {
   return (
     <div
+      onClick={props.onClick || undefined}
       className={cn(
         'p-4 flex-row flex flex-1 items-center gap-4 rounded-sm',
         props.className,
+        props.onClick && 'cursor-pointer',
       )}
     >
       <div

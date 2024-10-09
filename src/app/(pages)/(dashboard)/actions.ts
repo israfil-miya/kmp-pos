@@ -28,16 +28,13 @@ export type FormState = {
 interface Stats {
   expensesCurrentMonth: number;
   salesCurrentMonth: number;
-  revenueCurrentMonth: number;
   expensesCurrentYear: number;
   salesCurrentYear: number;
-  revenueCurrentYear: number;
   salesToday: number;
   invoicesToday: number;
-  productsNew: number;
   expiredProducts: number;
   suppliers: number;
-  availableProducts: number;
+  pendingDue: number;
   stores: number;
 }
 
@@ -80,28 +77,7 @@ export const getAllCardStats = async (): Promise<FormState> => {
       {
         $group: {
           _id: null,
-          total: { $sum: '$total' },
-        },
-      },
-    ]);
-
-    const revenueCurrentMonth = await Invoice.aggregate([
-      {
-        $match: {
-          createdAt: {
-            $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-            $lt: new Date(
-              new Date().getFullYear(),
-              new Date().getMonth() + 1,
-              0,
-            ),
-          },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: '$total' },
+          total: { $sum: '$grand_total' },
         },
       },
     ]);
@@ -135,24 +111,7 @@ export const getAllCardStats = async (): Promise<FormState> => {
       {
         $group: {
           _id: null,
-          total: { $sum: '$total' },
-        },
-      },
-    ]);
-
-    const revenueCurrentYear = await Invoice.aggregate([
-      {
-        $match: {
-          createdAt: {
-            $gte: new Date(new Date().getFullYear(), 0, 1),
-            $lt: new Date(new Date().getFullYear(), 12, 0),
-          },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: '$total' },
+          total: { $sum: '$grand_total' },
         },
       },
     ]);
@@ -177,7 +136,7 @@ export const getAllCardStats = async (): Promise<FormState> => {
       {
         $group: {
           _id: null,
-          total: { $sum: '$total' },
+          total: { $sum: '$grand_total' },
         },
       },
     ]);
@@ -204,62 +163,50 @@ export const getAllCardStats = async (): Promise<FormState> => {
       },
     ]);
 
-    const productsNew = await Product.aggregate([
+    const pendingDue = await Invoice.aggregate([
       {
-        $match: {
-          createdAt: {
-            $gte: new Date(
-              new Date().getFullYear(),
-              new Date().getMonth(),
-              new Date().getDate(),
-            ),
-            $lt: new Date(
-              new Date().getFullYear(),
-              new Date().getMonth(),
-              new Date().getDate() + 1,
-            ),
-          },
+        $addFields: {
+          totalDue: { $subtract: ['$grand_total', '$paid_amount'] },
         },
       },
       {
-        $count: 'total',
+        $group: {
+          _id: null,
+          total: { $sum: '$totalDue' },
+        },
       },
     ]);
 
-    const expiredProducts = await Product.aggregate([
-      {
-        $match: {
-          expiry_date: {
-            $lt: new Date(),
-          },
-        },
-      },
-      {
-        $count: 'total',
-      },
-    ]);
+    const expiredProducts = await Product.countDocuments({
+      $and: [{ exp_date: { $lt: getTodayDate() } }, { exp_date: { $ne: '' } }],
+    });
 
     const suppliers = await Supplier.countDocuments({});
+
     const availableProducts = await Product.countDocuments({
       $or: [{ exp_date: { $gte: getTodayDate() } }, { exp_date: '' }],
     });
+
     const stores = await Store.countDocuments({});
 
     const stats: Stats = {
       expensesCurrentMonth: expensesCurrentMonth[0]?.total || 0,
       salesCurrentMonth: salesCurrentMonth[0]?.total || 0,
-      revenueCurrentMonth: revenueCurrentMonth[0]?.total || 0,
       expensesCurrentYear: expensesCurrentYear[0]?.total || 0,
       salesCurrentYear: salesCurrentYear[0]?.total || 0,
-      revenueCurrentYear: revenueCurrentYear[0]?.total || 0,
       salesToday: salesToday[0]?.total || 0,
       invoicesToday: invoicesToday[0]?.total || 0,
-      productsNew: productsNew[0]?.total || 0,
-      expiredProducts: expiredProducts[0]?.total || 0,
-      suppliers,
-      availableProducts,
+      pendingDue: pendingDue[0]?.total
+        ? pendingDue[0]?.total > 0
+          ? pendingDue[0]?.total
+          : 0
+        : 0,
       stores,
+      expiredProducts,
+      suppliers,
     };
+
+    console.log(salesToday);
 
     return {
       error: false,

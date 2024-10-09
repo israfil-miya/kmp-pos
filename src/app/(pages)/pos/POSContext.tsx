@@ -6,6 +6,7 @@ export type ProductType = {
   batch: string;
   name: string;
   price: number;
+  cost: number;
   vat: number;
   unit: number; // Quantity of the product in the cart
   exp_date: string;

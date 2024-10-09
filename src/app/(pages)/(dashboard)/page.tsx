@@ -3,14 +3,14 @@ import LongCards from './components/Cards/LongCards';
 import ShortCards from './components/Cards/ShortCards';
 
 const Dashboard = async () => {
-  const cardStats = await getAllCardStats();
+  const cardData = await getAllCardStats();
 
-  console.log(cardStats);
+  console.log(cardData);
   return (
     <>
       <div className="flex-col flex gap-4">
-        <ShortCards />
-        <LongCards />
+        <ShortCards cardData={cardData} />
+        <LongCards cardData={cardData} />
       </div>
     </>
   );

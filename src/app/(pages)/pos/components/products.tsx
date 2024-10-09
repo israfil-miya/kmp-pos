@@ -60,6 +60,7 @@ function SearchedProducts() {
             batch: product.batch,
             name: product.name,
             price: product.selling_price,
+            cost: product.cost_price,
             vat: product.vat_rate,
             unit: 1,
             quantity: product.quantity,

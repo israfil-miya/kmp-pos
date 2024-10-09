@@ -9,6 +9,7 @@ import { InvoiceDataTypes } from '../schema';
 // Define the structure of the Invoice state
 interface Invoice {
   sub_total: number;
+  sub_cost: number; // Total cost based on product cost and quantity
   discount_value: number; // Store the discount value directly
   calculated_discount: number; // Store the calculated discount amount
   vat: number;
@@ -26,6 +27,7 @@ function Billing() {
 
   const [invoice, setInvoice] = useState<Invoice>({
     sub_total: 0,
+    sub_cost: 0, // Initialize sub_cost
     discount_value: 0, // Initialize discount_value
     calculated_discount: 0, // Initialize calculated_discount
     vat: 0,
@@ -51,23 +53,26 @@ function Billing() {
     { value: 'fixed', label: `৳` },
   ];
 
-  // Calculate sub_total and vat based on products
+  // Calculate sub_total, sub_cost, and vat based on products
   const getTotal = useCallback(() => {
     let sub_total = 0;
+    let sub_cost = 0;
     let vat = 0;
     context?.products.forEach((product: ProductType) => {
       const quantity = product.unit || 0;
       sub_total += product.price * quantity;
+      sub_cost += product.cost * quantity; // Calculate sub_cost
       vat += ((product.price * product.vat) / 100) * quantity;
     });
     setInvoice(prevInvoice => ({
       ...prevInvoice,
       sub_total,
+      sub_cost, // Update sub_cost
       vat,
     }));
   }, [context?.products]);
 
-  // Recalculate sub_total and vat whenever products change
+  // Recalculate sub_total, sub_cost, and vat whenever products change
   useEffect(() => {
     getTotal();
   }, [context?.products, getTotal]);
@@ -125,7 +130,7 @@ function Billing() {
       round_off: isNaN(roundOff) ? 0 : roundOff,
       total_amount: parseFloat((totalBeforeRoundOff + roundOff).toFixed(2)),
     }));
-  }, [invoice.sub_total, invoice.calculated_discount, invoice.vat]); // Removed 'invoice' from dependencies
+  }, [invoice.sub_total, invoice.calculated_discount, invoice.vat]);
 
   // a function to generate a 8 digit alphanumeric invoice number (all capital characters and numbers) with INV- prefix
   const generateInvoiceNumber = (): string => {
@@ -176,6 +181,7 @@ function Billing() {
           product: JSON.parse(JSON.stringify(product.id)),
           unit: product.unit || 0,
           total_price: product.price * (product.unit || 0),
+          total_cost: product.cost * (product.unit || 0),
         })),
         discount_amount: invoice.calculated_discount,
         vat_amount: invoice.vat,
@@ -183,6 +189,7 @@ function Billing() {
         grand_total: invoice.total_amount,
         paid_amount: invoice.paid_amount,
         payment_method: invoice.payment_method,
+        sub_cost: invoice.sub_cost, // Include sub_cost in the invoice
       };
 
       console.log(newInvoice);
@@ -197,6 +204,7 @@ function Billing() {
         context?.resetAll();
         setInvoice({
           sub_total: 0,
+          sub_cost: 0, // Reset sub_cost
           discount_value: 0,
           calculated_discount: 0,
           vat: 0,
@@ -227,6 +235,11 @@ function Billing() {
             <p className="font-medium">Sub Total:</p>
             <p>{invoice.sub_total.toFixed(2)} ৳</p>
           </div>
+          {/* 
+          <div className="flex justify-between items-center">
+            <p className="font-medium">Sub Cost:</p>
+            <p>{invoice.sub_cost.toFixed(2)} ৳</p>
+          </div> */}
 
           <div className="flex justify-between items-center">
             <p className="font-medium">Discount:</p>

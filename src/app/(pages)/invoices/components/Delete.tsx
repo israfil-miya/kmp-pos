@@ -2,8 +2,8 @@
 
 import React, { useActionState, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { InvoiceDataTypes } from '../../pos/schema';
 import { deleteInvoice } from '../actions';
-import { InvoiceDataTypes } from '../schema';
 
 interface PropsType {
   invoiceData: InvoiceDataTypes;

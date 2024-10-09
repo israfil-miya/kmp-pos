@@ -2,15 +2,44 @@
 
 import ShortCardTemplate from '@/components/Cards/short-cards/Template';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { toast } from 'sonner';
 
-const ShortCards = () => {
+import { FormState } from '../../actions';
+
+interface CardDataProps {
+  salesToday: number;
+  invoicesToday: number;
+  expiredProducts: number;
+  pendingDue: number;
+}
+
+const ShortCards: React.FC<{ cardData: FormState }> = props => {
+  const [cardData, setCardData] = React.useState<CardDataProps>({
+    salesToday: 0,
+    invoicesToday: 0,
+    pendingDue: 0,
+    expiredProducts: 0,
+  });
+
+  useEffect(() => {
+    if (props.cardData.error) {
+      if (props.cardData?.message !== '') {
+        toast.error(props.cardData.message);
+      }
+    } else if (props.cardData?.message !== '') {
+      setCardData(JSON.parse(props.cardData.message));
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [props.cardData.message, props.cardData.error]);
+
   const router = useRouter();
   return (
     <div className="flex flex-row gap-4">
       <ShortCardTemplate
         title="Today Sales"
-        description="350 ৳"
+        description={`${cardData.salesToday} ৳`}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -31,13 +60,13 @@ const ShortCards = () => {
           </svg>
         }
         className="bg-green-100 border-2 border-green-200"
-        onClick={() => router.push('/orders')}
+        onClick={() => router.push('/invoices')}
         iconClassName="bg-green-500 text-white"
       />
 
       <ShortCardTemplate
         title="Expired"
-        description="2"
+        description={`${cardData.expiredProducts}`}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -52,12 +81,12 @@ const ShortCards = () => {
           </svg>
         }
         className="bg-red-100 border-2 border-red-200"
-        onClick={() => router.push('/orders')}
+        onClick={() => router.push('/expired')}
         iconClassName="bg-red-500 text-white"
       />
       <ShortCardTemplate
         title="Today Invoices"
-        description="1"
+        description={`${cardData.invoicesToday}`}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -72,12 +101,12 @@ const ShortCards = () => {
           </svg>
         }
         className="bg-indigo-100 border-2 border-indigo-200"
-        onClick={() => router.push('/orders')}
+        onClick={() => router.push('/invoices')}
         iconClassName="bg-indigo-500 text-white"
       />
       <ShortCardTemplate
-        title="New Products"
-        description="0"
+        title="Pending Due"
+        description={`${cardData.pendingDue} ৳`}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -91,7 +120,7 @@ const ShortCards = () => {
           </svg>
         }
         className="bg-blue-100 border-2 border-blue-200"
-        onClick={() => router.push('/orders')}
+        onClick={() => router.push('/products')}
         iconClassName="bg-blue-500 text-white"
       />
     </div>

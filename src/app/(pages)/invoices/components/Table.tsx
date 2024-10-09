@@ -4,12 +4,12 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { InvoiceDataTypes } from '../../pos/schema';
 import {
   FormState,
   getAllInvoices as getAllInvoicesAction,
   getAllInvoicesFiltered as getAllInvoicesFilteredAction,
 } from '../actions';
-import { InvoiceDataTypes } from '../schema';
 import CreateButton from './Create';
 import DeleteButton from './Delete';
 import FilterButton from './Filter';
@@ -249,8 +249,10 @@ const Table: React.FC<TableDataProps> = props => {
                 <th className="font-bold">ID</th>
                 <th className="font-bold">Customer</th>
                 <th className="font-bold">Cashier</th>
-                <th className="font-bold">NOP</th>
+                <th className="font-bold">Cost</th>
                 <th className="font-bold">Bill</th>
+                <th className="font-bold">Discount</th>
+                <th className="font-bold">Payable</th>
                 <th className="font-bold">Paid</th>
                 <th className="font-bold">Method</th>
                 {session?.user?.role === 'administrator' && (
@@ -267,14 +269,12 @@ const Table: React.FC<TableDataProps> = props => {
                       <td>{item.invoice_no}</td>
                       <td className="capitalize">{item.customer.name}</td>
                       <td className="capitalize">{item.cashier}</td>
-                      <td>
-                        {item.products
-                          .map(product => product.unit)
-                          .reduce((a, b) => a + b, 0)}
-                      </td>
+                      <td>{item.sub_cost?.toLocaleString() || '0'} ৳</td>
+                      <td>{item.sub_total?.toLocaleString() || '0'} ৳</td>
 
-                      <td>{item.grand_total.toLocaleString() || '0'} ৳</td>
-                      <td>{item.paid_amount.toLocaleString() || '0'} ৳</td>
+                      <td>{item.discount_amount?.toLocaleString() || '0'} ৳</td>
+                      <td>{item.grand_total?.toLocaleString() || '0'} ৳</td>
+                      <td>{item.paid_amount?.toLocaleString() || '0'} ৳</td>
                       <td className="capitalize">{item.payment_method}</td>
 
                       {session?.user?.role === 'administrator' && (
@@ -295,7 +295,7 @@ const Table: React.FC<TableDataProps> = props => {
               ) : (
                 <tr key={0}>
                   <td
-                    colSpan={session?.user?.role === 'administrator' ? 7 : 6}
+                    colSpan={session?.user?.role === 'administrator' ? 11 : 10}
                     className="align-center text-center"
                   >
                     No Invoice To Show.

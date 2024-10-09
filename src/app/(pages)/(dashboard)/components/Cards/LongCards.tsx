@@ -1,16 +1,50 @@
+'use client';
+
 import LongCardTemplate from '@/components/Cards/long-cards/Template';
 import moment from 'moment-timezone';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { toast } from 'sonner';
+import { FormState } from '../../actions';
 
 const currentMonth = moment().format('MMMM');
 const currentYear = moment().format('YYYY');
 
-const LongCards = () => {
+interface CardDataProps {
+  expensesCurrentMonth: number;
+  salesCurrentMonth: number;
+  expensesCurrentYear: number;
+  salesCurrentYear: number;
+  suppliers: number;
+  stores: number;
+}
+
+const LongCards: React.FC<{ cardData: FormState }> = props => {
+  const [cardData, setCardData] = React.useState<CardDataProps>({
+    expensesCurrentMonth: 0,
+    salesCurrentMonth: 0,
+    expensesCurrentYear: 0,
+    salesCurrentYear: 0,
+    suppliers: 0,
+    stores: 0,
+  });
+
+  useEffect(() => {
+    if (props.cardData.error) {
+      if (props.cardData?.message !== '') {
+        toast.error(props.cardData.message);
+      }
+    } else if (props.cardData?.message !== '') {
+      setCardData(JSON.parse(props.cardData.message));
+    } else {
+      console.log('Nothing was returned from the server');
+    }
+  }, [props.cardData.message, props.cardData.error]);
+
   return (
     <div className="grid grid-cols-3 gap-4">
       <LongCardTemplate
         title={`Expenses (${currentMonth})`}
-        description="630 ৳"
+        description={`${cardData.expensesCurrentMonth} ৳`}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -28,7 +62,7 @@ const LongCards = () => {
       />
       <LongCardTemplate
         title={`Sales (${currentMonth})`}
-        description="1500 ৳"
+        description={`${cardData.salesCurrentMonth} ৳`}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -44,28 +78,8 @@ const LongCards = () => {
         className="bg-white border"
       />
       <LongCardTemplate
-        title={`Revenue (${currentMonth})`}
-        description="230.85 ৳"
-        icon={
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            className="w-8 h-8 fill-green-500 opacity-55"
-            viewBox="0 0 16 16"
-          >
-            <path
-              fillRule="evenodd"
-              d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5"
-            />
-          </svg>
-        }
-        className="bg-white border"
-      />
-      <LongCardTemplate
         title="Suppliers"
-        description="3"
+        description={`${cardData.suppliers}`}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -81,25 +95,8 @@ const LongCards = () => {
         className="bg-white border"
       />
       <LongCardTemplate
-        title="Available Products"
-        description="13"
-        icon={
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            className="w-8 h-8 fill-purple-500 opacity-55"
-            viewBox="0 0 16 16"
-          >
-            <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2zm3.564 1.426L5.596 5 8 5.961 14.154 3.5zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z" />
-          </svg>
-        }
-        className="bg-white border"
-      />
-      <LongCardTemplate
         title="Stores"
-        description="1"
+        description={`${cardData.stores}`}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -116,7 +113,7 @@ const LongCards = () => {
       />
       <LongCardTemplate
         title={`Expenses (${currentYear})`}
-        description="630 ৳"
+        description={`${cardData.expensesCurrentYear} ৳`}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -133,7 +130,7 @@ const LongCards = () => {
       />
       <LongCardTemplate
         title={`Sales (${currentYear})`}
-        description="1500 ৳"
+        description={`${cardData.salesCurrentYear} ৳`}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -151,26 +148,6 @@ const LongCards = () => {
             <circle cx="16.5" cy="15.5" r="1" />
             <path d="M7 7a2 2 0 1 1 4 0v9a3 3 0 0 0 6 0v-.5" />
             <path d="M8 11h6" />
-          </svg>
-        }
-        className="bg-white border"
-      />
-      <LongCardTemplate
-        title={`Revenue (${currentYear})`}
-        description="230.85 ৳"
-        icon={
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            className="w-8 h-8 fill-emerald-500  opacity-55"
-            viewBox="0 0 16 16"
-          >
-            <path
-              fillRule="evenodd"
-              d="M6 3.5A1.5 1.5 0 0 1 7.5 2h1A1.5 1.5 0 0 1 10 3.5v1A1.5 1.5 0 0 1 8.5 6v1H14a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 2 7h5.5V6A1.5 1.5 0 0 1 6 4.5zm-6 8A1.5 1.5 0 0 1 1.5 10h1A1.5 1.5 0 0 1 4 11.5v1A1.5 1.5 0 0 1 2.5 14h-1A1.5 1.5 0 0 1 0 12.5zm6 0A1.5 1.5 0 0 1 7.5 10h1a1.5 1.5 0 0 1 1.5 1.5v1A1.5 1.5 0 0 1 8.5 14h-1A1.5 1.5 0 0 1 6 12.5zm6 0a1.5 1.5 0 0 1 1.5-1.5h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5z"
-            />
           </svg>
         }
         className="bg-white border"

@@ -12,11 +12,13 @@ export interface Invoice extends mongoose.Document {
     product: mongoose.Types.ObjectId;
     unit: number;
     total_price: number;
+    total_cost: number;
   }[];
   discount_amount: number;
   vat_amount: number;
   sub_total: number;
   grand_total: number;
+  sub_cost: number;
   paid_amount: number;
   payment_method: string;
 }
@@ -65,6 +67,11 @@ const InvoiceSchema = new mongoose.Schema<Invoice>(
           required: [true, 'Total price is not given'],
           min: [0, 'Total price cannot be negative'], // Ensure positive price
         },
+        total_cost: {
+          type: Number,
+          required: [true, 'Total cost is not given'],
+          min: [0, 'Total cost cannot be negative'], // Ensure positive cost
+        },
       },
     ],
     discount_amount: {
@@ -78,6 +85,13 @@ const InvoiceSchema = new mongoose.Schema<Invoice>(
       type: Number,
       required: [true, 'Subtotal amount is not given'],
       min: [0, 'Total amount cannot be negative'], // Ensure positive
+    },
+
+    // Sub cost is the total cost before VAT and discount
+    sub_cost: {
+      type: Number,
+      required: [true, 'Sub cost amount is not given'],
+      min: [0, 'Total cost cannot be negative'], // Ensure positive
     },
 
     // Total is the final amount after VAT and discount

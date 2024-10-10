@@ -21,6 +21,7 @@ export interface Invoice extends mongoose.Document {
   sub_cost: number;
   paid_amount: number;
   payment_method: string;
+  store_name: string;
 }
 
 const InvoiceSchema = new mongoose.Schema<Invoice>(
@@ -119,6 +120,12 @@ const InvoiceSchema = new mongoose.Schema<Invoice>(
         values: ['cash', 'card', 'bkash', 'nagad', 'rocket', 'check', 'bank'],
         message: 'Invalid payment method',
       },
+    },
+
+    store_name: {
+      type: String,
+      required: [true, 'Store name is not given'],
+      minlength: [1, 'Store name cannot be empty'], // Ensure store name is not empty
     },
   },
   {

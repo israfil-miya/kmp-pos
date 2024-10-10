@@ -160,6 +160,7 @@ const CreateButton: React.FC = () => {
               handleSubmit(() => {
                 const formData = new FormData(formRef.current!);
                 formData.append('full_name', watch('full_name')!);
+                formData.append('store_name', session?.user.store!);
                 console.log('Form data', formData);
                 formAction(formData);
               })(e);

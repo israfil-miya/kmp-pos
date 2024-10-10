@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { InvoiceDataTypes } from '../../invoices/schema';
+import { InvoiceDataTypes } from '../../pos/schema';
 import {
   FormState,
   getAllCreditors as getAllCreditorsAction,
@@ -253,8 +253,11 @@ const Table: React.FC<TableDataProps> = props => {
                 <th className="font-bold">Phone</th>
                 <th className="font-bold">Address</th>
                 <th className="font-bold">Cashier</th>
-                <th className="font-bold">NOP</th>
+                <th className="font-bold">Store</th>
+                <th className="font-bold">Cost</th>
                 <th className="font-bold">Bill</th>
+                <th className="font-bold">Discount</th>
+                <th className="font-bold">Payable</th>
                 <th className="font-bold">Paid</th>
                 <th className="font-bold">Method</th>
                 {session?.user?.role === 'administrator' && (
@@ -275,18 +278,36 @@ const Table: React.FC<TableDataProps> = props => {
                       <td className="capitalize">
                         {item.customer?.phone || 'N/A'}
                       </td>
-                      <ExtendableTd data={item.customer?.phone || 'N/A'} />
+                      <ExtendableTd data={item.customer?.address || 'N/A'} />
                       <td className="capitalize">{item.cashier}</td>
-                      <td>
-                        {item.products
-                          .map(product => product.unit)
-                          .reduce((a, b) => a + b, 0)}
+                      <td
+                        className="uppercase items-center"
+                        style={{ verticalAlign: 'middle' }}
+                      >
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400"
+                        >
+                          {item.store_name}
+                        </span>
                       </td>
+                      <td>{item.sub_cost?.toLocaleString() || '0'} ৳</td>
+                      <td>{item.sub_total?.toLocaleString() || '0'} ৳</td>
 
-                      <td>{item.grand_total.toLocaleString() || '0'} ৳</td>
-                      <td>{item.paid_amount.toLocaleString() || '0'} ৳</td>
-                      <td className="capitalize">{item.payment_method}</td>
-
+                      <td>{item.discount_amount?.toLocaleString() || '0'} ৳</td>
+                      <td>{item.grand_total?.toLocaleString() || '0'} ৳</td>
+                      <td>{item.paid_amount?.toLocaleString() || '0'} ৳</td>
+                      <td
+                        className="uppercase items-center"
+                        style={{ verticalAlign: 'middle' }}
+                      >
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400"
+                        >
+                          {item.payment_method}
+                        </span>
+                      </td>
                       {session?.user?.role === 'administrator' && (
                         <td
                           className="text-center"
@@ -305,7 +326,7 @@ const Table: React.FC<TableDataProps> = props => {
               ) : (
                 <tr key={0}>
                   <td
-                    colSpan={session?.user?.role === 'administrator' ? 11 : 10}
+                    colSpan={session?.user?.role === 'administrator' ? 14 : 13}
                     className="align-center text-center"
                   >
                     No Invoice To Show.

@@ -13,6 +13,24 @@ interface NavProps {
   className?: string;
 }
 
+const authorizedRoutes = [
+  {
+    role: 'administrator',
+    path: [
+      '/',
+      '/stores',
+      '/users',
+      '/suppliers',
+      '/categories',
+      '/products',
+      '/invoices',
+      '/creditors',
+    ],
+  },
+  { role: 'cashier', path: ['/pos', '/invoices'] },
+  { role: 'manager', path: ['/invoices', '/creditors', '/expired'] },
+];
+
 const Nav: React.FC<NavProps> = props => {
   const { data: session } = useSession();
   const userRole = session?.user.role;

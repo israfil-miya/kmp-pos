@@ -1,5 +1,6 @@
 'use client';
 
+import cn from '@/utility/cn';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
@@ -249,12 +250,14 @@ const Table: React.FC<TableDataProps> = props => {
                 <th className="font-bold">ID</th>
                 <th className="font-bold">Customer</th>
                 <th className="font-bold">Cashier</th>
+                <th className="font-bold">Store</th>
                 <th className="font-bold">Cost</th>
                 <th className="font-bold">Bill</th>
                 <th className="font-bold">Discount</th>
                 <th className="font-bold">Payable</th>
                 <th className="font-bold">Paid</th>
                 <th className="font-bold">Method</th>
+                <th className="font-bold">Status</th>
                 {session?.user?.role === 'administrator' && (
                   <th className="font-bold">Action</th>
                 )}
@@ -268,14 +271,63 @@ const Table: React.FC<TableDataProps> = props => {
                       <td>{index + 1}</td>
                       <td>{item.invoice_no}</td>
                       <td className="capitalize">{item.customer.name}</td>
-                      <td className="capitalize">{item.cashier}</td>
+                      <td
+                        className="uppercase items-center"
+                        style={{ verticalAlign: 'middle' }}
+                      >
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400"
+                        >
+                          {item.cashier}
+                        </span>
+                      </td>
+                      <td
+                        className="uppercase items-center"
+                        style={{ verticalAlign: 'middle' }}
+                      >
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400"
+                        >
+                          {item.store_name}
+                        </span>
+                      </td>
                       <td>{item.sub_cost?.toLocaleString() || '0'} ৳</td>
                       <td>{item.sub_total?.toLocaleString() || '0'} ৳</td>
 
                       <td>{item.discount_amount?.toLocaleString() || '0'} ৳</td>
                       <td>{item.grand_total?.toLocaleString() || '0'} ৳</td>
                       <td>{item.paid_amount?.toLocaleString() || '0'} ৳</td>
-                      <td className="capitalize">{item.payment_method}</td>
+                      <td
+                        className="uppercase items-center"
+                        style={{ verticalAlign: 'middle' }}
+                      >
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400"
+                        >
+                          {item.payment_method}
+                        </span>
+                      </td>
+                      <td
+                        className="uppercase items-center"
+                        style={{ verticalAlign: 'middle' }}
+                      >
+                        <span
+                          key={index}
+                          className={cn(
+                            'text-xs font-medium px-2.5 py-0.5 rounded border',
+                            item.grand_total === item.paid_amount
+                              ? 'bg-green-100 text-green-800 border-green-400'
+                              : 'bg-red-100 text-yellow-800 border-yellow-400',
+                          )}
+                        >
+                          {item.grand_total === item.paid_amount
+                            ? 'Paid'
+                            : 'Due'}
+                        </span>
+                      </td>
 
                       {session?.user?.role === 'administrator' && (
                         <td

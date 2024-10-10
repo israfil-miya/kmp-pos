@@ -6,6 +6,7 @@ export interface Expense extends mongoose.Document {
   amount: number;
   category: string;
   full_name: string;
+  store_name?: string;
 }
 
 const ExpenseSchema = new mongoose.Schema<Expense>(
@@ -29,6 +30,11 @@ const ExpenseSchema = new mongoose.Schema<Expense>(
       type: String,
       minlength: [1, 'Full name must be at least 1 character'],
       required: [true, 'Full name is required'],
+    },
+    store_name: {
+      type: String,
+      required: [true, 'Store name is not given'],
+      minlength: [1, 'Store name cannot be empty'], // Ensure store name is not empty
     },
   },
   { timestamps: true },

@@ -25,7 +25,7 @@ export const validationSchema = z.object({
   grand_total: z.number().gte(0, 'Grand total cannot be negative'),
   paid_amount: z.number().gte(0, 'Paid amount cannot be negative'),
   payment_method: z.string(),
-
+  store_name: z.string(),
   _id: z.optional(z.string()),
   createdAt: z.optional(z.union([z.date(), z.string()])),
   updatedAt: z.optional(z.union([z.date(), z.string()])),

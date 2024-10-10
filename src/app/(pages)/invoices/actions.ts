@@ -4,7 +4,8 @@ import Invoice from '@/models/Invoices';
 import dbConnect from '@/utility/dbConnect';
 import { addRegexField } from '@/utility/regexQuery';
 import { revalidatePath } from 'next/cache';
-import { Query, validationSchema as schema } from './schema';
+import { validationSchema as schema } from '../pos/schema';
+import { Query } from './schema';
 
 dbConnect();
 
@@ -70,6 +71,7 @@ export const getAllInvoicesFiltered = async (data: {
     addRegexField(query, 'cashier', searchText);
     addRegexField(query, 'payment_method', searchText, true);
     addRegexField(query, 'invoice_no', searchText, true);
+    addRegexField(query, 'shop_name', searchText);
     addRegexField(query, 'customer.name', searchText);
 
     const searchQuery =

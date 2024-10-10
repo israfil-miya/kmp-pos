@@ -251,6 +251,7 @@ const Table: React.FC<TableDataProps> = props => {
               <tr>
                 <th className="font-bold">S/N</th>
                 <th className="font-bold">Name</th>
+                <th className="font-bold">Shop</th>
                 <th className="font-bold">Reason</th>
                 <th className="font-bold">Category</th>
                 <th className="font-bold">Amount</th>
@@ -268,6 +269,17 @@ const Table: React.FC<TableDataProps> = props => {
                     <tr key={item._id}>
                       <td>{index + 1}</td>
                       <td className="capitalize">{item.full_name}</td>
+                      <td
+                        className="uppercase items-center"
+                        style={{ verticalAlign: 'middle' }}
+                      >
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400"
+                        >
+                          {item.store_name}
+                        </span>
+                      </td>
                       <td className="test-wrap capitalize">{item.reason}</td>
                       <td
                         className="uppercase items-center"

@@ -5,6 +5,7 @@ export const validationSchema = z.object({
   amount: z.optional(z.coerce.number()).default(0),
   category: z.optional(z.string()),
   full_name: z.optional(z.string()),
+  store_name: z.optional(z.string()),
   _id: z.optional(z.string()),
   createdAt: z.optional(z.union([z.date(), z.string()])),
   updatedAt: z.optional(z.union([z.date(), z.string()])),

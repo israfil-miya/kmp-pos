@@ -189,6 +189,7 @@ function Billing() {
         grand_total: invoice.total_amount,
         paid_amount: invoice.paid_amount,
         payment_method: invoice.payment_method,
+        store_name: session?.user?.store || '',
         sub_cost: invoice.sub_cost, // Include sub_cost in the invoice
       };
 

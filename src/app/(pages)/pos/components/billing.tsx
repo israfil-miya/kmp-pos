@@ -178,7 +178,9 @@ function Billing() {
           address: customer?.address || '',
         },
         products: products!.map(product => ({
-          product: JSON.parse(JSON.stringify(product.id)),
+          name: product.name,
+          category: product.category,
+          product_id: JSON.parse(JSON.stringify(product.id)),
           unit: product.unit || 0,
           total_price: product.price * (product.unit || 0),
           total_cost: product.cost * (product.unit || 0),

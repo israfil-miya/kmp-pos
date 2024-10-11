@@ -5,6 +5,7 @@ export type ProductType = {
   id: Types.ObjectId;
   batch: string;
   name: string;
+  category: string[];
   price: number;
   cost: number;
   vat: number;

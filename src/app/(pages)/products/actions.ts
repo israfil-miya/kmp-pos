@@ -13,7 +13,7 @@ import getTodayDate from '@/utility/getTodaysDate';
 import { addRegexField } from '@/utility/regexQuery';
 import mongoose from 'mongoose';
 import { revalidatePath } from 'next/cache';
-import { ProductSortEnum } from './schema';
+import { ProductDataTypes, ProductSortEnum } from './schema';
 
 import { Query, validationSchema as schema } from './schema';
 
@@ -169,58 +169,44 @@ export const getAllProductsFiltered = async (data: {
   sortBy?: ProductSortEnum;
 }): Promise<FormState> => {
   try {
-    const page = data.page;
-    const itemsPerPage = data.itemsPerPage;
-    const { searchText } = data.filters;
+    const {
+      page,
+      itemsPerPage,
+      filters: { searchText },
+    } = data;
 
     const query: Query = {};
 
+    // Using a utility function to add regex fields for searching
     addRegexField(query, 'name', searchText.trim());
     addRegexField(query, 'batch', searchText.trim(), true);
     addRegexField(query, 'category', searchText.trim());
     addRegexField(query, 'supplier', searchText.trim());
     addRegexField(query, 'store', searchText.trim());
 
-    const searchQuery =
-      Object.keys(query).length > 0
-        ? {
-            $or: Object.entries(query).map(([key, value]) => ({
-              [key]: value,
-            })),
-          }
-        : { $or: [{}] };
+    // Constructing the search query
+    const searchQuery = Object.keys(query).length
+      ? { $or: Object.entries(query).map(([key, value]) => ({ [key]: value })) }
+      : { $or: [{}] };
 
+    // Count the total number of documents
     const count: number = await Product.countDocuments({
       ...searchQuery,
-
-      $or: [
-        {
-          exp_date: { $gte: getTodayDate() },
-        },
-        {
-          exp_date: '',
-        },
-      ],
+      $or: [{ exp_date: { $gte: getTodayDate() } }, { exp_date: '' }],
     });
 
     const skip = (page - 1) * itemsPerPage;
 
+    // Construct the sort query
     const sortQuery = getSortQuery(data.sortBy || ProductSortEnum.AddedDesc);
 
-    const products = await Product.aggregate([
+    const products = await Product.aggregate<ProductDataTypes>([
       {
         $match: {
           $and: [
-            { ...searchQuery },
+            searchQuery,
             {
-              $or: [
-                {
-                  exp_date: { $gte: getTodayDate() },
-                },
-                {
-                  exp_date: '',
-                },
-              ],
+              $or: [{ exp_date: { $gte: getTodayDate() } }, { exp_date: '' }],
             },
           ],
         },
@@ -237,32 +223,15 @@ export const getAllProductsFiltered = async (data: {
       { $limit: itemsPerPage },
     ]);
 
-    const simpleQuery = { name: { $regex: 'bananafdf', $options: 'i' } };
-    const productsXX = await Product.find(simpleQuery);
-
-    console.log('products', productsXX, 'filters', JSON.stringify(searchQuery));
-
     const pageCount: number = Math.ceil(count / itemsPerPage);
 
-    if (products) {
-      let productsData = {
-        pagination: {
-          count,
-          pageCount,
-        },
+    return {
+      error: false,
+      message: JSON.stringify({
+        pagination: { count, pageCount },
         items: products,
-      };
-
-      return {
-        error: false,
-        message: JSON.stringify(productsData),
-      };
-    } else {
-      return {
-        error: true,
-        message: "Couldn't retrieve products data",
-      };
-    }
+      }),
+    };
   } catch (error: any) {
     return {
       error: true,
@@ -277,25 +246,22 @@ export const getAllProducts = async (data: {
   sortBy?: ProductSortEnum;
 }): Promise<FormState> => {
   try {
-    const page = data.page;
-    const itemsPerPage = data.itemsPerPage;
+    const { page, itemsPerPage } = data;
 
     const sortQuery = getSortQuery(data.sortBy || ProductSortEnum.AddedDesc);
-
     const skip = (page - 1) * itemsPerPage;
 
+    // Count the total number of documents
     const count: number = await Product.countDocuments({
-      $or: [
-        {
-          exp_date: { $gte: getTodayDate() },
-        },
-        {
-          exp_date: '',
-        },
-      ],
+      $or: [{ exp_date: { $gte: getTodayDate() } }, { exp_date: '' }],
     });
 
-    const products = await Product.aggregate([
+    const products = await Product.aggregate<ProductDataTypes>([
+      {
+        $match: {
+          $or: [{ exp_date: { $gte: getTodayDate() } }, { exp_date: '' }],
+        },
+      },
       {
         $addFields: {
           in_stock: {
@@ -303,45 +269,20 @@ export const getAllProducts = async (data: {
           },
         },
       },
-      {
-        $match: {
-          $or: [
-            {
-              exp_date: { $gte: getTodayDate() },
-            },
-            {
-              exp_date: '',
-            },
-          ],
-        },
-      },
       { $sort: sortQuery },
       { $skip: skip },
       { $limit: itemsPerPage },
-      // { $project: { in_stock: 0 } }, // remove the in_stock field from the final output
     ]);
 
     const pageCount: number = Math.ceil(count / itemsPerPage);
 
-    if (products) {
-      let productsData = {
-        pagination: {
-          count,
-          pageCount,
-        },
+    return {
+      error: false,
+      message: JSON.stringify({
+        pagination: { count, pageCount },
         items: products,
-      };
-
-      return {
-        error: false,
-        message: JSON.stringify(productsData),
-      };
-    } else {
-      return {
-        error: true,
-        message: "Couldn't retrieve products data",
-      };
-    }
+      }),
+    };
   } catch (error: any) {
     return {
       error: true,

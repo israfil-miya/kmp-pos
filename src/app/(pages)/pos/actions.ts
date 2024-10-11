@@ -109,16 +109,19 @@ export const createNewInvoice = async (
   try {
     // go through data.products and for each product convert the product id to a mongoose.Types.ObjectId
     data.products = data.products.map(product => {
+      console.log('product:', product);
       return {
         ...product,
-        product: new mongoose.Types.ObjectId(product.product),
+        product_id: new mongoose.Types.ObjectId(product.product_id),
       };
     });
 
     parsed = schema.safeParse(data);
 
+    console.log('parsed:', parsed.data?.products, data);
+
     if (!parsed.success) {
-      console.log(parsed.error.issues);
+      console.log('HERE: ', parsed.error.issues, data);
       return {
         error: true,
         message: 'Invalid invoice data',
@@ -131,7 +134,7 @@ export const createNewInvoice = async (
       // update the stock of each product in the invoice
       for (let i = 0; i < data.products.length; i++) {
         const product = data.products[i];
-        const productData = await Product.findById(product.product);
+        const productData = await Product.findById(product.product_id);
         productData!.quantity -= product.unit;
         await productData!.save();
       }
@@ -157,6 +160,8 @@ export const createNewInvoice = async (
 
     if (error instanceof mongoose.Error.ValidationError) {
       const validationIssues = extractDbErrorMessages(error);
+
+      console.log('HERE VALIDATION ISSUE: ', validationIssues, data);
       return {
         error: true,
         message: 'Invalid invoice data',

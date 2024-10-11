@@ -9,10 +9,12 @@ export interface Invoice extends mongoose.Document {
     address: string;
   };
   products: {
-    product: mongoose.Types.ObjectId;
+    name: string;
+    category: string[];
     unit: number;
     total_price: number;
     total_cost: number;
+    product_id: mongoose.Types.ObjectId;
   }[];
   discount_amount: number;
   vat_amount: number;
@@ -53,10 +55,23 @@ const InvoiceSchema = new mongoose.Schema<Invoice>(
     },
     products: [
       {
-        product: {
+        product_id: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'Product',
           required: [true, 'Product id is not given'], // Product reference is required
+        },
+        name: {
+          type: String,
+          required: [true, 'Product name is not given'],
+          minlength: [1, 'Product name cannot be empty'], // Ensure product name is not empty
+        },
+        category: {
+          type: [String],
+          required: [true, 'Product category is not given'],
+          validate: {
+            validator: (categories: string[]) => categories.length > 0,
+            message: 'Product category cannot be empty',
+          },
         },
         unit: {
           type: Number,

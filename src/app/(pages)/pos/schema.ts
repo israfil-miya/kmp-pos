@@ -12,7 +12,9 @@ export const validationSchema = z.object({
   }),
   products: z.array(
     z.object({
-      product: z.instanceof(Types.ObjectId),
+      name: z.string(),
+      category: z.array(z.string()),
+      product_id: z.instanceof(Types.ObjectId),
       unit: z.number().gte(1, 'Unit cannot be less than 1'),
       total_price: z.number().gte(0, 'Total price cannot be negative'),
       total_cost: z.number().gte(0, 'Total cost cannot be negative'),

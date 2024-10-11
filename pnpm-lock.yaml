@@ -11,9 +11,6 @@ importers:
       '@hookform/resolvers':
         specifier: ^3.9.0
         version: 3.9.0(react-hook-form@7.53.0(react@19.0.0-rc-7771d3a7-20240827))
-      '@types/jspdf':
-        specifier: ^2.0.0
-        version: 2.0.0
       bwip-js:
         specifier: ^4.5.1
         version: 4.5.1
@@ -35,6 +32,9 @@ importers:
       jspdf:
         specifier: ^2.5.2
         version: 2.5.2
+      lucide-react:
+        specifier: ^0.451.0
+        version: 0.451.0(react@19.0.0-rc-7771d3a7-20240827)
       moment-timezone:
         specifier: ^0.5.46
         version: 0.5.46
@@ -541,10 +541,6 @@ packages:
 
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
-
-  '@types/jspdf@2.0.0':
-    resolution: {integrity: sha512-oonYDXI4GegGaG7FFVtriJ+Yqlh4YR3L3NVDiwCEBVG7sbya19SoGx4MW4kg1MCMRPgkbbFTck8YKJL8PrkDfA==}
-    deprecated: This is a stub types definition. jspdf provides its own type definitions, so you do not need this installed.
 
   '@types/node@20.16.10':
     resolution: {integrity: sha512-vQUKgWTjEIRFCvK6CyriPH3MZYiYlNy0fKiEYHWbcoWLEgs4opurGGKlebrTLqdSMIbXImH6XExNiIyNUv3WpA==}
@@ -1542,6 +1538,11 @@ packages:
 
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
+
+  lucide-react@0.451.0:
+    resolution: {integrity: sha512-OwQ3uljZLp2cerj8sboy5rnhtGTCl9UCJIhT1J85/yOuGVlEH+xaUPR7tvNdddPvmV5M5VLdr7cQuWE3hzA4jw==}
+    peerDependencies:
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0-rc
 
   memoize-one@5.2.1:
     resolution: {integrity: sha512-zYiwtZUcYyXKo/np96AGZAckk+FWWsUdJ3cHGGmld7+AhvcWmQyGCYUh1hc4Q/pkOhb65dQR/pqCyK0cOaHz4Q==}
@@ -2728,10 +2729,6 @@ snapshots:
   '@types/estree@1.0.6': {}
 
   '@types/json5@0.0.29': {}
-
-  '@types/jspdf@2.0.0':
-    dependencies:
-      jspdf: 2.5.2
 
   '@types/node@20.16.10':
     dependencies:
@@ -3958,6 +3955,10 @@ snapshots:
       js-tokens: 4.0.0
 
   lru-cache@10.4.3: {}
+
+  lucide-react@0.451.0(react@19.0.0-rc-7771d3a7-20240827):
+    dependencies:
+      react: 19.0.0-rc-7771d3a7-20240827
 
   memoize-one@5.2.1: {}
 

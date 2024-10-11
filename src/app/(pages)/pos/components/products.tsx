@@ -59,6 +59,7 @@ function SearchedProducts() {
             id: new Types.ObjectId(product._id),
             batch: product.batch,
             name: product.name,
+            category: product.category,
             price: product.selling_price,
             cost: product.cost_price,
             vat: product.vat_rate,

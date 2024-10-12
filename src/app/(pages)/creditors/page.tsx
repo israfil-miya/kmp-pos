@@ -9,6 +9,7 @@ const InvoicesPage = async () => {
   const products = await getAllCreditors({
     page: 1,
     itemsPerPage: 30,
+    store: session?.user?.store,
   });
   return (
     <SessionProvider session={session}>

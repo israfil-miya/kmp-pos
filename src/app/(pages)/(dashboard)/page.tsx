@@ -1,3 +1,4 @@
+import { getAllInvoices } from '../invoices/actions';
 import {
   getAllCardStats,
   getSalesByMonth,
@@ -7,17 +8,18 @@ import {
 import LongCards from './components/Cards/LongCards';
 import ShortCards from './components/Cards/ShortCards';
 import Graphs from './components/Graphs/Graphs';
+import Table from './components/Table';
 
 const Dashboard = async () => {
   const cardData = await getAllCardStats();
   const salesByMonth = await getSalesByMonth();
   const salesByStore = await getSalesByStore();
   const salesVsExpenses = await getSalesVSExpensesByDate();
+  const invoices = await getAllInvoices({
+    page: 1,
+    itemsPerPage: 5,
+  });
 
-  console.log(cardData);
-  console.log(salesByMonth);
-  console.log(salesByStore);
-  console.log(salesVsExpenses);
   return (
     <>
       <div className="flex-col flex gap-4">
@@ -28,6 +30,7 @@ const Dashboard = async () => {
           salesByStore={salesByStore}
           salesVsExpenses={salesVsExpenses}
         />
+        <Table invoices={invoices} />
       </div>
     </>
   );

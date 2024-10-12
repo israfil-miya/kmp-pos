@@ -56,7 +56,7 @@ const SalesVsExpenseGraph: React.FC<SalesVsExpenseGraphProps> = ({
           label: 'Expenses',
           data: Object.keys(data).map(key => data[key].expenses), // Get expenses data for each label
           backgroundColor: transparentize('rgb(255, 99, 132)'), // Set the color for expenses bars
-          borderColor: transparentize('rgb(255, 99, 132)'),
+          borderColor: 'rgb(255, 99, 132)',
           borderWidth: 2,
           type: 'bar',
           order: 1,

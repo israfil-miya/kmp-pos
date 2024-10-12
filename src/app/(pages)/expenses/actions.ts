@@ -100,6 +100,7 @@ export const createNewExpense = async (
     console.log('data', parsed?.data);
     if (error instanceof mongoose.Error.ValidationError) {
       const validationIssues = extractDbErrorMessages(error);
+      console.log('issues', validationIssues);
       return {
         error: true,
         message: 'Invalid form data',
@@ -123,6 +124,7 @@ export const getAllExpensesFiltered = async (data: {
   filters: {
     searchText: string;
   };
+  store?: string | null;
 }): Promise<FormState> => {
   try {
     const page = data.page;
@@ -132,8 +134,13 @@ export const getAllExpensesFiltered = async (data: {
     const query: Query = {};
 
     addRegexField(query, 'reason', searchText.trim());
-    addRegexField(query, 'category', searchText.trim(), true);
+    addRegexField(query, 'category', searchText.trim());
     addRegexField(query, 'full_name', searchText.trim());
+    addRegexField(
+      query,
+      'store_name',
+      data.store ? data.store.trim() : searchText.trim(),
+    );
 
     const searchQuery =
       Object.keys(query).length > 0
@@ -144,7 +151,9 @@ export const getAllExpensesFiltered = async (data: {
           }
         : { $or: [{}] };
 
-    const count: number = await Expense.countDocuments(searchQuery);
+    const count: number = await Expense.countDocuments({
+      ...searchQuery,
+    });
 
     const skip = (page - 1) * itemsPerPage;
 
@@ -153,6 +162,7 @@ export const getAllExpensesFiltered = async (data: {
     };
 
     const expenses = await Expense.aggregate([
+      { $match: { ...searchQuery, store_name: { $ne: '' } } },
       {
         $addFields: {
           due_amount: {
@@ -202,6 +212,7 @@ export const getAllExpensesFiltered = async (data: {
 export const getAllExpenses = async (data: {
   page: number;
   itemsPerPage: number;
+  store?: string | null;
 }): Promise<FormState> => {
   try {
     const page = data.page;
@@ -213,9 +224,19 @@ export const getAllExpenses = async (data: {
 
     const skip = (page - 1) * itemsPerPage;
 
-    const count: number = await Expense.countDocuments({});
+    let query: Query = {};
+    if (data.store) {
+      addRegexField(query, 'store_name', data.store);
+    }
+
+    const searchQuery = {
+      ...query,
+    };
+
+    const count: number = await Expense.countDocuments(searchQuery);
 
     const expenses = await Expense.aggregate([
+      { $match: searchQuery },
       {
         $addFields: {
           due_amount: {

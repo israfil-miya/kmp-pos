@@ -120,7 +120,7 @@ export const createNewProduct = async (
         return {
           error: false,
           message:
-            'A similar product already exists with the same name, expiry date and shop, you might want to merge them',
+            'A similar product already exists with the same name, expiry date and store, you might want to merge them',
           fields: parsed.data,
         };
       } else {
@@ -167,6 +167,7 @@ export const getAllProductsFiltered = async (data: {
     searchText: string;
   };
   sortBy?: ProductSortEnum;
+  store?: string | null;
 }): Promise<FormState> => {
   try {
     const {
@@ -182,7 +183,11 @@ export const getAllProductsFiltered = async (data: {
     addRegexField(query, 'batch', searchText.trim(), true);
     addRegexField(query, 'category', searchText.trim());
     addRegexField(query, 'supplier', searchText.trim());
-    addRegexField(query, 'store', searchText.trim());
+    addRegexField(
+      query,
+      'store',
+      data.store ? data.store.trim() : searchText.trim(),
+    );
 
     // Constructing the search query
     const searchQuery = Object.keys(query).length
@@ -244,6 +249,7 @@ export const getAllProducts = async (data: {
   page: number;
   itemsPerPage: number;
   sortBy?: ProductSortEnum;
+  store?: string | null;
 }): Promise<FormState> => {
   try {
     const { page, itemsPerPage } = data;
@@ -251,16 +257,22 @@ export const getAllProducts = async (data: {
     const sortQuery = getSortQuery(data.sortBy || ProductSortEnum.AddedDesc);
     const skip = (page - 1) * itemsPerPage;
 
-    // Count the total number of documents
-    const count: number = await Product.countDocuments({
+    let query: Query = {};
+    if (data.store) {
+      addRegexField(query, 'store', data.store);
+    }
+
+    const searchQuery = {
+      ...query,
       $or: [{ exp_date: { $gte: getTodayDate() } }, { exp_date: '' }],
-    });
+    };
+
+    // Count the total number of documents
+    const count: number = await Product.countDocuments(searchQuery);
 
     const products = await Product.aggregate<ProductDataTypes>([
       {
-        $match: {
-          $or: [{ exp_date: { $gte: getTodayDate() } }, { exp_date: '' }],
-        },
+        $match: searchQuery,
       },
       {
         $addFields: {
@@ -348,7 +360,7 @@ export const editProduct = async (
         return {
           error: false,
           message:
-            'A similar product already exists with the same name, expiry date and shop, you might want to merge them',
+            'A similar product already exists with the same name, expiry date and store, you might want to merge them',
           fields: parsed.data,
         };
       } else {

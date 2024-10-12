@@ -36,6 +36,7 @@ function Form() {
       const response = await getProductByBatchCode(code);
 
       if (response.error) {
+        toast.info(response.message);
         handleBarcodeDownload(code, setLoading);
       } else {
         const productData: ProductDataTypes = JSON.parse(response.message);

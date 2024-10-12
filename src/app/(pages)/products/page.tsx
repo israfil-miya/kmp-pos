@@ -17,6 +17,7 @@ const ProductsPage = async () => {
   const products = await getAllProducts({
     page: 1,
     itemsPerPage: 30,
+    store: session?.user?.store,
   });
 
   return (

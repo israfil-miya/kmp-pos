@@ -36,6 +36,24 @@ interface TableDataProps {
   data: FormState;
 }
 
+type OptionsDataTypes = {
+  Filtered: {
+    page: number;
+    itemsPerPage: number;
+    filters: {
+      searchText: string;
+    };
+    sortBy: ProductSortEnum;
+    store?: string;
+  };
+  NonFiltered: {
+    page: number;
+    itemsPerPage: number;
+    sortBy: ProductSortEnum;
+    store?: string;
+  };
+};
+
 const Table: React.FC<TableDataProps> = props => {
   const [isLoading, setIsLoading] = useState(false);
   const [products, setProducts] = useState<ProductsState>({
@@ -65,6 +83,10 @@ const Table: React.FC<TableDataProps> = props => {
     searchText: '',
   });
 
+  const authorizedToPerformAction = ['administrator', 'manager'].includes(
+    session?.user.role || '',
+  );
+
   const [sortBy, setSortBy] = useState<ProductSortEnum>(
     ProductSortEnum.AddedDesc,
   );
@@ -73,11 +95,17 @@ const Table: React.FC<TableDataProps> = props => {
     try {
       // setIsLoading(true);
 
-      let response = await getAllProductsAction({
+      let options: OptionsDataTypes['NonFiltered'] = {
         page: page,
         itemsPerPage: itemsPerPage,
         sortBy: sortBy,
-      });
+      };
+
+      if (session?.user?.store) {
+        options['store'] = session?.user?.store;
+      }
+
+      let response = await getAllProductsAction(options);
       if (response.error) {
         if (response?.message !== '') {
           toast.error(response.message);
@@ -99,12 +127,18 @@ const Table: React.FC<TableDataProps> = props => {
     try {
       // setIsLoading(true);
 
-      let response = await getAllProductsFilteredAction({
-        page: isFiltered ? page : 1,
+      let options: OptionsDataTypes['Filtered'] = {
+        page: page,
         itemsPerPage: itemsPerPage,
         filters: filters,
         sortBy: sortBy,
-      });
+      };
+
+      if (session?.user?.store) {
+        options['store'] = session?.user?.store;
+      }
+
+      let response = await getAllProductsFilteredAction(options);
       if (response.error) {
         if (response?.message !== '') {
           toast.error(response.message);
@@ -325,7 +359,7 @@ const Table: React.FC<TableDataProps> = props => {
                 <th className="font-bold">Supplier</th>
                 <th className="font-bold">Restocked</th>
                 <th className="font-bold">Status</th>
-                {session?.user?.role === 'administrator' && (
+                {authorizedToPerformAction && (
                   <th className="font-bold">Action</th>
                 )}
               </tr>
@@ -406,7 +440,7 @@ const Table: React.FC<TableDataProps> = props => {
                         </span>
                       </td>
 
-                      {session?.user?.role === 'administrator' && (
+                      {authorizedToPerformAction && (
                         <td
                           className="text-center"
                           style={{ verticalAlign: 'middle' }}
@@ -431,7 +465,7 @@ const Table: React.FC<TableDataProps> = props => {
               ) : (
                 <tr key={0}>
                   <td
-                    colSpan={session?.user?.role === 'administrator' ? 12 : 11}
+                    colSpan={authorizedToPerformAction ? 12 : 11}
                     className="align-center text-center"
                   >
                     No Product To Show.

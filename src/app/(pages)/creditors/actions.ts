@@ -28,6 +28,7 @@ export const getAllCreditorsFiltered = async (data: {
   filters: {
     searchText: string;
   };
+  store?: string | null;
 }): Promise<FormState> => {
   try {
     const page = data.page;
@@ -41,6 +42,12 @@ export const getAllCreditorsFiltered = async (data: {
     addRegexField(query, 'customer.phone', searchText.trim());
     addRegexField(query, 'customer.address', searchText.trim());
     addRegexField(query, 'invoice_no', searchText.trim(), true);
+
+    addRegexField(
+      query,
+      'store_name',
+      data.store ? data.store.trim() : searchText.trim(),
+    );
 
     const searchQuery =
       Object.keys(query).length > 0
@@ -106,6 +113,7 @@ export const getAllCreditorsFiltered = async (data: {
 export const getAllCreditors = async (data: {
   page: number;
   itemsPerPage: number;
+  store?: string | null;
 }): Promise<FormState> => {
   try {
     const page = data.page;
@@ -115,14 +123,22 @@ export const getAllCreditors = async (data: {
       createdAt: -1,
     };
 
+    let query: Query = {};
+    if (data.store) {
+      addRegexField(query, 'store_name', data.store);
+    }
+
+    const searchQuery = {
+      ...query,
+      $expr: { $lt: ['$paid_amount', '$grand_total'] },
+    };
+
     const skip = (page - 1) * itemsPerPage;
 
-    const count: number = await Invoice.countDocuments({
-      $expr: { $lt: ['$paid_amount', '$grand_total'] },
-    });
+    const count: number = await Invoice.countDocuments(searchQuery);
 
     const creditors = await Invoice.aggregate([
-      { $match: { $expr: { $lt: ['$paid_amount', '$grand_total'] } } },
+      { $match: searchQuery },
       { $sort: sortQuery },
       { $skip: skip },
       { $limit: itemsPerPage },

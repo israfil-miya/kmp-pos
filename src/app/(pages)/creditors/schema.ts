@@ -36,10 +36,15 @@ export interface Query {
   'customer.name'?: RegexQuery;
   'customer.phone'?: RegexQuery;
   'customer.address'?: RegexQuery;
+  store_name?: RegexQuery;
   invoice_no?: RegexQuery;
 }
 
 export type RegexFields = Extract<
   keyof Query,
-  'customer.name' | 'customer.phone' | 'customer.address' | 'invoice_no'
+  | 'customer.name'
+  | 'customer.phone'
+  | 'customer.address'
+  | 'invoice_no'
+  | 'store_name'
 >;

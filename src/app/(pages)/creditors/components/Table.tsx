@@ -28,6 +28,22 @@ interface TableDataProps {
   data: FormState;
 }
 
+type OptionsDataTypes = {
+  Filtered: {
+    page: number;
+    itemsPerPage: number;
+    filters: {
+      searchText: string;
+    };
+    store?: string;
+  };
+  NonFiltered: {
+    page: number;
+    itemsPerPage: number;
+    store?: string;
+  };
+};
+
 const Table: React.FC<TableDataProps> = props => {
   const [loading, setLoading] = useState(false);
   const [creditors, setCreditors] = useState<CreditorsState>({
@@ -49,6 +65,10 @@ const Table: React.FC<TableDataProps> = props => {
   const prevPageCount = useRef<number>(0);
   const prevPage = useRef<number>(1);
 
+  const authorizedToPerformAction = ['administrator', 'cashier'].includes(
+    session?.user.role || '',
+  );
+
   const [filters, setFilters] = useState({
     searchText: '',
   });
@@ -57,10 +77,16 @@ const Table: React.FC<TableDataProps> = props => {
     try {
       // setLoading(true);
 
-      let response = await getAllCreditorsAction({
+      let options: OptionsDataTypes['NonFiltered'] = {
         page: page,
         itemsPerPage: itemsPerPage,
-      });
+      };
+
+      if (session?.user?.store) {
+        options['store'] = session?.user?.store;
+      }
+
+      let response = await getAllCreditorsAction(options);
       if (response.error) {
         if (response?.message !== '') {
           toast.error(response.message);
@@ -82,11 +108,17 @@ const Table: React.FC<TableDataProps> = props => {
     try {
       // setLoading(true);
 
-      let response = await getAllCreditorsFilteredAction({
-        page: isFiltered ? page : 1,
+      let options: OptionsDataTypes['Filtered'] = {
+        page: page,
         itemsPerPage: itemsPerPage,
         filters: filters,
-      });
+      };
+
+      if (session?.user?.store) {
+        options['store'] = session?.user?.store;
+      }
+
+      let response = await getAllCreditorsFilteredAction(options);
       if (response.error) {
         if (response?.message !== '') {
           toast.error(response.message);
@@ -172,7 +204,7 @@ const Table: React.FC<TableDataProps> = props => {
               onClick={handlePrevious}
               disabled={page === 1 || pageCount === 0 || loading}
               type="button"
-              className="inline-flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              className="inline-flex items-center px-4 py-2 text-sm bg-gray-50 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -201,7 +233,7 @@ const Table: React.FC<TableDataProps> = props => {
               onClick={handleNext}
               disabled={page === pageCount || pageCount === 0 || loading}
               type="button"
-              className="inline-flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              className="inline-flex items-center px-4 py-2 text-sm bg-gray-50 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             >
               Next
               <svg
@@ -223,7 +255,7 @@ const Table: React.FC<TableDataProps> = props => {
             value={itemsPerPage}
             onChange={e => setItemsPerPage(parseInt(e.target.value))}
             required
-            className="appearance-none bg-gray-200 text-gray-700 border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+            className="appearance-none bg-gray-50 text-gray-700 border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           >
             <option value={30}>30</option>
             <option value={50}>50</option>
@@ -260,7 +292,7 @@ const Table: React.FC<TableDataProps> = props => {
                 <th className="font-bold">Payable</th>
                 <th className="font-bold">Paid</th>
                 <th className="font-bold">Method</th>
-                {session?.user?.role === 'administrator' && (
+                {authorizedToPerformAction && (
                   <th className="font-bold">Action</th>
                 )}
               </tr>
@@ -308,7 +340,7 @@ const Table: React.FC<TableDataProps> = props => {
                           {item.payment_method}
                         </span>
                       </td>
-                      {session?.user?.role === 'administrator' && (
+                      {authorizedToPerformAction && (
                         <td
                           className="text-center"
                           style={{ verticalAlign: 'middle' }}
@@ -326,7 +358,7 @@ const Table: React.FC<TableDataProps> = props => {
               ) : (
                 <tr key={0}>
                   <td
-                    colSpan={session?.user?.role === 'administrator' ? 14 : 13}
+                    colSpan={authorizedToPerformAction ? 14 : 13}
                     className="align-center text-center"
                   >
                     No Invoice To Show.

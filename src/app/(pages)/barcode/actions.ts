@@ -25,7 +25,7 @@ export const getProductByBatchCode = async (
     } else {
       return {
         error: true,
-        message: "Couldn't retrieve product data",
+        message: "The product doesn't exist in the database",
       };
     }
   } catch (error: any) {

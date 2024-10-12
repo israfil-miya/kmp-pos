@@ -9,6 +9,7 @@ const ExpensesPage = async () => {
   const expenses = await getAllExpenses({
     page: 1,
     itemsPerPage: 30,
+    store: session?.user?.store,
   });
   return (
     <SessionProvider session={session}>

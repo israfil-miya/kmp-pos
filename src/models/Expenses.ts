@@ -33,8 +33,7 @@ const ExpenseSchema = new mongoose.Schema<Expense>(
     },
     store_name: {
       type: String,
-      required: [true, 'Store name is not given'],
-      minlength: [1, 'Store name cannot be empty'], // Ensure store name is not empty
+      default: '',
     },
   },
   { timestamps: true },

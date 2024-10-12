@@ -32,7 +32,7 @@ let Table: React.FC<{ data: FormState }> = ({ data }) => {
     <>
       <div className="flex flex-col sm:flex-row justify-between mb-4 gap-2 items-center">
         <h2 className="text-3xl font-semibold">Product Category List</h2>
-        <CreateButton />
+        {session?.user.role === 'administrator' && <CreateButton />}
       </div>
 
       <div className="table-responsive text-nowrap text-sm">

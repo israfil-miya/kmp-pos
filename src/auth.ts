@@ -32,7 +32,10 @@ async function getUser(
       full_name: userData.full_name as string,
       email: userData.email as string,
       role: userData.role as string,
-      store: (userData.store as string) || null,
+      store:
+        userData.role !== 'administrator'
+          ? (userData.store as string) || null
+          : null,
     };
 
     return user;

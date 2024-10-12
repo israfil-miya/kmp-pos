@@ -18,7 +18,7 @@ export const handleBarcodeDownload = (
   price: number | undefined = undefined,
   vat_rate: number = 0,
   file_name: string = `${code}_${Date.now()}_barcode.pdf`,
-  shop_name: string = 'Khalek Molla Plaza',
+  store_name: string = 'Khalek Molla Plaza',
 ) => {
   setLoading(true);
   try {
@@ -105,7 +105,7 @@ export const handleBarcodeDownload = (
             },
           );
         }
-        if (shop_name) {
+        if (store_name) {
           doc.setFontSize(24);
 
           // Increase letter spacing (e.g., 1pt space between characters)
@@ -114,8 +114,8 @@ export const handleBarcodeDownload = (
           // Set font family to monospace (Courier is built-in)
           doc.setFont('courier', 'normal');
 
-          // Render the shop name with uppercase letters, center-aligned
-          doc.text(shop_name.toUpperCase(), 80, 115, {
+          // Render the store name with uppercase letters, center-aligned
+          doc.text(store_name.toUpperCase(), 80, 115, {
             align: 'center',
           });
         }

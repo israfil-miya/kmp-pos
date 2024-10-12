@@ -66,6 +66,7 @@ export const getAllProductsFiltered = async (data: {
   filters: {
     searchText: string;
   };
+  store?: string | null;
 }): Promise<FormState> => {
   try {
     const page = data.page;
@@ -78,7 +79,11 @@ export const getAllProductsFiltered = async (data: {
     addRegexField(query, 'batch', searchText.trim(), true);
     addRegexField(query, 'category', searchText.trim());
     addRegexField(query, 'supplier', searchText.trim());
-    addRegexField(query, 'store', searchText.trim());
+    addRegexField(
+      query,
+      'store',
+      data.store ? data.store.trim() : searchText.trim(),
+    );
 
     const searchQuery =
       Object.keys(query).length > 0
@@ -141,6 +146,7 @@ export const getAllProductsFiltered = async (data: {
 export const getAllProducts = async (data: {
   page: number;
   itemsPerPage: number;
+  store?: string | null;
 }): Promise<FormState> => {
   try {
     const page = data.page;
@@ -150,14 +156,22 @@ export const getAllProducts = async (data: {
       createdAt: -1,
     };
 
+    let query: Query = {};
+    if (data.store) {
+      addRegexField(query, 'store', data.store);
+    }
+
+    const searchQuery = {
+      ...query,
+      exp_date: { $lt: getTodayDate(), $ne: '' },
+    };
+
     const skip = (page - 1) * itemsPerPage;
 
-    const count: number = await Product.countDocuments({
-      exp_date: { $lt: getTodayDate(), $ne: '' },
-    });
+    const count: number = await Product.countDocuments(searchQuery);
 
     const products = await Product.aggregate([
-      { $match: { exp_date: { $lt: getTodayDate(), $ne: '' } } },
+      { $match: searchQuery },
       { $sort: sortQuery },
       { $skip: skip },
       { $limit: itemsPerPage },

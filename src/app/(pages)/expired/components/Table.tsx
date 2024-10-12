@@ -4,7 +4,7 @@ import cn from '@/utility/cn';
 import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { use, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import {
   FormState,
@@ -28,6 +28,22 @@ interface TableDataProps {
   data: FormState;
 }
 
+type OptionsDataTypes = {
+  Filtered: {
+    page: number;
+    itemsPerPage: number;
+    filters: {
+      searchText: string;
+    };
+    store?: string;
+  };
+  NonFiltered: {
+    page: number;
+    itemsPerPage: number;
+    store?: string;
+  };
+};
+
 const Table: React.FC<TableDataProps> = props => {
   const [loading, setLoading] = useState(false);
   const [invoices, setProducts] = useState<ProductsState>({
@@ -49,6 +65,10 @@ const Table: React.FC<TableDataProps> = props => {
   const prevPageCount = useRef<number>(0);
   const prevPage = useRef<number>(1);
 
+  const authorizedToPerformAction = ['administrator', 'manager'].includes(
+    session?.user.role || '',
+  );
+
   const [filters, setFilters] = useState({
     searchText: '',
   });
@@ -57,10 +77,18 @@ const Table: React.FC<TableDataProps> = props => {
     try {
       // setLoading(true);
 
-      let response = await getAllProductsAction({
+      let options: OptionsDataTypes['NonFiltered'] = {
         page: page,
         itemsPerPage: itemsPerPage,
-      });
+      };
+
+      if (session?.user?.store) {
+        options['store'] = session?.user?.store;
+      }
+
+      console.log(options);
+
+      let response = await getAllProductsAction(options);
       if (response.error) {
         if (response?.message !== '') {
           toast.error(response.message);
@@ -82,11 +110,19 @@ const Table: React.FC<TableDataProps> = props => {
     try {
       // setLoading(true);
 
-      let response = await getAllProductsFilteredAction({
-        page: isFiltered ? page : 1,
+      let options: OptionsDataTypes['Filtered'] = {
+        page: page,
         itemsPerPage: itemsPerPage,
         filters: filters,
-      });
+      };
+
+      if (session?.user?.store) {
+        options['store'] = session?.user?.store;
+      }
+
+      console.log(options);
+
+      let response = await getAllProductsFilteredAction(options);
       if (response.error) {
         if (response?.message !== '') {
           toast.error(response.message);
@@ -164,7 +200,7 @@ const Table: React.FC<TableDataProps> = props => {
 
   return (
     <>
-      <h2 className="text-3xl font-semibold">Products List</h2>
+      <h2 className="text-3xl font-semibold">Expired Products List</h2>
       <div className="flex flex-col sm:flex-row justify-between mb-4 mt-6 gap-2 items-center">
         <div className="items-center justify-start flex gap-2">
           <div className="inline-flex rounded-sm" role="group">
@@ -172,7 +208,7 @@ const Table: React.FC<TableDataProps> = props => {
               onClick={handlePrevious}
               disabled={page === 1 || pageCount === 0 || loading}
               type="button"
-              className="inline-flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              className="inline-flex items-center px-4 py-2 text-sm bg-gray-50 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -201,7 +237,7 @@ const Table: React.FC<TableDataProps> = props => {
               onClick={handleNext}
               disabled={page === pageCount || pageCount === 0 || loading}
               type="button"
-              className="inline-flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              className="inline-flex items-center px-4 py-2 text-sm bg-gray-50 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             >
               Next
               <svg
@@ -223,7 +259,7 @@ const Table: React.FC<TableDataProps> = props => {
             value={itemsPerPage}
             onChange={e => setItemsPerPage(parseInt(e.target.value))}
             required
-            className="appearance-none bg-gray-200 text-gray-700 border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+            className="appearance-none bg-gray-50 text-gray-700 border border-gray-200 rounded-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           >
             <option value={30}>30</option>
             <option value={50}>50</option>
@@ -258,7 +294,7 @@ const Table: React.FC<TableDataProps> = props => {
                 <th className="font-bold">Supplier</th>
                 <th className="font-bold">Restocked</th>
                 <th className="font-bold">Status</th>
-                {session?.user?.role === 'administrator' && (
+                {authorizedToPerformAction && (
                   <th className="font-bold">Action</th>
                 )}
               </tr>
@@ -339,7 +375,7 @@ const Table: React.FC<TableDataProps> = props => {
                         </span>
                       </td>
 
-                      {session?.user?.role === 'administrator' && (
+                      {authorizedToPerformAction && (
                         <td
                           className="text-center"
                           style={{ verticalAlign: 'middle' }}
@@ -357,7 +393,7 @@ const Table: React.FC<TableDataProps> = props => {
               ) : (
                 <tr key={0}>
                   <td
-                    colSpan={session?.user?.role === 'administrator' ? 12 : 11}
+                    colSpan={authorizedToPerformAction ? 12 : 11}
                     className="align-center text-center"
                   >
                     No Product To Show.

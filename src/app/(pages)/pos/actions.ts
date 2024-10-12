@@ -38,10 +38,6 @@ export const getAllProductsFiltered = async (data: {
       [key]: value,
     }));
 
-    console.log('searchConditions:', searchConditions);
-    console.log('store:', store);
-    console.log('Today Date:', getTodayDate());
-
     let sortQuery: Record<string, 1 | -1> = {
       // sort by exp_date from expired soon to later
       exp_date: 1,

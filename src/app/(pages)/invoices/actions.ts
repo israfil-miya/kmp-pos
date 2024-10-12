@@ -60,6 +60,7 @@ export const getAllInvoicesFiltered = async (data: {
   filters: {
     searchText: string;
   };
+  store?: string | null;
 }): Promise<FormState> => {
   try {
     const page = data.page;
@@ -68,11 +69,16 @@ export const getAllInvoicesFiltered = async (data: {
 
     const query: Query = {};
 
-    addRegexField(query, 'cashier', searchText);
-    addRegexField(query, 'payment_method', searchText, true);
-    addRegexField(query, 'invoice_no', searchText, true);
-    addRegexField(query, 'shop_name', searchText);
-    addRegexField(query, 'customer.name', searchText);
+    addRegexField(query, 'cashier', searchText.trim());
+    addRegexField(query, 'payment_method', searchText.trim(), true);
+    addRegexField(query, 'invoice_no', searchText.trim(), true);
+    addRegexField(query, 'customer.name', searchText.trim());
+
+    addRegexField(
+      query,
+      'store_name',
+      data.store ? data.store.trim() : searchText.trim(),
+    );
 
     const searchQuery =
       Object.keys(query).length > 0
@@ -131,6 +137,7 @@ export const getAllInvoicesFiltered = async (data: {
 export const getAllInvoices = async (data: {
   page: number;
   itemsPerPage: number;
+  store?: string | null;
 }): Promise<FormState> => {
   try {
     const page = data.page;
@@ -142,9 +149,19 @@ export const getAllInvoices = async (data: {
 
     const skip = (page - 1) * itemsPerPage;
 
-    const count: number = await Invoice.countDocuments({});
+    let query: Query = {};
+    if (data.store) {
+      addRegexField(query, 'store_name', data.store);
+    }
+
+    const searchQuery = {
+      ...query,
+    };
+
+    const count: number = await Invoice.countDocuments(searchQuery);
 
     const invoices = await Invoice.aggregate([
+      { $match: searchQuery },
       { $sort: sortQuery },
       { $skip: skip },
       { $limit: itemsPerPage },

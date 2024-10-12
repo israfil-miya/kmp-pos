@@ -30,8 +30,24 @@ interface TableDataProps {
   data: FormState;
 }
 
+type OptionsDataTypes = {
+  Filtered: {
+    page: number;
+    itemsPerPage: number;
+    filters: {
+      searchText: string;
+    };
+    store?: string;
+  };
+  NonFiltered: {
+    page: number;
+    itemsPerPage: number;
+    store?: string;
+  };
+};
+
 const Table: React.FC<TableDataProps> = props => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [expenses, setExpenses] = useState<ExpensesState>({
     pagination: {
       count: 0,
@@ -51,18 +67,28 @@ const Table: React.FC<TableDataProps> = props => {
   const prevPageCount = useRef<number>(0);
   const prevPage = useRef<number>(1);
 
+  const authorizedToPerformAction = ['administrator', 'manager'].includes(
+    session?.user.role || '',
+  );
+
   const [filters, setFilters] = useState({
     searchText: '',
   });
 
   const getAllExpenses = async (): Promise<void> => {
     try {
-      // setIsLoading(true);
+      // setLoading(true);
 
-      let response = await getAllExpensesAction({
+      let options: OptionsDataTypes['NonFiltered'] = {
         page: page,
         itemsPerPage: itemsPerPage,
-      });
+      };
+
+      if (session?.user?.store) {
+        options['store'] = session?.user?.store;
+      }
+
+      let response = await getAllExpensesAction(options);
       if (response.error) {
         if (response?.message !== '') {
           toast.error(response.message);
@@ -76,19 +102,26 @@ const Table: React.FC<TableDataProps> = props => {
       console.error(error);
       toast.error('An error occurred while retrieving expenses data');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   const getAllExpensesFiltered = async (): Promise<void> => {
     try {
-      // setIsLoading(true);
+      // setLoading(true);
 
-      let response = await getAllExpensesFilteredAction({
-        page: isFiltered ? page : 1,
+      let options: OptionsDataTypes['Filtered'] = {
+        page: page,
         itemsPerPage: itemsPerPage,
         filters: filters,
-      });
+      };
+
+      if (session?.user?.store) {
+        options['store'] = session?.user?.store;
+      }
+
+      let response = await getAllExpensesFilteredAction(options);
+
       if (response.error) {
         if (response?.message !== '') {
           toast.error(response.message);
@@ -103,7 +136,7 @@ const Table: React.FC<TableDataProps> = props => {
       console.error(error);
       toast.error('An error occurred while retrieving expenses data');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -172,7 +205,7 @@ const Table: React.FC<TableDataProps> = props => {
           <div className="inline-flex rounded-sm" role="group">
             <button
               onClick={handlePrevious}
-              disabled={page === 1 || pageCount === 0 || isLoading}
+              disabled={page === 1 || pageCount === 0 || loading}
               type="button"
               className="inline-flex items-center px-4 py-2 text-sm bg-gray-50 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             >
@@ -201,7 +234,7 @@ const Table: React.FC<TableDataProps> = props => {
             </button>
             <button
               onClick={handleNext}
-              disabled={page === pageCount || pageCount === 0 || isLoading}
+              disabled={page === pageCount || pageCount === 0 || loading}
               type="button"
               className="inline-flex items-center px-4 py-2 text-sm bg-gray-50 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             >
@@ -242,22 +275,22 @@ const Table: React.FC<TableDataProps> = props => {
         <CreateButton />
       </div>
 
-      {isLoading && <p className="text-center">Loading...</p>}
+      {loading && <p className="text-center">Loading...</p>}
 
-      {!isLoading && (
+      {!loading && (
         <div className="table-responsive text-nowrap text-sm">
           <table className="table table-bordered table-striped">
             <thead>
               <tr>
                 <th className="font-bold">S/N</th>
                 <th className="font-bold">Name</th>
-                <th className="font-bold">Shop</th>
+                <th className="font-bold">Store</th>
                 <th className="font-bold">Reason</th>
                 <th className="font-bold">Category</th>
                 <th className="font-bold">Amount</th>
                 <th className="font-bold">Creation Date</th>
                 <th className="font-bold">Last Update</th>
-                {session?.user?.role === 'administrator' && (
+                {authorizedToPerformAction && (
                   <th className="font-bold">Action</th>
                 )}
               </tr>
@@ -305,14 +338,16 @@ const Table: React.FC<TableDataProps> = props => {
                           : 'N/A'}
                       </td>
 
-                      {session?.user?.role === 'administrator' && (
+                      {authorizedToPerformAction && (
                         <td
                           className="text-center"
                           style={{ verticalAlign: 'middle' }}
                         >
                           <div className="inline-block">
                             <div className="flex gap-2">
-                              <EditButton expenseData={item} />
+                              {session?.user.role === 'administrator' && (
+                                <EditButton expenseData={item} />
+                              )}
                               <DeleteButton expenseData={item} />
                             </div>
                           </div>
@@ -324,7 +359,7 @@ const Table: React.FC<TableDataProps> = props => {
               ) : (
                 <tr key={0}>
                   <td
-                    colSpan={session?.user?.role === 'administrator' ? 8 : 7}
+                    colSpan={authorizedToPerformAction ? 9 : 8}
                     className="align-center text-center"
                   >
                     No Expense To Show.

@@ -5,20 +5,20 @@ const authorizedRoutes = [
   {
     href: '/suppliers',
     label: 'Suppliers',
-    roles: ['administrator', 'manager'],
+    roles: ['administrator'],
   },
   {
     href: '/categories',
     label: 'Categories',
-    roles: ['administrator', 'manager'],
+    roles: ['administrator'],
   },
   { href: '/products', label: 'Products', roles: ['administrator', 'manager'] },
-  { href: '/pos', label: 'POS', roles: ['cashier', 'manager'] },
+  { href: '/pos', label: 'POS', roles: ['cashier'] },
   { href: '/invoices', label: 'Invoices', roles: [] },
   { href: '/creditors', label: 'Creditors', roles: [] },
-  { href: '/barcode', label: 'Barcode', roles: ['administrator'] },
+  { href: '/barcode', label: 'Barcode', roles: ['administrator', 'manager'] },
   { href: '/expenses', label: 'Expenses', roles: ['administrator', 'manager'] },
-  { href: '/expired', label: 'Expired', roles: ['manager'] },
+  { href: '/expired', label: 'Expired', roles: ['administrator', 'manager'] },
   { href: '/logout', label: 'Logout', roles: [] },
 ];
 

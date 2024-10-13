@@ -197,8 +197,8 @@ const Table: React.FC<TableDataProps> = props => {
   return (
     <>
       <h2 className="text-3xl font-semibold">Creditors List</h2>
-      <div className="flex flex-col sm:flex-row justify-between mb-4 mt-6 gap-2 items-center">
-        <div className="items-center justify-start flex gap-2">
+      <div className="flex flex-col sm:flex-row justify-between mt-2 mb-4 sm:mt-6 gap-2 items-center">
+        <div className="sm:items-center w-full flex gap-2">
           <div className="inline-flex rounded-sm" role="group">
             <button
               onClick={handlePrevious}
@@ -261,15 +261,17 @@ const Table: React.FC<TableDataProps> = props => {
             <option value={50}>50</option>
             <option value={100}>100</option>
           </select>
-          <FilterButton
-            page={page}
-            itemsPerPage={itemsPerPage}
-            setFilters={setFilters}
-            setIsFiltered={setIsFiltered}
-            setCreditors={setCreditors}
-          />
+
+          <div className="w-full sm:w-auto">
+            <FilterButton
+              page={page}
+              itemsPerPage={itemsPerPage}
+              setFilters={setFilters}
+              setIsFiltered={setIsFiltered}
+              setCreditors={setCreditors}
+            />
+          </div>
         </div>
-        {/* <CreateButton /> */}
       </div>
 
       {loading && <p className="text-center">Loading...</p>}
@@ -361,7 +363,7 @@ const Table: React.FC<TableDataProps> = props => {
                     colSpan={authorizedToPerformAction ? 14 : 13}
                     className="align-center text-center"
                   >
-                    No Invoice To Show.
+                    No Creditor To Show.
                   </td>
                 </tr>
               )}

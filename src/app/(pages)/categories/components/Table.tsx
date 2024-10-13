@@ -30,9 +30,13 @@ let Table: React.FC<{ data: FormState }> = ({ data }) => {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row justify-between mb-4 gap-2 items-center">
-        <h2 className="text-3xl font-semibold">Product Category List</h2>
-        {session?.user.role === 'administrator' && <CreateButton />}
+      <div className="flex flex-col sm:flex-row justify-between gap-2 mb-4">
+        <h2 className="text-3xl font-semibold text-gray-800">
+          Product Category List
+        </h2>
+        <div className="w-full sm:w-auto">
+          {session?.user.role === 'administrator' && <CreateButton />}
+        </div>
       </div>
 
       <div className="table-responsive text-nowrap text-sm">

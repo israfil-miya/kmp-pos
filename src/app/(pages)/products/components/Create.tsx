@@ -131,7 +131,7 @@ const CreateButton: React.FC<PropsType> = props => {
         onClick={() => {
           setIsOpen(true);
         }}
-        className="items-center flex gap-2 rounded-sm bg-green-600 hover:opacity-90 hover:ring-2 hover:ring-green-600 transition duration-200 delay-300 hover:text-opacity-100 text-white py-2 px-3"
+        className="w-full sm:text-nowrap items-center flex gap-2 rounded-sm bg-green-600 hover:opacity-90 hover:ring-2 hover:ring-green-600 transition duration-200 delay-300 hover:text-opacity-100 text-white py-2 px-3"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

@@ -200,8 +200,8 @@ const Table: React.FC<TableDataProps> = props => {
   return (
     <>
       <h2 className="text-3xl font-semibold">Expenses List</h2>
-      <div className="flex flex-col sm:flex-row justify-between mb-4 mt-6 gap-2 items-center">
-        <div className="items-center flex gap-2">
+      <div className="flex flex-col sm:flex-row justify-between mt-2 mb-4 sm:mt-6 gap-2 items-center">
+        <div className="sm:items-center w-full flex gap-2">
           <div className="inline-flex rounded-sm" role="group">
             <button
               onClick={handlePrevious}
@@ -264,15 +264,20 @@ const Table: React.FC<TableDataProps> = props => {
             <option value={50}>50</option>
             <option value={100}>100</option>
           </select>
-          <FilterButton
-            page={page}
-            itemsPerPage={itemsPerPage}
-            setFilters={setFilters}
-            setIsFiltered={setIsFiltered}
-            setExpenses={setExpenses}
-          />
+
+          <div className="w-full sm:w-auto">
+            <FilterButton
+              page={page}
+              itemsPerPage={itemsPerPage}
+              setFilters={setFilters}
+              setIsFiltered={setIsFiltered}
+              setExpenses={setExpenses}
+            />
+          </div>
         </div>
-        <CreateButton />
+        <div className="w-full sm:w-auto">
+          <CreateButton />
+        </div>
       </div>
 
       {loading && <p className="text-center">Loading...</p>}

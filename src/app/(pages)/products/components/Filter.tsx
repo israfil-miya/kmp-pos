@@ -90,7 +90,7 @@ const FilterButton: React.FC<PropsType> = ({
         type="button"
         className="flex items-center gap-2 rounded-sm bg-blue-600 hover:opacity-90 hover:ring-4 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 text-white px-3 py-2"
       >
-        Filter
+        <span className="sm:block hidden">Filter</span>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="16"

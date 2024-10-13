@@ -88,7 +88,7 @@ const FilterButton: React.FC<PropsType> = ({
         disabled={loading}
         onClick={() => setIsOpen(true)}
         type="button"
-        className="flex items-center gap-2 rounded-sm bg-blue-600 hover:opacity-90 hover:ring-4 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 text-white px-3 py-2"
+        className="w-full sm:text-nowrap flex items-center gap-2 rounded-sm bg-blue-600 hover:opacity-90 hover:ring-4 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 text-white px-3 py-2"
       >
         Filter
         <svg

@@ -78,48 +78,44 @@ const Graphs: React.FC<GraphProps> = props => {
   }, [props.salesVsExpenses]);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex lg:flex-row flex-col gap-4">
+    <div className="flex flex-col gap-4 w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="border rounded p-4 w-full">
-          <p className="mt-4 text-xl font-semibold">Sales by Month</p>
-
-          <p className="text-sm text-gray-800">
+          <h2 className="text-xl font-semibold mb-1">Sales by Month</h2>
+          <p className="text-sm text-muted-foreground mb-4">
             Distribution of sales across months
           </p>
-
           <SalesByMonthGraph
             loading={loading.salesByMonth}
             data={salesByMonth}
-            className="h-96"
+            className="h-[300px] sm:h-[400px]"
           />
         </div>
         <div className="border rounded p-4 w-full">
-          <p className="mt-4 text-xl font-semibold">
+          <h2 className="text-xl font-semibold mb-1">
             Sales by Store Last 14 Days
-          </p>
-
-          <p className="text-sm text-gray-800">
+          </h2>
+          <p className="text-sm text-muted-foreground mb-4">
             Store-wise sales over the last 14 days
           </p>
-
           <SalesByStoreGraph
             loading={loading.salesByStore}
             data={salesByStore}
-            className="h-96"
+            className="h-[300px] sm:h-[400px]"
           />
         </div>
       </div>
       <div className="border rounded p-4 w-full">
-        <p className="mt-4 text-xl font-semibold">
+        <h2 className="text-xl font-semibold mb-1">
           Sales vs Expenses Last 14 Days
-        </p>
-        <p className="text-sm text-gray-800">
+        </h2>
+        <p className="text-sm text-muted-foreground mb-4">
           Comparison of daily sales and expenses
         </p>
         <SalesVsExpenseGraph
           loading={loading.salesVsExpenses}
           data={salesVsExpenses}
-          className="h-96"
+          className="h-[300px] sm:h-[400px]"
         />
       </div>
     </div>

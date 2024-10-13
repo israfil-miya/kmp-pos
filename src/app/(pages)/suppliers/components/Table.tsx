@@ -31,7 +31,7 @@ interface TableDataProps {
 }
 
 const Table: React.FC<TableDataProps> = props => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [suppliers, setSuppliers] = useState<SuppliersState>({
     pagination: {
       count: 0,
@@ -57,7 +57,7 @@ const Table: React.FC<TableDataProps> = props => {
 
   const getAllSuppliers = async (): Promise<void> => {
     try {
-      // setIsLoading(true);
+      // setLoading(true);
 
       let response = await getAllSuppliersAction({
         page: page,
@@ -76,13 +76,13 @@ const Table: React.FC<TableDataProps> = props => {
       console.error(error);
       toast.error('An error occurred while retrieving suppliers data');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   const getAllSuppliersFiltered = async (): Promise<void> => {
     try {
-      // setIsLoading(true);
+      // setLoading(true);
 
       let response = await getAllSuppliersFilteredAction({
         page: isFiltered ? page : 1,
@@ -103,7 +103,7 @@ const Table: React.FC<TableDataProps> = props => {
       console.error(error);
       toast.error('An error occurred while retrieving suppliers data');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -167,12 +167,12 @@ const Table: React.FC<TableDataProps> = props => {
   return (
     <>
       <h2 className="text-3xl font-semibold">Suppliers List</h2>
-      <div className="flex flex-col sm:flex-row justify-between mb-4 mt-6 gap-2 items-center">
-        <div className="items-center flex gap-2">
+      <div className="flex flex-col sm:flex-row justify-between mt-2 mb-4 sm:mt-6 gap-2 items-center">
+        <div className="sm:items-center w-full flex gap-2">
           <div className="inline-flex rounded-sm" role="group">
             <button
               onClick={handlePrevious}
-              disabled={page === 1 || pageCount === 0 || isLoading}
+              disabled={page === 1 || pageCount === 0 || loading}
               type="button"
               className="inline-flex items-center px-4 py-2 text-sm bg-gray-50 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             >
@@ -201,7 +201,7 @@ const Table: React.FC<TableDataProps> = props => {
             </button>
             <button
               onClick={handleNext}
-              disabled={page === pageCount || pageCount === 0 || isLoading}
+              disabled={page === pageCount || pageCount === 0 || loading}
               type="button"
               className="inline-flex items-center px-4 py-2 text-sm bg-gray-50 text-gray-700 border border-gray-200 rounded-s-sm leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             >
@@ -231,20 +231,25 @@ const Table: React.FC<TableDataProps> = props => {
             <option value={50}>50</option>
             <option value={100}>100</option>
           </select>
-          <FilterButton
-            page={page}
-            itemsPerPage={itemsPerPage}
-            setFilters={setFilters}
-            setIsFiltered={setIsFiltered}
-            setSuppliers={setSuppliers}
-          />
+
+          <div className="w-full sm:w-auto">
+            <FilterButton
+              page={page}
+              itemsPerPage={itemsPerPage}
+              setFilters={setFilters}
+              setIsFiltered={setIsFiltered}
+              setSuppliers={setSuppliers}
+            />
+          </div>
         </div>
-        <CreateButton />
+        <div className="w-full sm:w-auto">
+          <CreateButton />
+        </div>
       </div>
 
-      {isLoading && <p className="text-center">Loading...</p>}
+      {loading && <p className="text-center">Loading...</p>}
 
-      {!isLoading && (
+      {!loading && (
         <div className="table-responsive text-nowrap text-sm">
           <table className="table table-bordered table-striped">
             <thead>

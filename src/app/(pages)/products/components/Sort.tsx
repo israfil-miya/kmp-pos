@@ -126,12 +126,13 @@ const SortButton: React.FC<PropsType> = ({
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={loading}
-        className="flex items-center gap-2 rounded-sm bg-blue-600 hover:opacity-90 hover:ring-4 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 text-white px-3 py-2 focus:outline-none"
+        className="w-full sm:text-nowrap flex items-center gap-2 rounded-sm bg-blue-600 hover:opacity-90 hover:ring-4 hover:ring-blue-600 transition duration-200 delay-300 hover:text-opacity-100 text-white px-3 py-2 focus:outline-none"
       >
-        Sort
+        <span className="sm:block hidden">Sort</span>
         <svg
-          className="w-5 h-5"
+          className="h-6 w-6"
           xmlns="http://www.w3.org/2000/svg"
+          width="16"
           height="16"
           fill="currentColor"
           viewBox="0 0 16 16"

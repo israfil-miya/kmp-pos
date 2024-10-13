@@ -253,8 +253,8 @@ const Table: React.FC<TableDataProps> = props => {
   return (
     <>
       <h2 className="text-3xl font-semibold">Products List</h2>
-      <div className="flex flex-col sm:flex-row justify-between mb-4 mt-6 gap-2 items-center">
-        <div className="items-center flex gap-2">
+      <div className="flex flex-col sm:flex-row justify-between mt-2 mb-4 sm:mt-6 gap-2 items-center">
+        <div className="sm:items-center w-full flex gap-2">
           <div className="inline-flex rounded-sm" role="group">
             <button
               onClick={handlePrevious}
@@ -317,6 +317,7 @@ const Table: React.FC<TableDataProps> = props => {
             <option value={50}>50</option>
             <option value={100}>100</option>
           </select>
+
           <FilterButton
             page={page}
             itemsPerPage={itemsPerPage}
@@ -324,21 +325,26 @@ const Table: React.FC<TableDataProps> = props => {
             setIsFiltered={setIsFiltered}
             setProducts={setProducts}
           />
-          <SortButton
-            page={page}
-            itemsPerPage={itemsPerPage}
-            setSortBy={setSortBy}
-            sortBy={sortBy}
-            filters={filters}
-            setIsFiltered={setIsFiltered}
-            setProducts={setProducts}
+
+          <div className="w-full sm:w-auto">
+            <SortButton
+              page={page}
+              itemsPerPage={itemsPerPage}
+              setSortBy={setSortBy}
+              sortBy={sortBy}
+              filters={filters}
+              setIsFiltered={setIsFiltered}
+              setProducts={setProducts}
+            />
+          </div>
+        </div>
+        <div className="w-full sm:w-auto">
+          <CreateButton
+            suppliersList={suppliers}
+            categoriesList={categories}
+            storesList={stores}
           />
         </div>
-        <CreateButton
-          suppliersList={suppliers}
-          categoriesList={categories}
-          storesList={stores}
-        />
       </div>
 
       {isLoading && <p className="text-center">Loading...</p>}

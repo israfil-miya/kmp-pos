@@ -28,9 +28,11 @@ const Table: React.FC<{ data: FormState }> = ({ data }) => {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row justify-between mb-4 gap-2 items-center">
-        <h2 className="text-3xl font-semibold">Stores List</h2>
-        <CreateButton />
+      <div className="flex flex-col sm:flex-row justify-between gap-2 mb-4">
+        <h2 className="text-3xl font-semibold text-gray-800">Stores List</h2>
+        <div className="w-full sm:w-auto">
+          <CreateButton />
+        </div>
       </div>
 
       <div className="table-responsive text-nowrap text-sm">

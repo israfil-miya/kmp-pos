@@ -1,7 +1,7 @@
 'use client';
 
 import ExtendableTd from '@/components/ExtendableTd';
-import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
+import { formatDate } from '@/utility/date';
 import fetchData from '@/utility/fetchData';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -333,14 +333,10 @@ const Table: React.FC<TableDataProps> = props => {
                       <td>{item.amount || 0} ৳</td>
 
                       <td>
-                        {item.createdAt
-                          ? convertToDDMMYYYY(item.createdAt)
-                          : 'N/A'}
+                        {item.createdAt ? formatDate(item.createdAt) : 'N/A'}
                       </td>
                       <td>
-                        {item.updatedAt
-                          ? convertToDDMMYYYY(item.updatedAt)
-                          : 'N/A'}
+                        {item.updatedAt ? formatDate(item.updatedAt) : 'N/A'}
                       </td>
 
                       {authorizedToPerformAction && (

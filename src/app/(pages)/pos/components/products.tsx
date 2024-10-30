@@ -1,4 +1,4 @@
-import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
+import { formatDate } from '@/utility/date';
 import { Types } from 'mongoose';
 import { useSession } from 'next-auth/react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -143,9 +143,7 @@ function SearchedProducts() {
                   <td>{product.quantity}</td>
                   <td>{product.price} ৳</td>
                   <td>
-                    {product.exp_date
-                      ? convertToDDMMYYYY(product.exp_date)
-                      : 'N/A'}
+                    {product.exp_date ? formatDate(product.exp_date) : 'N/A'}
                   </td>
                 </tr>
               ))}

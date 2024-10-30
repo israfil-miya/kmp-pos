@@ -5,8 +5,8 @@ import Invoice from '@/models/Invoices';
 import Product from '@/models/Products';
 import Store from '@/models/Stores';
 import Supplier from '@/models/Suppliers';
+import { getTodayDate } from '@/utility/date';
 import dbConnect from '@/utility/dbConnect';
-import getTodayDate from '@/utility/getTodaysDate';
 import moment from 'moment-timezone';
 dbConnect();
 

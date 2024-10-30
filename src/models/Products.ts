@@ -1,4 +1,4 @@
-import getTodayDate from '@/utility/getTodaysDate';
+import { getTodayDate } from '@/utility/date';
 import mongoose from 'mongoose';
 
 export interface Product extends mongoose.Document {

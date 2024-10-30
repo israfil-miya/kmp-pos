@@ -37,7 +37,7 @@ const Table: React.FC<{ invoices: FormState }> = props => {
 
   return (
     <>
-      <p className="mt-4 text-xl font-semibold">Last 5 Transactions</p>
+      <p className="mt-4 text-xl font-semibold">Last Transactions</p>
       <div className="table-responsive text-nowrap text-sm">
         <table className="table table-bordered table-striped">
           <thead>

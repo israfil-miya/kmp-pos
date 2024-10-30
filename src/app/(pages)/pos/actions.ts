@@ -9,7 +9,7 @@ import { InvoiceDataTypes } from './schema';
 
 dbConnect();
 
-import getTodayDate from '@/utility/getTodaysDate';
+import { getTodayDate } from '@/utility/date';
 import { Query, validationSchema as schema } from './schema';
 
 export type FormState = {

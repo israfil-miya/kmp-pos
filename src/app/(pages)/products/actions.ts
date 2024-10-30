@@ -8,8 +8,8 @@ import {
   mapFormDataToFields,
   parseFormData,
 } from '@/utility/actionHelpers';
+import { getTodayDate } from '@/utility/date';
 import dbConnect from '@/utility/dbConnect';
-import getTodayDate from '@/utility/getTodaysDate';
 import { addRegexField } from '@/utility/regexQuery';
 import mongoose from 'mongoose';
 import { revalidatePath } from 'next/cache';

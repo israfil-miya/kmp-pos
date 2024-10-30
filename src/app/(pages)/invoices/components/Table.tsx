@@ -1,6 +1,7 @@
 'use client';
 
 import cn from '@/utility/cn';
+import { formatDate, getTimeFromISODate as getTime } from '@/utility/date';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
@@ -281,6 +282,7 @@ const Table: React.FC<TableDataProps> = props => {
               <tr>
                 <th className="font-bold">S/N</th>
                 <th className="font-bold">ID</th>
+                <th className="font-bold">Date & Time</th>
                 <th className="font-bold">Customer</th>
                 <th className="font-bold">Cashier</th>
                 <th className="font-bold">Store</th>
@@ -303,6 +305,13 @@ const Table: React.FC<TableDataProps> = props => {
                     <tr key={String(item._id)}>
                       <td>{index + 1}</td>
                       <td>{item.invoice_no}</td>
+                      <td>
+                        {item?.createdAt ? formatDate(item?.createdAt) : null}
+                        <br />
+                        {item?.createdAt
+                          ? getTime(item?.createdAt as string)
+                          : null}
+                      </td>
                       <td className="capitalize">{item.customer.name}</td>
                       <td
                         className="uppercase items-center"

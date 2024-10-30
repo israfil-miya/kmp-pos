@@ -1,7 +1,7 @@
 'use client';
 
 import cn from '@/utility/cn';
-import { YYYY_MM_DD_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
+import { formatDate } from '@/utility/date';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { use, useEffect, useRef, useState } from 'react';
@@ -323,9 +323,7 @@ const Table: React.FC<TableDataProps> = props => {
                       </td>
 
                       <td>
-                        {item.exp_date
-                          ? convertToDDMMYYYY(item.exp_date)
-                          : 'N/A'}
+                        {item.exp_date ? formatDate(item.exp_date) : 'N/A'}
                       </td>
                       <td>{item.selling_price} ৳</td>
                       <td>{item.quantity}</td>
@@ -356,7 +354,7 @@ const Table: React.FC<TableDataProps> = props => {
 
                       <td>
                         {item.restock_date
-                          ? convertToDDMMYYYY(item.restock_date)
+                          ? formatDate(item.restock_date)
                           : 'N/A'}
                       </td>
                       <td

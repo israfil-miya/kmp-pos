@@ -96,7 +96,7 @@ const Graphs: React.FC<GraphProps> = props => {
             Sales by Store Last 14 Days
           </h2>
           <p className="text-sm text-muted-foreground mb-4">
-            Store-wise sales over the last 14 days
+            Distribution of store sales
           </p>
           <SalesByStoreGraph
             loading={loading.salesByStore}

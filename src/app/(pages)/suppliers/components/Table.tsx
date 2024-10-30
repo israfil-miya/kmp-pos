@@ -1,7 +1,7 @@
 'use client';
 
 import ExtendableTd from '@/components/ExtendableTd';
-import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
+import { formatDate } from '@/utility/date';
 import fetchData from '@/utility/fetchData';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -276,9 +276,7 @@ const Table: React.FC<TableDataProps> = props => {
                       <td className="test-wrap capitalize">{item.company}</td>
 
                       <td>
-                        {item.reg_date
-                          ? convertToDDMMYYYY(item.reg_date)
-                          : 'N/A'}
+                        {item.reg_date ? formatDate(item.reg_date) : 'N/A'}
                       </td>
                       <td>{item.email}</td>
                       <td>{item.phone}</td>

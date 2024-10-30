@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { ReactElement, ReactNode, useState } from 'react';
 
 const replaceNewlineWithBr = (text: string) => {
   const lines: string[] = text.split('\n');
@@ -16,7 +16,9 @@ interface PropsType {
   data: string;
 }
 
-const ExtendableTd: React.FC<PropsType> = props => {
+const ExtendableTd: React.FC<PropsType> = (
+  props,
+): ReactElement<HTMLTableCellElement> | null => {
   const { data } = props;
 
   const [showFullText, setShowFullText] = useState(false);

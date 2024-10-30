@@ -1,7 +1,7 @@
 'use client';
 
 import ExtendableTd from '@/components/ExtendableTd';
-import { ISO_to_DD_MM_YY as convertToDDMMYYYY } from '@/utility/dateConversion';
+import { formatDate } from '@/utility/date';
 import moment from 'moment-timezone';
 import { useSession } from 'next-auth/react';
 import React, { useEffect, useState } from 'react';
@@ -60,7 +60,7 @@ let Table: React.FC<{ data: FormState }> = ({ data }) => {
                   <td>
                     {item.createdAt
                       ? moment(
-                          convertToDDMMYYYY(item?.createdAt),
+                          formatDate(item?.createdAt),
                           'DD-MM-YYYY',
                         ).format('Do MMMM, YYYY')
                       : null}

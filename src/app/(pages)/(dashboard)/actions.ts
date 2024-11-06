@@ -173,12 +173,12 @@ export const getSalesByMonth = async (): Promise<FormState> => {
     const monthlySalesObject: { [key: string]: number } = {};
     for (let i = 0; i < 6; i++) {
       const date = now.clone().subtract(5 - i, 'months');
-      const monthName = `${date.format('MMM')}-${date.year()}`;
+      const monthName = `${date.format('MMM')}-${date.year()}`; // Consistently use 'MMM' for short month names
       monthlySalesObject[monthName] = 0;
     }
 
     salesMonthly.forEach(({ _id, total }) => {
-      const monthName = `${moment.months(_id.month - 1)}-${_id.year}`;
+      const monthName = `${moment(_id.month, 'M').format('MMM')}-${_id.year}`; // Use 'MMM' format for short month name
       monthlySalesObject[monthName] = total;
     });
 

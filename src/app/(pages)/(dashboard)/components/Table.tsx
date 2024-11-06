@@ -1,6 +1,7 @@
 'use client';
 
 import cn from '@/utility/cn';
+import { formatDate, getTimeFromISODate as getTime } from '@/utility/date';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { FormState } from '../../invoices/actions';
@@ -44,6 +45,7 @@ const Table: React.FC<{ invoices: FormState }> = props => {
             <tr>
               <th className="font-bold">S/N</th>
               <th className="font-bold">ID</th>
+              <th className="font-bold">Date</th>
               <th className="font-bold">Customer</th>
               <th className="font-bold">Cashier</th>
               <th className="font-bold">Store</th>
@@ -60,6 +62,14 @@ const Table: React.FC<{ invoices: FormState }> = props => {
                 <tr key={String(item._id)}>
                   <td>{index + 1}</td>
                   <td>{item.invoice_no}</td>
+                  <td>
+                    {' '}
+                    {item?.createdAt ? formatDate(item?.createdAt) : null}
+                    <br />
+                    {item?.createdAt
+                      ? getTime(item?.createdAt as string)
+                      : null}
+                  </td>
                   <td className="capitalize">{item.customer.name}</td>
                   <td
                     className="uppercase items-center"

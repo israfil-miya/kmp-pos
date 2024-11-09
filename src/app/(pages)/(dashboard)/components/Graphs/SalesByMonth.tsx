@@ -57,7 +57,7 @@ const SalesByMonthGraph: React.FC<SalesByMonthGraphProps> = ({
   }
 
   return (
-    <div className={cn('h-96', className)}>
+    <div className={cn('w-full h-full', className)}>
       <ChartContainer config={chartConfig}>
         <RechartsAreaChart data={graphData}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -71,7 +71,7 @@ const SalesByMonthGraph: React.FC<SalesByMonthGraphProps> = ({
             stroke="#1c318f"
             fill="#4169e1"
             strokeWidth={2}
-            fillOpacity={0.6}
+            fillOpacity={0.5}
           />
         </RechartsAreaChart>
       </ChartContainer>

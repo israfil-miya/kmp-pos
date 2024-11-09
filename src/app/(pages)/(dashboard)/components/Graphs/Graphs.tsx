@@ -88,7 +88,7 @@ const Graphs: React.FC<GraphProps> = props => {
           <SalesByMonthGraph
             loading={loading.salesByMonth}
             data={salesByMonth}
-            className="h-[300px] sm:h-[400px]"
+            className=""
           />
         </div>
         <div className="border rounded p-4 w-full">
@@ -101,7 +101,7 @@ const Graphs: React.FC<GraphProps> = props => {
           <SalesByStoreGraph
             loading={loading.salesByStore}
             data={salesByStore}
-            className="h-[300px] sm:h-[400px]"
+            className=""
           />
         </div>
       </div>

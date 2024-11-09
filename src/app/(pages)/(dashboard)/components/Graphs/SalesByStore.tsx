@@ -30,7 +30,7 @@ export default function SalesByStoreGraph({
   }
 
   return (
-    <div className={`w-full ${className}`}>
+    <div className={`w-full h-full ${className}`}>
       <ChartContainer
         config={{
           sales: {
@@ -39,14 +39,18 @@ export default function SalesByStoreGraph({
           },
         }}
       >
-        <BarChart data={chartData} layout="vertical">
+        <BarChart data={chartData} layout="vertical" margin={{ left: 20 }}>
           <XAxis type="number" />
-          <YAxis dataKey="store" type="category" />
+          <YAxis
+            dataKey="store"
+            type="category"
+            tickFormatter={value => value.split(' ').join('\n')}
+          />
           <ChartTooltip content={<ChartTooltipContent />} />
           <Bar
             dataKey="sales"
             fill="var(--color-sales)"
-            radius={[0, 8, 8, 0]}
+            radius={[0, 4, 4, 0]}
             label={{
               position: 'right',
               fill: 'hsl(var(--foreground))',
